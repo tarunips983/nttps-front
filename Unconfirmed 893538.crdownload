@@ -1,0 +1,10 @@
+@echo off
+ECHO Starting Node.js Server with PM2...
+
+cd "E:\project\public"
+
+
+pm2 start server.js --name pdf-server --watch
+
+ECHO Server is running under PM2 process name: pdf-server
+pause

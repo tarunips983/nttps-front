@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Portal - Login</title>
+  <style>
+    /* Cleaned and fixed login-style.css */
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-image: url('back-login.jpeg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      font-family: Arial, sans-serif;
+    }
+
+    .login-container {
+      background: white;
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+      width: 320px;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #232f3e;
+      font-size: 1.75rem;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px 14px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: 1.5px solid #ccc;
+      font-size: 1rem;
+      box-sizing: border-box;
+      transition: border-color 0.3s ease;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="password"]:focus {
+      outline: none;
+      border-color: #ff9900;
+      box-shadow: 0 0 5px #ff9900;
+    }
+
+    button {
+      background-color: #ff9900;
+      border: none;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-top: 12px;
+      width: 100%;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #cc7a00;
+    }
+
+    .msg {
+      margin-top: 10px;
+      font-weight: 600;
+      display: none;
+    }
+
+    .error-msg {
+      color: #d93025;
+    }
+
+    .success-msg {
+      color: #1d6f42;
+    }
+
+    .toggle-link {
+      display: block;
+      margin-top: 15px;
+      color: #007bff;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    .toggle-link:hover {
+      text-decoration: underline;
+    }
+
+    .home-button {
+      display: block;
+      width: fit-content;
+      padding: 8px 12px;
+      background-color: #f0f0f0;
+      color: #333;
+      text-decoration: none;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+      margin-bottom: 10px;
+    }
+
+    .home-button:hover {
+      background-color: #e0e0e0;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="login-container">
+    <a class="home-button" href="index.html">← Home</a>
+    <h2 id="formTitle">🔐 Admin Login</h2>
+
+    <form id="authForm" autocomplete="off">
+      <input type="email" id="email" placeholder="Email" required autofocus />
+      <input type="password" id="password" placeholder="Password" required />
+
+      <div id="registerFields" style="display: none;">
+        <input type="password" id="confirmPassword" placeholder="Confirm Password" />
+        <input type="text" id="inviteCode" placeholder="Invite Code" />
+        <input type="text" id="otp" placeholder="Verification Code (Check Email)" style="display: none;" />
+      </div>
+
+      <button type="submit" id="submitButton">Login</button>
+
+      <div class="msg error-msg" id="errorMsg"></div>
+      <div class="msg success-msg" id="successMsg"></div>
+
+      <a href="#" id="toggleLink" class="toggle-link">Need to create an account? Register</a>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById("authForm");
+    const errorMsg = document.getElementById("errorMsg");
+    const successMsg = document.getElementById("successMsg");
+    const SERVER_URL = "https://nttps-backend.onrender.com";
+
+    const emailField = document.getElementById("email");
+    const passwordField = document.getElementById("password");
+    const formTitle = document.getElementById("formTitle");
+    const submitButton = document.getElementById("submitButton");
+    const toggleLink = document.getElementById("toggleLink");
+    const registerFields = document.getElementById("registerFields");
+    const confirmPasswordField = document.getElementById("confirmPassword");
+    const inviteCodeField = document.getElementById("inviteCode");
+    const otpField = document.getElementById("otp");
+
+    let isLoginMode = true;
+    let isVerifyMode = false;
+
+    function showMessage(element, message, isError = true) {
+      element.textContent = message;
+      element.style.display = "block";
+      (isError ? successMsg : errorMsg).style.display = "none";
+      setTimeout(() => {
+        element.style.display = "none";
+        element.textContent = "";
+      }, 4000);
+    }
+
+    function toggleMode(e) {
+      if (e) e.preventDefault();
+      isLoginMode = !isLoginMode;
+      isVerifyMode = false;
+      form.reset();
+
+      errorMsg.style.display = "none";
+      successMsg.style.display = "none";
+
+      if (isLoginMode) {
+        formTitle.innerHTML = "🔐 Admin Login";
+        submitButton.textContent = "Login";
+        submitButton.style.backgroundColor = "#ff9900";
+        toggleLink.textContent = "Need to create an account? Register";
+        registerFields.style.display = "none";
+        passwordField.style.display = "block";
+      } else {
+        formTitle.innerHTML = "📝 Create Account";
+        submitButton.textContent = "Send Verification Code";
+        submitButton.style.backgroundColor = "#28a745";
+        toggleLink.textContent = "Already have an account? Login";
+        registerFields.style.display = "block";
+
+        passwordField.style.display = "block";
+        confirmPasswordField.style.display = "block";
+        inviteCodeField.style.display = "block";
+        otpField.style.display = "none";
+      }
+    }
+
+    toggleLink.addEventListener("click", toggleMode);
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errorMsg.style.display = "none";
+      successMsg.style.display = "none";
+
+      if (isLoginMode) {
+        await handleLogin();
+      } else if (isVerifyMode) {
+        await handleVerify();
+      } else {
+        await handleRegister();
+      }
+    });
+
+    async function handleLogin() {
+      const username = emailField.value.trim();
+      const password = passwordField.value;
+
+      try {
+        const response = await fetch(`${SERVER_URL}/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          localStorage.setItem("adminToken", data.token);
+          localStorage.removeItem("isAdmin");
+          window.location.href = "add-product.html";
+        } else {
+          const data = await response.json().catch(() => ({}));
+          showMessage(errorMsg, data.message || "Invalid email or password");
+        }
+      } catch (err) {
+        console.error("Login fetch error:", err);
+        showMessage(errorMsg, "Error connecting to server.");
+      }
+    }
+
+    async function handleRegister() {
+      const email = emailField.value.trim();
+      const password = passwordField.value;
+      const confirmPassword = confirmPasswordField.value;
+      const inviteCode = inviteCodeField.value.trim();
+
+      if (password !== confirmPassword) {
+        showMessage(errorMsg, "Passwords do not match.");
+        return;
+      }
+
+      try {
+        const response = await fetch(`${SERVER_URL}/register-send-otp`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password, inviteCode })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showMessage(successMsg, data.message, false);
+          isVerifyMode = true;
+          formTitle.innerHTML = "✉️ Check Your Email";
+          submitButton.textContent = "Verify & Register";
+          emailField.disabled = true;
+          passwordField.style.display = "none";
+          confirmPasswordField.style.display = "none";
+          inviteCodeField.style.display = "none";
+          otpField.style.display = "block";
+          otpField.required = true;
+        } else {
+          showMessage(errorMsg, data.message || "Registration failed.");
+        }
+      } catch (err) {
+        console.error("Registration error:", err);
+        showMessage(errorMsg, "Could not connect to server.");
+      }
+    }
+
+    async function handleVerify() {
+      const email = emailField.value.trim();
+      const otp = otpField.value.trim();
+
+      try {
+        const response = await fetch(`${SERVER_URL}/register-verify`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, otp })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showMessage(successMsg, data.message, false);
+          setTimeout(() => {
+            emailField.disabled = false;
+            otpField.required = false;
+            toggleMode();
+          }, 2000);
+        } else {
+          showMessage(errorMsg, data.message || "Verification failed.");
+        }
+      } catch (err) {
+        console.error("Verification error:", err);
+        showMessage(errorMsg, "Could not connect to server.");
+      }
+    }
+  </script>
+</body>
+</html>

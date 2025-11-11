@@ -1,0 +1,177 @@
+/* style.css - Shared styles for MyShop */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f9f9f9;
+  color: #333;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  background-color: #232f3e;
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+header h1 {
+  font-size: 1.8rem;
+  user-select: none;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.nav-right input[type="text"] {
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: none;
+  width: 220px;
+  transition: box-shadow 0.3s ease;
+}
+
+.nav-right input[type="text"]:focus {
+  outline: none;
+  box-shadow: 0 0 5px #ff9900;
+}
+
+.nav-right a {
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 4px;
+  background-color: #3a475a;
+  transition: background-color 0.3s ease;
+  user-select: none;
+}
+
+.nav-right a:hover {
+  background-color: #ff9900;
+  color: #232f3e;
+}
+
+/* Sub navigation bar */
+.sub-nav {
+  background-color: #3a475a;
+  padding: 10px 20px;
+}
+
+.sub-nav ul {
+  list-style: none;
+  display: flex;
+  gap: 30px;
+  margin: 0;
+  padding: 0;
+  background: transparent; /* 🔥 Fix: remove white box */
+}
+
+
+.sub-nav ul li {
+  position: relative;
+}
+
+.sub-nav ul li a {
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 4px;
+  display: block;
+  transition: background 0.3s ease;
+}
+
+.sub-nav ul li a:hover {
+  background-color: #ff9900;
+  color: #232f3e;
+}
+
+/* Dropdown wrapper (parent <li>) */
+.dropdown {
+  position: relative; /* Parent should control position */
+}
+
+/* Dropdown menu */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;   /* directly below parent */
+  left: 0;
+  background: #fff;
+  min-width: 160px;
+  border-radius: 6px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  z-index: 999;
+
+  /* Reset default UL styles */
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  /* Prevent full width issue */
+  width: auto;
+  white-space: nowrap;
+}
+
+/* Dropdown items */
+.dropdown-content li a {
+  display: block;
+  padding: 10px 15px;
+  color: #232f3e;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background 0.3s;
+}
+
+.dropdown-content li a:hover {
+  background: #f0f0f0;
+  color: #ff6600;
+}
+
+/* Show on hover */
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+
+
+footer p {
+  margin: 5px 0;
+}
+
+@media (max-width: 650px) {
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .nav-right {
+    margin-top: 10px;
+    width: 100%;
+    gap: 10px;
+  }
+  .nav-right input[type="text"] {
+    width: 100%;
+  }
+  main {
+    padding: 10px;
+  }
+}
