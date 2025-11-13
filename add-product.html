@@ -50,7 +50,7 @@ const EMAIL_USER = process.env.EMAIL_USER;
 const EMAIL_PASS = process.env.EMAIL_PASS;
 
 const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
+    host: "tmcamotp@gmail.com",
     port: 465,
     secure: true,
     auth: { user: EMAIL_USER, pass: EMAIL_PASS }
@@ -376,3 +376,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`);
 });
+
