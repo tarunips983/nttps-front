@@ -1,379 +1,1898 @@
-require("dotenv").config(); // Load .env first
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        const token = localStorage.getItem('adminToken');
+        const isAdmin = localStorage.getItem('isAdmin');
 
-const express = require("express");
-const cors = require("cors");
-const multer = require("multer");
-const fs = require("fs");
-const fsp = require("fs").promises;
-const path = require("path");
-const pdf = require("pdf-parse");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
+        if (!token && isAdmin !== "true") {
+            alert("You must be logged in to access this page.");
+            window.location.href = "login.html";
+        }
+    </script>
+    <meta charset="UTF-8" />
+    <title>Admin - PDF Database + Daily Progress</title>
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+    body { font-family: Arial; background:#f4f4f4; padding:20px; margin:0; }
+    header { background:#232f3e; color:white; padding:12px 20px; display:flex; justify-content:space-between; align-items:center; }
+    header h1 { margin:0; font-size:1.25rem; }
+    header .buttons { display:flex; gap:10px; }
+    header button { background:#dc3545; border:none; color:white; padding:8px 14px; border-radius:5px; cursor:pointer; font-weight:bold; }
+    .btn-clear { background:#6c757d; color:white; }
+        
+    .btn-export { background: #1D6F42; color: white; }
+    .btn-import-label { 
+        background: #6f42c1;
+        color: white; 
+        cursor: pointer; 
+        padding: 6px 10px; 
+        border-radius: 6px; 
+        font-size: 0.9rem;
+        display: inline-block;
+    }
+    .container { 
+        max-width: 1800px; 
+        width: 95%;      
+        margin: 20px auto; 
+    }
+    
+    .tabs { display:flex; gap:8px; margin-bottom:10px; }
+    .tab-btn { padding:8px 14px; border-radius:6px; border:1px solid #ccc; cursor:pointer; background:white; }
+    .tab-btn.active { background:#007bff; color:white; border-color:#007bff; }
+    .panel { background:white; padding:20px; border-radius:10px; box-shadow:0 5px 15px rgba(0,0,0,0.06); display:none; }
+    .panel.active { display:block; }
+    
+    label { display:block; margin-top:10px; font-weight:bold; }
+    input, select, textarea { width:100%; padding:10px; margin-top:5px; border:1px solid #ccc; border-radius:5px; box-sizing:border-box; }
+    textarea { min-height:80px; resize:vertical; }
+    .flex-row { display:flex; gap:12px; }
+    .col { flex:1; }
+    button.primary { margin-top:12px; padding:8px 12px; border:none; border-radius:6px; cursor:pointer; font-weight:bold; background:#28a745; color:white; }
+    button.secondary { background:#007bff; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; }
+    table { width:100%; border-collapse:collapse; margin-top:15px; display:block; overflow:auto; max-height:420px; }
+    th, td { border:1px solid #ddd; padding:8px; text-align:left; vertical-align:top; }
+    th { background:#f0f0f0; position:sticky; top:0; z-index:2; }
+    th.wrap { cursor: pointer; } 
+    tr:nth-child(even) { background:#fafafa; }
+    
+    td.wrap, th.wrap { white-space:normal; word-break:break-word; word-wrap:break-word; }
+    
+    .actions { 
+        display:flex; 
+        gap: 4px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .small-btn { 
+        padding: 5px 7px;
+        font-size: 0.8rem;
+        border-radius:4px; border:none; cursor:pointer; font-weight:bold; 
+        flex-shrink: 0;
+    }
+    
+    .preview-btn { background:#ff9900; color:white; }
+    .edit-btn { background:#007bff; color:white; }
+    .delete-btn { background:#dc3545; color:white; }
+    .download-btn { background:#28a745; color:white; }
+    
+    .restore-btn { background: #28a745; color:white; }
+    
+    th:last-child, td:last-child {
+        min-width: 180px;
+    }
 
-// CLOUDINARY IMPORTS
-const cloudinary = require("cloudinary").v2;
-const streamifier = require("streamifier");
+    #messageBox { margin-top:10px; font-weight:bold; color:green; }
+    
+    .modal-overlay {
+        display:none; 
+        position:fixed; 
+        top:0; left:0; 
+        width:100%; height:100%; 
+        background:rgba(0,0,0,0.6); 
+        backdrop-filter:blur(4px); 
+        justify-content:center; 
+        align-items:center; 
+        z-index:1000;
+        animation: fadeIn 0.2s ease-out;
+    }
 
-// CONFIGURE CLOUDINARY
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+    #previewModalContent { background:white; border-radius:10px; max-width:95%; width:1000px; height:90%; position:relative; padding:10px; display:flex; flex-direction:column; }
+    #previewModalContent button.closeBtn { position:absolute; top:10px; right:10px; background:#dc3545; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; z-index: 10; }
+    #pdfFrame { flex:1; width:100%; border:none; border-radius:8px; }
 
-const app = express();
+    
+    /* --- Modal Preview Fix --- */
+    #snapshotPreviewContent { 
+        background: white; 
+        border-radius: 10px; 
+        max-width: 95%; 
+        width: 1200px; 
+        max-height: 90%; 
+        position: relative; 
+        padding: 0;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    #snapshotPreviewContent .modal-controls { 
+        display:flex; 
+        gap:10px; 
+        justify-content:flex-end; 
+        border-bottom: 1px solid #ccc;
+        padding: 20px 20px 10px 20px;
+        background: white;
+        z-index: 10;
+        flex-shrink: 0;
+    }
+    #snapshotPreviewContent .modal-controls button { padding:6px 12px; border:none; border-radius:5px; cursor:pointer; font-weight:bold; }
+    #snapshotPreviewContent .print-btn { background: #007bff; color: white; }
+    #snapshotPreviewContent .closeBtn { background: #dc3545; color: white; }
+    
+    #snapshotFrame { 
+        width: 100%;
+        border: none; 
+        margin: 0;
+        padding: 10px 20px 20px 20px;
+        box-sizing: border-box;
+        background: #ffffff; 
+        color: #000000;
+        overflow: auto;
+        flex-grow: 1;
+    }
+    
+    #snapshotFrame table {
+        width: auto;
+        min-width: 100%;
+        border-collapse: collapse;
+        color: #000000;
+    }
+    /* --- End Modal Preview Fix --- */
 
-// ---------------------------------------------
-// CORS
-// ---------------------------------------------
-app.use(cors({
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-}));
+    #snapshotFrame th, #snapshotFrame td { border:1px solid #ccc; padding:8px; text-align:left; vertical-align:top; white-space:normal; word-break:break-word; }
+    #snapshotFrame th { background:#f0f0f0; position:static; }
+    #snapshotFrame td button { display: none; } 
+    #snapshotFrame td[contenteditable="true"] { background: none; }
 
-// ---------------------------------------------
-// FILE PATHS
-// ---------------------------------------------
-const USERS_FILE = path.join(__dirname, "users.json");
-const uploadsFolder = path.join(__dirname, "uploads"); // old path but unused
-const dataFile = path.join(__dirname, "data.json");
-const dailyFile = path.join(__dirname, "daily.json");
-
-if (!fs.existsSync(uploadsFolder)) fs.mkdirSync(uploadsFolder);
-
-// ---------------------------------------------
-// EMAIL SETUP
-// ---------------------------------------------
-const EMAIL_USER = process.env.EMAIL_USER;
-const EMAIL_PASS = process.env.EMAIL_PASS;
-
-const transporter = nodemailer.createTransport({
-    host: "tmcamotp@gmail.com",
-    port: 465,
-    secure: true,
-    auth: { user: EMAIL_USER, pass: EMAIL_PASS }
-});
-
-// ---------------------------------------------
-// AUTHENTICATION MIDDLEWARE
-// ---------------------------------------------
-const JWT_SECRET = "810632";
-
-function authenticateToken(req, res, next) {
-    const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1];
-    if (!token) return res.status(401).json({ message: "Unauthorized" });
-
-    jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) return res.status(403).json({ message: "Invalid token" });
-        req.user = user;
-        next();
-    });
+    #progressTable, #savedProgressTable { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    #progressTable th, #progressTable td, #savedProgressTable th, #savedProgressTable td { border: 1px solid #ccc; padding: 8px; text-align: left; vertical-align: top; white-space: normal; min-width: 120px; }
+    #progressTable td[contenteditable="true"] { background: #fffbe7; outline: none; min-height: 28px; }
+    #progressTable th { background: #eaeaea; position: sticky; top: 0; }
+    #savedProgressTable th { background: #f5f5f5; }
+    .sheet-controls { display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
+    .small { padding:6px 10px; border-radius:6px; border:none; cursor:pointer; }
+    .btn-add { background:#28a745; color:white; }
+    .btn-save { background:#007bff; color:white; }
+    .btn-clear { background:#6c757d; color:white; }
+    
+    .search-row { display:flex; gap:8px; margin-top:10px; align-items:center; flex-wrap: wrap; }
+    
+    .muted { color:#666; font-size:0.9rem; }
+/* --- NEW: Daily Progress Controls (Professional Look) --- */
+.sheet-controls {
+    display: flex;
+    flex-wrap: wrap; /* Allows groups to stack on small screens */
+    align-items: flex-end; /* Aligns all groups to the bottom */
+    gap: 15px; /* Space between groups */
+    padding: 10px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    margin-bottom: 15px; /* Space before table */
 }
 
-// ---------------------------------------------
-// MULTER MEMORY STORAGE FOR CLOUDINARY
-// ---------------------------------------------
-const uploadInMemory = multer({ storage: multer.memoryStorage() });
-
-// ---------------------------------------------
-// MIDDLEWARE
-// ---------------------------------------------
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true, limit: "10mb" }));
-
-// ---------------------------------------------
-// UTILS
-// ---------------------------------------------
-async function readJsonFile(filePath, defaultData = []) {
-    try {
-        const data = await fsp.readFile(filePath, "utf8");
-        if (!data.trim()) return defaultData;
-        return JSON.parse(data);
-    } catch {
-        return defaultData;
-    }
+/* Style for each group of buttons */
+.control-group {
+    display: flex;
+    align-items: center; /* Align items within the group */
+    gap: 8px; /* Space between buttons in a group */
+    
+    /* Add a nice visual separator */
+    padding-left: 15px;
+    border-left: 1px solid #ccc;
 }
 
-async function safeWriteJson(filePath, data) {
-    const temp = filePath + ".tmp";
-    await fsp.writeFile(temp, JSON.stringify(data, null, 2));
-    await fsp.rename(temp, filePath);
+/* Remove border from the first group */
+.control-group:first-child {
+    border-left: none;
+    padding-left: 0;
 }
 
-// =================================================================
-// RECORD ROUTES
-// =================================================================
+/* Fix for the date label and input */
+.control-group .date-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+/* Standardize labels in the control bar */
+.control-group label {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600; 
+}
+/* Standardize inputs in the control bar */
+.control-group input[type="date"] {
+    width: 160px;
+    padding: 6px 10px;
+    margin: 0; /* Remove default margin */
+}
+/* --- End of New CSS --- */
+    .selected-row > td {
+        background-color: #dbeafe !important;
+    }
+    .pagination-btn {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 0.9rem;
+        transition: background-color 0.2s;
+    }
+    .pagination-btn:hover {
+        background-color: #5a6268;
+    }
 
-// Get all non-deleted records
-app.get("/records", async (req, res) => {
-    const records = await readJsonFile(dataFile, []);
-    res.json(records.filter(r => !r.isDeleted));
-});
+    #toastContainer {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 2000;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .toast {
+        background: #232f3e;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        font-weight: bold;
+        opacity: 0;
+        transform: translateX(100%);
+        animation: slideIn 0.3s forwards, slideOut 0.5s 3.5s forwards;
+    }
+    .toast.error { background: #dc3545; }
+    .toast.success { background: #28a745; }
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateX(100%); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slideOut {
+        from { opacity: 1; transform: translateX(0); }
+        to { opacity: 0; transform: translateX(100%); }
+    }
 
-// Get trash
-app.get("/records/trash", authenticateToken, async (req, res) => {
-    const records = await readJsonFile(dataFile, []);
-    res.json(records.filter(r => r.isDeleted));
-});
+    .pdf-dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    .dash-box {
+        background: #f9f9f9;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+    }
+    .dash-box h4 { margin: 0 0 5px 0; font-size: 0.9rem; color: #555; }
+    .dash-box p { margin: 0; font-size: 1.5rem; font-weight: bold; color: #007bff; }
+    .filter-bar {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        background: #f9f9f9;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        align-items: center;
+    }
+    .filter-bar select {
+        width: auto;
+        flex: 1;
+        min-width: 150px;
+        padding: 8px;
+    }
+    .filter-bar .small {
+        padding: 8px 12px;
+    }
 
-// ---------------------------------------------------------
-// CLOUDINARY UPLOAD ROUTE — REPLACES OLD LOCAL UPLOAD
-// ---------------------------------------------------------
-app.post("/upload", authenticateToken, uploadInMemory.array("pdfs", 10), async (req, res) => {
-    try {
-        let records = await readJsonFile(dataFile, []);
-        if (!req.files || req.files.length === 0) {
-            return res.status(400).json({ error: "No PDFs uploaded" });
+    tr.status-done > td { background-color: #e6ffed !important; }
+    tr.status-progress > td { background-color: #fff9e0 !important; }
+    tr.status-pending > td { background-color: #ffebe6 !important; }
+    tr.selected-row > td { background-color: #dbeafe !important; }
+
+    #formToggle {
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 12px 18px;
+        font-size: 1.25rem;
+        color: #232f3e;
+        cursor: pointer;
+        display: block;
+        width: 100%;
+        text-align: left;
+        margin-top: 10px;
+        margin-bottom: 15px;
+        transition: background-color 0.2s ease, box-shadow 0.2s ease;
+        box-sizing: border-box;
+    }
+    #formToggle:hover {
+        background-color: #e9e9e9;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    #confirmModalContent {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        max-width: 400px;
+        width: 90%;
+        animation: fadeIn 0.2s ease-out;
+    }
+    #confirmTitle {
+        margin: 0;
+        color: #232f3e;
+    }
+    #confirmMessage {
+        margin: 15px 0;
+        color: #333;
+        font-size: 1rem;
+    }
+
+    #progressTable tbody tr.dragging {
+        opacity: 0.5;
+        background: #f0f8ff;
+        border: 1px dashed #007bff;
+    }
+    #progressTable tbody tr {
+        transition: background-color 0.2s ease;
+    }
+    #progressTable tbody tr:hover {
+        background-color: #f5f5f5;
+        cursor: move;
+    }
+
+
+    @media (max-width: 650px) {
+        header { flex-direction: column; gap: 12px; align-items: flex-start; }
+        header .buttons { width: 100%; justify-content: flex-start; }
+    }
+    @media (max-width: 400px) {
+         .tabs { flex-direction: column; align-items: stretch; }
+         .tab-btn { text-align: center; }
+    }
+</style>
+</head>
+<body>
+    <header>
+        <h1>📂 Admin - PDF Database + Daily Progress</h1>
+        <div class="buttons">
+            <button onclick="goHome()">🏠 Home</button>
+            <button onclick="logout()">🚪 Logout</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="tabs">
+            <button id="tabPdf" class="tab-btn active" onclick="showPanel('pdf')">PDF Database</button>
+            <button id="tabDaily" class="tab-btn" onclick="showPanel('daily')">Daily Work Progress</button>
+        </div>
+
+        <div id="pdfPanel" class="panel active">
+            
+            <h2>📊 Dashboard</h2>
+            <div id="pdfDashboard" class="pdf-dashboard-grid">
+                </div>
+            
+            <hr style="margin:20px 0;">
+
+            <div>
+                <h2 id="formToggle">Add / Edit Record ➕</h2>
+                <div id="formWrapper" style="display: none; overflow: hidden; animation: fadeIn 0.3s ease-out;">
+                    <form id="recordForm">
+                        <input type="hidden" id="editId">
+                        <input type="hidden" id="currentPdf">
+                        <label>Name of the Work</label>
+                        <input type="text" id="workName" required>
+                        <label>PR No.</label>
+                        <input type="text" id="prNo" required>
+                        <label>Sub Division</label>
+                        <select id="subDivision" required>
+                            <option value="">Select Sub Division</option>
+                            <option value="Sub Div-I">Sub Div-I</option>
+                            <option value="Sub Div-II">Sub Div-II</option>
+                            <option value="Sub Div-III">Sub Div-III</option>
+                            <option value="Sub Div-IV">Sub Div-IV</option>
+                        </select>
+                        <label>Record Type</label>
+                        <select id="recordType" required>
+                            <option value="">Select Type</option>
+                            <option value="PR">PR</option>
+                            <option value="Estimate">Estimate</option>
+                            <option value="Drawing">Drawing</option>
+                            <option value="Other">Other Record</option>
+                        </select>
+                        <label>PDF File</label>
+                        <input type="file" id="pdfFile" accept="application/pdf" onchange="autoExtractPDF()">
+                        <label>Amount</label>
+                        <input type="number" id="amount" required>
+                        <label>Send To</label>
+                        <input type="text" id="sendTo" required>
+                        <button type="submit" class="primary">Add / Update Record</button>
+                    </form>
+                </div>
+            </div>
+            
+            <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+
+            <div> <h2 id="pdfListTitle">All Records</h2>
+                <div class="filter-bar">
+                    <input type="text" id="searchInput" placeholder="🔍 Search records..." style="padding:8px; border-radius:5px; border:1px solid #ccc; flex:1; min-width:150px;">
+                    <select id="filterSubDivision" style="padding:8px;"></select>
+                    <select id="filterRecordType" style="padding:8px;"></select>
+                    <button class="small btn-clear" onclick="resetAllFilters()">Reset</button>
+                    
+                    <button id="trashToggleBtn" class="small btn-clear" onclick="toggleTrashView()" style="background-color: #dc3545;">♻️ View Trash</button>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; flex-wrap:wrap; margin-bottom:10px;">
+                    <div style="margin-top:5px;">
+                        <button class="pagination-btn" onclick="prevPage()">⬅ Prev</button>
+                        <span id="pageInfo" style="margin:0 10px;">Page 1</span>
+                        <button class="pagination-btn" onclick="nextPage()">Next ➡</button>
+                    </div>
+                </div>
+                <table>
+                    <thead>
+                        <tr id="pdfTableHead">
+                            </tr>
+                    </thead>
+                    <tbody id="recordTable"></tbody>
+                </table>
+            </div>
+
+        </div> 
+        
+        <div id="dailyPanel" class="panel">
+            <h2>🧾 Daily Work Progress - Update/Edit</h2>
+           <div class="sheet-controls">
+            
+            <div class="control-group">
+                <div class="date-group">
+                    <label for="snapshotDate">Progress Date:</label>
+                    <input type="date" id="snapshotDate">
+                </div>
+            </div>
+
+            <div class="control-group">
+                <button class="small btn-add" onclick="addProgressRow()">➕ Add Row</button>
+                <button class="small btn-add" onclick="insertRowBefore()">⬆️ Insert Row Before</button>
+            <button class="small btn-add" onclick="insertRowAfter()">⬇️ Insert Row After</button>
+            </div>
+        
+            <div class="control-group">
+                <button class="small btn-save" onclick="saveProgress()">💾 Save Progress</button>
+                <button class="small btn-save" style="background-color: #ff9900;" onclick="saveDraft()">📝 Save Draft</button>
+                <button class="small btn-clear" onclick="clearSheet()">🧹 Clear Sheet</button>
+            </div>
+            
+            <div class="control-group">
+                <button class="small btn-export" onclick="exportToExcel()">📤 Export to Excel</button>
+                <label for="importFile" class="btn-import-label">📥 Import from Excel</label>
+                <input type="file" id="importFile" onchange="importFromExcel(event)" accept=".xlsx, .xls" style="display: none;">
+            </div>
+        
+            <div class="control-group">
+                <button class="small btn-merge" onclick="mergeCells()">🔀 Merge Selected</button>
+                <button class="small btn-unmerge" onclick="unmergeCells()">↩️ Unmerge</button>
+            </div>
+            
+            <input type="hidden" id="snapshotId">
+            
+            <span id="autoSaveMsg" class="muted" style="margin-left: auto;"></span>
+        </div>
+            
+            <div style="overflow:auto; border:1px solid #ddd; border-radius:6px;">
+                <table id="progressTable" aria-label="Editable daily progress sheet">
+                    <thead>
+                        <tr>
+                            <th style="width:100px">Date</th>
+                            <th style="width:100px">Division</th>
+                            <th style="width:140px">Sub-Division/Location</th>
+                            <th style="min-width:300px">Maintenance Activity Description</th>
+                            <th style="width:120px">Man Power Engaged</th>
+                            <th style="width:120px">Status</th>
+                            <th style="min-width:200px">Remarks/Issues</th>
+                            <th style="width:80px">Row</th>
+                        </tr>
+                    </thead>
+                    <tbody id="progressTableBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 style="margin-top:18px;">📋 Saved Daily Progress Reports (Archive)</h3>
+            <div class="search-row">
+                <input type="text" id="savedSearch" placeholder="🔍 Search by date..." style="padding:8px; border-radius:5px; border:1px solid #ccc; flex:1;">
+                <div>
+                    <button class="small" onclick="prevSavedPage()">⬅ Prev</button>
+                    <span id="savedPageInfo" style="margin:0 8px">Page 1</span>
+                    <button class="small" onclick="nextSavedPage()">Next ➡</button>
+                </div>
+            </div>
+            <div style="overflow:auto; margin-top:8px; border:1px solid #eee; border-radius:6px;">
+                <table id="savedProgressTable" aria-label="Saved daily progress snapshots">
+                    <thead>
+                        <tr>
+                            <th style="width:400px">Snapshot Date</th>
+                            <th style="width:400px">Row Count</th>
+                            <th style="min-width:500px">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="savedBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div> 
+    
+    <div id="previewModal" class="modal-overlay">
+        <div id="previewModalContent">
+            <button class="closeBtn" onclick="closePreview()">X</button>
+            <iframe id="pdfFrame"></iframe>
+        </div>
+    </div>
+
+    <div id="snapshotPreviewModal" class="modal-overlay">
+        <div id="snapshotPreviewContent">
+            <div class="modal-controls">
+                <button class="print-btn" onclick="printSnapshot()">🖨️ Print</button>
+                <button class="closeBtn" onclick="closeSnapshotPreview()">X</button>
+            </div>
+            <div id="snapshotFrame">
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="modal-overlay">
+        <div id="confirmModalContent">
+            <h3 id="confirmTitle">Are you sure?</h3>
+            <p id="confirmMessage">This action cannot be undone.</p>
+            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
+                <button id="confirmBtnCancel" class="small btn-clear">Cancel</button>
+                <button id="confirmBtnOk" class="small delete-btn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastContainer"></div>
+
+
+    <script>
+const API = "https://nttps-backend.onrender.com";
+        // =================================================================
+        // Security & Auth (Unchanged)
+        // =================================================================
+        const adminToken = localStorage.getItem('adminToken');
+
+const authFetch = async (url, options = {}) => {
+    const headers = new Headers(options.headers || {});
+
+    // ✅ Add token
+    if (adminToken) {
+        headers.append('Authorization', `Bearer ${adminToken}`);
+    }
+
+    // ✅ Correct FormData check
+    const isFormData = options.body && options.body.constructor === FormData;
+
+    // ✅ Only add JSON header when NOT sending FormData
+    if (!isFormData) {
+        if (!headers.has('Content-Type')) {
+            headers.set('Content-Type', 'application/json');
+        }
+    }
+
+    // ✅ Perform request
+    const res = await fetch(url, { ...options, headers });
+
+    // ✅ Auto logout on token expiry
+    if (res.status === 401 || res.status === 403) {
+        showToast("Session expired. Please log in again.", true);
+        setTimeout(logout, 2000);
+    }
+
+    return res;
+};
+
+        
+
+        /* ----------------- Tab switching ----------------- */
+        function showPanel(name) {
+            document.getElementById('pdfPanel').classList.remove('active');
+            document.getElementById('dailyPanel').classList.remove('active');
+            document.getElementById('tabPdf').classList.remove('active');
+            document.getElementById('tabDaily').classList.remove('active');
+
+            if (name === 'pdf') {
+                document.getElementById('pdfPanel').classList.add('active');
+                document.getElementById('tabPdf').classList.add('active');
+            } else {
+                document.getElementById('dailyPanel').classList.add('active');
+                document.getElementById('tabDaily').classList.add('active');
+                loadSavedProgress();
+            }
         }
 
-        const uploadedFiles = await Promise.all(
-            req.files.map(file =>
-                new Promise((resolve, reject) => {
-                    const uploadStream = cloudinary.uploader.upload_stream(
-                        {
-                            folder: "pdf_uploads",
-                            resource_type: "raw"
-                        },
-                        (error, result) => {
-                            if (error) return reject(error);
-                            resolve({ result, originalname: file.originalname });
-                        }
-                    );
-                    streamifier.createReadStream(file.buffer).pipe(uploadStream);
-                })
-            )
-        );
-
-        // Save in JSON database
-        uploadedFiles.forEach(u => {
-            records.push({
-                id: Date.now() + Math.floor(Math.random() * 1000),
-                workName: req.body.workName || u.originalname,
-                prNo: req.body.prNo || "N/A",
-                subDivision: req.body.subDivision || "N/A",
-                recordType: req.body.recordType || "Other Record",
-                amount: req.body.amount || "0",
-                sendTo: req.body.sendTo || "N/A",
-                pdfPath: u.result.secure_url,
-                cloudinaryPublicId: u.result.public_id,
-                isDeleted: false
-            });
-        });
-
-        await safeWriteJson(dataFile, records);
-        res.json({ success: true, records });
-
-    } catch (err) {
-        console.error("UPLOAD ERROR:", err);
-        res.status(500).json({ error: "Upload failed" });
-    }
-});
-
-// Move to trash
-app.delete("/records/:id", authenticateToken, async (req, res) => {
-    let records = await readJsonFile(dataFile, []);
-    const id = Number(req.params.id);
-
-    const index = records.findIndex(r => r.id === id);
-    if (index === -1) return res.status(404).json({ error: "Not found" });
-
-    records[index].isDeleted = true;
-    await safeWriteJson(dataFile, records);
-
-    res.json({ success: true });
-});
-
-// Restore
-app.post("/records/:id/restore", authenticateToken, async (req, res) => {
-    let records = await readJsonFile(dataFile, []);
-    const id = Number(req.params.id);
-
-    const index = records.findIndex(r => r.id === id);
-    if (index === -1) return res.status(404).json({ error: "Not found" });
-
-    records[index].isDeleted = false;
-    await safeWriteJson(dataFile, records);
-
-    res.json({ success: true });
-});
-
-// Permanent Delete (Cloudinary Delete)
-app.delete("/records/trash/:id", authenticateToken, async (req, res) => {
-    let records = await readJsonFile(dataFile, []);
-    const id = Number(req.params.id);
-
-    const record = records.find(r => r.id === id);
-    if (!record) return res.status(404).json({ error: "Not found" });
-
-    if (record.cloudinaryPublicId) {
-        try {
-            await cloudinary.uploader.destroy(record.cloudinaryPublicId, {
-                resource_type: "raw"
-            });
-        } catch (err) {
-            console.log("Cloudinary delete error:", err);
+        /* ----------------- Toast Notifications ----------------- */
+        function showToast(message, isError = false) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            toast.classList.add(isError ? 'error' : 'success');
+            container.appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 4000);
         }
-    }
 
-    records = records.filter(r => r.id !== id);
-    await safeWriteJson(dataFile, records);
+        /* --- Custom Confirm Modal Logic --- */
+        let onConfirmCallback = null;
+        const confirmModal = document.getElementById('confirmModal');
+        const confirmMsgEl = document.getElementById('confirmMessage');
+        const confirmOkBtn = document.getElementById('confirmBtnOk');
+        const confirmCancelBtn = document.getElementById('confirmBtnCancel'); // --- NEW ---
 
-    res.json({ success: true });
-});
+        function showConfirm(message, onConfirm, buttonClass = 'delete-btn') {
+            confirmMsgEl.textContent = message;
+            onConfirmCallback = onConfirm;
+            
+            confirmOkBtn.className = `small ${buttonClass}`;
 
-// =================================================================
-// PDF EXTRACTION
-// =================================================================
-
-app.post("/extract-pdf", authenticateToken, uploadInMemory.single("pdfFile"), async (req, res) => {
-    if (!req.file) return res.status(400).json({ error: "No PDF uploaded" });
-
-    try {
-        const data = await pdf(req.file.buffer);
-        const text = data.text;
-
-        res.json({
-            prNo: (text.match(/PR\s*No\.?\s*[:\-]?\s*(\d+)/i) || ["", ""])[1],
-            workName: (text.match(/Brief Description\s*:\s*(.+)/i) || ["", ""])[1],
-            amount: (text.match(/Estimated\s*Value\s*[:\-]?\s*([\d,]+\.?\d*)/i) || ["", ""])[1],
-            subDivision: (text.match(/Division\s*:\s*([A-Za-z0-9\-]+)/i) || ["", ""])[1],
-            recordType: "PR"
-        });
-
-    } catch (err) {
-        res.status(500).json({ error: "Failed to read PDF" });
-    }
-});
-
-// =================================================================
-// DAILY PROGRESS ROUTES
-// =================================================================
-
-app.get("/daily-progress", async (req, res) => {
-    res.json(await readJsonFile(dailyFile, []));
-});
-
-app.get("/daily-progress/:id", async (req, res) => {
-    const id = Number(req.params.id);
-    const snaps = await readJsonFile(dailyFile, []);
-    const snap = snaps.find(s => s.id === id);
-    if (!snap) return res.status(404).json({ error: "Not found" });
-    res.json(snap);
-});
-
-app.post("/daily-progress", authenticateToken, async (req, res) => {
-    const { id, date, tableHTML, rowCount } = req.body;
-
-    let snaps = await readJsonFile(dailyFile, []);
-
-    if (id) {
-        const index = snaps.findIndex(s => s.id == id);
-        if (index !== -1) {
-            snaps[index] = { ...snaps[index], date, tableHTML, rowCount };
+            confirmModal.style.display = 'flex';
         }
-    } else {
-        snaps.push({ id: Date.now(), date, tableHTML, rowCount });
-    }
 
-    await safeWriteJson(dailyFile, snaps);
-    res.json({ success: true });
-});
-
-app.delete("/daily-progress/:id", authenticateToken, async (req, res) => {
-    let snaps = await readJsonFile(dailyFile, []);
-    const id = Number(req.params.id);
-
-    snaps = snaps.filter(s => s.id !== id);
-    await safeWriteJson(dailyFile, snaps);
-
-    res.json({ success: true });
-});
-
-// =================================================================
-// USER AUTH
-// =================================================================
-
-let pendingVerifications = {};
-
-app.post("/register-send-otp", async (req, res) => {
-    try {
-        const { email, password, inviteCode } = req.body;
-
-        if (!email || !password || inviteCode !== "810632")
-            return res.status(400).json({ message: "Invalid data" });
-
-        const users = await readJsonFile(USERS_FILE, []);
-        if (users.find(u => u.username === email))
-            return res.status(409).json({ message: "Already registered" });
-
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        const passwordHash = await bcrypt.hash(password, 10);
-
-        pendingVerifications[email] = {
-            email,
-            passwordHash,
-            otp,
-            expires: Date.now() + 10 * 60 * 1000
+        confirmOkBtn.onclick = () => {
+            if (onConfirmCallback) {
+                onConfirmCallback();
+            }
+            onConfirmCallback = null;
+            confirmModal.style.display = 'none';
         };
 
-        await transporter.sendMail({
-            from: EMAIL_USER,
-            to: email,
-            subject: "Verification Code",
-            text: `Your OTP is ${otp}`
+        confirmCancelBtn.onclick = () => {
+            onConfirmCallback = null;
+            confirmModal.style.display = 'none';
+        };
+
+
+        /* =================================================================== */
+        /* ===================== PDF DATABASE PANEL CODE ===================== */
+        /* =================================================================== */
+        const recordForm = document.getElementById('recordForm');
+        const recordTable = document.getElementById('recordTable');
+        const editId = document.getElementById('editId');
+        let allRecords = [];
+        let currentPage = 1;
+        const recordsPerPage = 10;
+        let filteredRecords = []; 
+        let sortAsc = true;
+        
+        const filterSubDivisionEl = document.getElementById('filterSubDivision');
+        const filterRecordTypeEl = document.getElementById('filterRecordType');
+        const searchInputEl = document.getElementById('searchInput');
+
+        let viewingTrash = false;
+
+        async function loadRecords() {
+            try {
+                const res = await authFetch(`${API}/records`);
+                if (!res.ok) throw new Error('Failed to load');
+                
+                allRecords = await res.json();
+                
+                populateFilterDropdowns(allRecords);
+                applyAllFilters();
+                
+            } catch (err) {
+                console.error(err);
+                recordTable.innerHTML = "<tr><td colspan='8'>⚠️ Failed to load records</td></tr>";
+            }
+        }
+        
+        function populateFilterDropdowns(data) {
+            const subDivisions = [...new Set(data.map(r => r.subDivision).filter(Boolean))];
+            const recordTypes = [...new Set(data.map(r => r.recordType).filter(Boolean))];
+            
+            filterSubDivisionEl.innerHTML = '<option value="">All Sub Divisions</option>';
+            subDivisions.sort().forEach(val => {
+                filterSubDivisionEl.innerHTML += `<option value="${val}">${val}</option>`;
+            });
+            
+            filterRecordTypeEl.innerHTML = '<option value="">All Record Types</option>';
+            recordTypes.sort().forEach(val => {
+                filterRecordTypeEl.innerHTML += `<option value="${val}">${val}</option>`;
+            });
+        }
+
+        function updateDashboard(data = []) {
+            const totalAmount = data.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+            const prCount = data.filter(r => (r.recordType || '').toLowerCase() === 'pr').length;
+            const estimateCount = data.filter(r => (r.recordType || '').toLowerCase() === 'estimate').length;
+
+            document.getElementById('pdfDashboard').innerHTML = `
+                <div class="dash-box">
+                    <h4>Total Records</h4>
+                    <p id="statTotalRecords">${data.length}</p>
+                </div>
+                <div class="dash-box">
+                    <h4>Total Amount</h4>
+                    <p id="statTotalAmount">₹${totalAmount.toLocaleString('en-IN')}</p>
+                </div>
+                <div class="dash-box">
+                    <h4>PRs</h4>
+                    <p id="statPrCount">${prCount}</p>
+                </div>
+                <div class="dash-box">
+                    <h4>Estimates</h4>
+                    <p id="statEstimateCount">${estimateCount}</p>
+                </div>
+            `;
+        }
+
+        function applyAllFilters() {
+            const searchTerm = searchInputEl.value.toLowerCase();
+            const subDiv = filterSubDivisionEl.value;
+            const recType = filterRecordTypeEl.value;
+
+            filteredRecords = allRecords.filter(r => {
+                const matchesSearch = (
+                    (r.workName || '').toLowerCase().includes(searchTerm) ||
+                    (r.prNo || '').toLowerCase().includes(searchTerm) ||
+                    (r.subDivision || '').toLowerCase().includes(searchTerm) ||
+                    (r.recordType || '').toLowerCase().includes(searchTerm)
+                );
+                const matchesSubDiv = !subDiv || r.subDivision === subDiv;
+                const matchesRecType = !recType || r.recordType === recType;
+                
+                return matchesSearch && matchesSubDiv && matchesRecType;
+            });
+            
+            currentPage = 1;
+            renderRecords(filteredRecords, viewingTrash);
+            updateDashboard(filteredRecords);
+        }
+
+        function resetAllFilters() {
+            searchInputEl.value = '';
+            filterSubDivisionEl.value = '';
+            filterRecordTypeEl.value = '';
+            applyAllFilters();
+        }
+        
+        searchInputEl.addEventListener('input', applyAllFilters);
+        filterSubDivisionEl.addEventListener('change', applyAllFilters);
+        filterRecordTypeEl.addEventListener('change', applyAllFilters);
+
+        function renderRecords(data, isTrash = false) {
+            const tableHead = document.getElementById('pdfTableHead');
+            if (isTrash) {
+                tableHead.innerHTML = `
+                    <th class="wrap">Name</th>
+                    <th class="wrap">PR No</th>
+                    <th class="wrap">Sub Div</th>
+                    <th class="wrap">Deleted On</th>
+                    <th class="wrap">Actions</th>
+                `;
+            } else {
+                tableHead.innerHTML = `
+                    <th class="wrap" onclick="sortRecords('id')">ID ↕️</th>
+                    <th class="wrap" onclick="sortRecords('workName')">Name ↕️</th>
+                    <th class="wrap" onclick="sortRecords('prNo')">PR No ↕️</th>
+                    <th class="wrap" onclick="sortRecords('subDivision')">Sub Div ↕️</th>
+                    <th class="wrap" onclick="sortRecords('recordType')">Type ↕️</th>
+                    <th class="wrap" onclick="sortRecords('amount')">Amount ↕️</th>
+                    <th class="wrap" onclick="sortRecords('sendTo')">Send To ↕️</th>
+                    <th class="wrap">Actions</th>
+                `;
+            }
+
+            const start = (currentPage - 1) * recordsPerPage;
+            const end = start + recordsPerPage;
+            const paginated = data.slice(start, end);
+
+            recordTable.innerHTML = '';
+            if (!paginated.length) {
+                const cols = isTrash ? 5 : 8;
+                recordTable.innerHTML = `<tr><td colspan="${cols}">No records found</td></tr>`;
+                document.getElementById('pageInfo').textContent = `Page 1 of 1`;
+                return;
+            }
+
+            paginated.forEach(r => {
+                const tr = document.createElement('tr');
+                if (isTrash) {
+                    tr.innerHTML = `
+                        <td class="wrap">${r.workName || ''}</td>
+                        <td class="wrap">${r.prNo || ''}</td>
+                        <td class="wrap">${r.subDivision || ''}</td>
+                        <td class="wrap">${new Date(r.deletedOn).toLocaleString()}</td>
+                        <td class="wrap">
+                            <div class="actions">
+                                <button class="small-btn restore-btn" onclick="restoreRecord(${r.id})">Restore</button>
+                                <button class="small-btn delete-btn" onclick="deleteRecordPermanently(${r.id})">Delete Perm.</button>
+                            </div>
+                        </td>
+                    `;
+                } else {
+                    tr.innerHTML = `
+                        <td class="wrap">${r.id || ''}</td>
+                        <td class="wrap">${r.workName || ''}</td>
+                        <td class="wrap">${r.prNo || ''}</td>
+                        <td class="wrap">${r.subDivision || ''}</td>
+                        <td class="wrap">${r.recordType || ''}</td>
+                        <td class="wrap">₹${r.amount ? parseFloat(r.amount).toLocaleString('en-IN') : '0'}</td>
+                        <td class="wrap">${r.sendTo || ''}</td>
+                        <td class="wrap">
+                            <div class="actions">
+                                ${r.pdfPath ? `<button class="small-btn preview-btn" onclick="previewPDF('${r.pdfPath}')">Preview</button>` : ''}
+                                <button class="small-btn edit-btn" onclick="editRecord(${r.id})">Edit</button>
+                                <button class="small-btn delete-btn" onclick="deleteRecord(${r.id})">Trash</button>
+                                ${r.pdfPath ? `<button class="small-btn download-btn" onclick="downloadPDF('${r.pdfPath}')">Download</button>` : ''}
+                            </div>
+                        </td>
+                    `;
+                }
+                recordTable.appendChild(tr);
+            });
+            document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${Math.max(1, Math.ceil(data.length / recordsPerPage))}`;
+        }
+
+        function nextPage() {
+            if (currentPage < Math.ceil(filteredRecords.length / recordsPerPage)) {
+                currentPage++;
+                renderRecords(filteredRecords, viewingTrash);
+            }
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderRecords(filteredRecords, viewingTrash);
+            }
+        }
+        
+        function sortRecords(field) {
+            if (viewingTrash) return;
+            const sorter = (a, b) => {
+                let valA = a[field];
+                let valB = b[field];
+                if (field === 'amount' || field === 'id') {
+                    valA = parseFloat(valA) || 0;
+                    valB = parseFloat(valB) || 0;
+                }
+                if (valA < valB) return sortAsc ? -1 : 1;
+                if (valA > valB) return sortAsc ? 1 : -1;
+                return 0;
+            };
+            allRecords.sort(sorter);
+            filteredRecords.sort(sorter);
+            sortAsc = !sortAsc;
+            currentPage = 1;
+            renderRecords(filteredRecords, viewingTrash);
+        }
+       const BACKEND =
+    location.hostname.includes("netlify.app")
+        ? "https://nttps-backend.onrender.com"
+        : "http://172.21.16.51:3000";
+
+function previewPDF(path) {
+    document.getElementById("pdfFrame").src = BACKEND + path;
+    document.getElementById("previewModal").style.display = "flex";
+}
+
+
+        function closePreview() {
+            document.getElementById('previewModal').style.display = 'none';
+            document.getElementById('pdfFrame').src = '';
+        }
+
+        function editRecord(id) {
+            const r = allRecords.find(r => r.id === id);
+            if (!r) return;
+            document.getElementById('workName').value = r.workName;
+            document.getElementById('prNo').value = r.prNo;
+            document.getElementById('subDivision').value = r.subDivision;
+            document.getElementById('recordType').value = r.recordType;
+            document.getElementById('amount').value = r.amount;
+            document.getElementById('sendTo').value = r.sendTo;
+            editId.value = r.id;
+            document.getElementById('currentPdf').value = r.pdfPath || '';
+            
+            document.getElementById('formWrapper').style.display = 'block';
+            document.getElementById('formToggle').textContent = 'Add / Edit Record ➖';
+            
+            window.scrollTo(0, 0); 
+        }
+
+        async function deleteRecord(id) {
+            showConfirm('Move this record to the trash bin?', async () => {
+                try {
+                    const res = await authFetch(`${API}/records/${id}`, { method: 'DELETE' }); 
+                    const data = await res.json();
+                    if (data.success) {
+                        showToast('Record moved to trash');
+                        loadRecords();
+                    } else showToast('Delete failed', true);
+                } catch (err) {
+                    console.error(err);
+                    showToast('Server error', true);
+                }
+            });
+        }
+        
+        async function toggleTrashView() {
+            viewingTrash = !viewingTrash;
+            const btn = document.getElementById('trashToggleBtn');
+            const title = document.getElementById('pdfListTitle');
+            
+            if (viewingTrash) {
+                btn.textContent = 'View Active Records';
+                btn.style.backgroundColor = '#1D6F42';
+                title.textContent = 'Trash Bin';
+                await loadTrash();
+            } else {
+                btn.textContent = '♻️ View Trash';
+                btn.style.backgroundColor = '#dc3545';
+                title.textContent = 'All Records';
+                await loadRecords();
+            }
+            searchInputEl.disabled = viewingTrash;
+            filterSubDivisionEl.disabled = viewingTrash;
+            filterRecordTypeEl.disabled = viewingTrash;
+        }
+
+        async function loadTrash() {
+            try {
+                const res = await authFetch('${API}/records/trash');
+                if (!res.ok) throw new Error('Failed to load trash');
+                
+                const trashRecords = await res.json();
+                trashRecords.sort((a,b) => (b.deletedOn || '').localeCompare(a.deletedOn));
+                
+                allRecords = trashRecords;
+                filteredRecords = trashRecords;
+                currentPage = 1;
+                
+                renderRecords(filteredRecords, true);
+                updateDashboard(filteredRecords);
+                
+            } catch (err) {
+                showToast(err.message, true);
+                recordTable.innerHTML = "<tr><td colspan='5'>⚠️ Failed to load trash</td></tr>";
+            }
+        }
+        
+        async function restoreRecord(id) {
+            showConfirm('Restore this record to the main list?', async () => {
+                try {
+                    const res = await authFetch(`${API}/records/${id}/restore`, { method: 'POST' }); 
+                    const data = await res.json();
+                    if (data.success) {
+                        showToast('Record restored');
+                        loadTrash();
+                    } else showToast('Restore failed', true);
+                } catch (err) {
+                    console.error(err);
+                    showToast('Server error', true);
+                }
+            }, 'restore-btn');
+        }
+
+        async function deleteRecordPermanently(id) {
+            showConfirm('PERMANENTLY DELETE this record? This cannot be undone.', async () => {
+                try {
+                    const res = await authFetch(`${API}/records/trash/${id}`, { method: 'DELETE' }); 
+                    const data = await res.json();
+                    if (data.success) {
+                        showToast('Record permanently deleted');
+                        loadTrash();
+                    } else showToast('Delete failed', true);
+                } catch (err) {
+                    console.error(err);
+                    showToast('Server error', true);
+                }
+            });
+        }
+
+        recordForm.addEventListener('submit', async e => {
+            e.preventDefault();
+            const formData = new FormData();
+            const pdfFile = document.getElementById('pdfFile').files[0];
+            if (pdfFile) formData.append('pdfs', pdfFile);
+            else if (editId.value) formData.append('pdfPath', document.getElementById('currentPdf').value);
+            formData.append('workName', document.getElementById('workName').value);
+            formData.append('prNo', document.getElementById('prNo').value);
+            formData.append('subDivision', document.getElementById('subDivision').value);
+            formData.append('recordType', document.getElementById('recordType').value);
+            formData.append('amount', document.getElementById('amount').value);
+            formData.append('sendTo', document.getElementById('sendTo').value);
+            if (editId.value) formData.append('id', editId.value);
+
+            try {
+                const res = await authFetch(`${API}/upload`, { 
+                    method: 'POST', 
+                    body: formData 
+                });
+                
+                const data = await res.json();
+                if (data.success || data.records) {
+                    showToast(editId.value ? 'Record updated' : 'Record added');
+                    recordForm.reset();
+                    editId.value = '';
+                    document.getElementById('currentPdf').value = '';
+                    loadRecords();
+                    
+                    document.getElementById('formWrapper').style.display = 'none';
+                    document.getElementById('formToggle').textContent = 'Add / Edit Record ➕';
+
+                } else showToast('Operation failed', true);
+            } catch (err) {
+                console.error(err);
+                showToast('Server error', true);
+            }
         });
 
-        res.json({ message: "OTP sent" });
+        function downloadPDF(path) {
+            const a = document.createElement('a');
+            a.href = path;
+            a.download = path.split('/').pop();
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
 
+        function goHome() { window.location.href = 'index.html'; }
+        
+        function logout() { 
+            localStorage.removeItem('isAdmin'); 
+            localStorage.removeItem('adminToken');
+            window.location.href = 'login.html';
+        }
+
+        async function autoExtractPDF() {
+            const fileInput = document.getElementById("pdfFile");
+            const file = fileInput.files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append("pdfFile", file);
+            try {
+                const res = await authFetch(`${API}/extract-pdf`, { 
+                    method: "POST", 
+                    body: formData 
+                });
+
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.error || "Failed to extract PDF content");
+                }
+
+                const data = await res.json();
+                if (data.workName) document.getElementById("workName").value = data.workName;
+                if (data.prNo) document.getElementById("prNo").value = data.prNo;
+                if (data.recordType) document.getElementById("recordType").value = data.recordType;
+                if (data.amount) document.getElementById("amount").value = data.amount;
+
+            } catch (err) {
+                console.error(err);
+                showToast(err.message, true);
+            }
+        }
+
+
+        /* =================================================================== */
+        /* =================== DAILY WORK PROGRESS PANEL CODE ================ */
+        /* =================================================================== */
+        const sheetTbody = document.getElementById('progressTableBody');
+        const snapshotDateEl = document.getElementById('snapshotDate');
+        const snapshotIdEl = document.getElementById('snapshotId');
+        let loadedSnapshotDate = null; // <-- ADD THIS LINE
+        
+        let savedEntries = [];
+        let savedFiltered = [];
+        let savedPage = 1;
+        const savedPerPage = 8;
+        
+        function styleRow(tr) {
+            if (!tr) return;
+            const statusCell = tr.children[5];
+            if (!statusCell) return;
+            const status = statusCell.textContent.toLowerCase().trim();
+            tr.classList.remove('status-done', 'status-progress', 'status-pending');
+            if (status.includes('done') || status.includes('completed')) {
+                tr.classList.add('status-done');
+            } else if (status.includes('progress') || status.includes('wip')) {
+                tr.classList.add('status-progress');
+            } else if (status.includes('pending') || status.includes('issue')) {
+                tr.classList.add('status-pending');
+            }
+        }
+        function styleProgressRows() {
+            sheetTbody.querySelectorAll('tr').forEach(styleRow);
+        }
+        sheetTbody.addEventListener('input', (e) => {
+            const tr = e.target.closest('tr');
+            styleRow(tr);
+        });
+
+        function addProgressRow(prefill={}) {
+            const tr = document.createElement('tr');
+            tr.draggable = true;
+            
+            const makeCell = (value='') => {
+                const td = document.createElement('td');
+                td.contentEditable = true;
+                td.setAttribute('role','gridcell');
+                td.textContent = value;
+                return td;
+            };
+            tr.appendChild(makeCell(prefill.date || ''));
+            tr.appendChild(makeCell(prefill.division || ''));
+            tr.appendChild(makeCell(prefill.subDivision || ''));
+            tr.appendChild(makeCell(prefill.activity || ''));
+            tr.appendChild(makeCell(prefill.manpower || ''));
+            tr.appendChild(makeCell(prefill.status || ''));
+            tr.appendChild(makeCell(prefill.remarks || ''));
+            const rowCell = document.createElement('td');
+            tr.appendChild(rowCell);
+            sheetTbody.appendChild(tr);
+            styleRow(tr);
+        }
+        function insertRowBefore() {
+            // 1. Create a new blank row (logic from addProgressRow)
+            const tr = document.createElement('tr');
+            tr.draggable = true; // Make it draggable
+
+            const makeCell = (value='') => {
+                const td = document.createElement('td');
+                td.contentEditable = true;
+                td.setAttribute('role','gridcell');
+                td.textContent = value;
+                return td;
+            };
+            
+            tr.appendChild(makeCell(''));
+            tr.appendChild(makeCell(''));
+            tr.appendChild(makeCell(''));
+            tr.appendChild(makeCell(''));
+            tr.appendChild(makeCell(''));
+            tr.appendChild(makeCell(''));
+            tr.appendChild(makeCell(''));
+            
+            const rowCell = document.createElement('td');
+            tr.appendChild(rowCell);
+
+            // 2. Check if a row is selected
+            if (!lastSelectedRow) {
+                // If no row is selected, just add to the top
+                sheetTbody.prepend(tr);
+            } else {
+                // If a row is selected, insert the new row *before* it
+                lastSelectedRow.before(tr);
+            }
+
+            // 3. Update row numbers and style
+            styleRow(tr);
+            updateRowNumbers();
+        }
+        function insertRowAfter() {
+            const tr = document.createElement('tr');
+            tr.draggable = true;
+            
+            const makeCell = (value='') => {
+                const td = document.createElement('td');
+                td.contentEditable = true;
+                td.setAttribute('role','gridcell');
+                td.textContent = value;
+                return td;
+            };
+            tr.appendChild(makeCell(''));
+            tr.appendChild(makeCell(''));
+            tr.appendChild(makeCell(''));
+            tr.appendChild(makeCell(''));
+            tr.appendChild(makeCell(''));
+            tr.appendChild(makeCell(''));
+            tr.appendChild(makeCell(''));
+            const rowCell = document.createElement('td');
+            tr.appendChild(rowCell);
+            if (!lastSelectedRow) {
+                sheetTbody.appendChild(tr);
+            } else {
+                lastSelectedRow.after(tr);
+            }
+            styleRow(tr);
+            updateRowNumbers();
+        }
+
+        function removeRow(btn){
+            const tr = btn.closest('tr');
+            if(tr) tr.remove();
+            updateRowNumbers();
+        }
+
+        function clearSheet(){
+            showConfirm('Clear all rows from the sheet?', () => {
+                sheetTbody.innerHTML='';
+                snapshotIdEl.value = '';
+                loadedSnapshotDate = null;
+                setDefaultDate();
+                localStorage.removeItem('dailyProgressDraft');
+                autoSaveMsgEl.textContent = '';
+            });
+        }
+
+        function initSheet() {
+            sheetTbody.innerHTML = '';
+            for (let i = 0; i < 20; i++) {
+                addProgressRow();
+            }
+            updateRowNumbers(); 
+            styleProgressRows();
+        }
+        
+        function setDefaultDate() {
+             if (!snapshotDateEl.value) {
+                 snapshotDateEl.value = new Date().toISOString().substr(0, 10);
+             }
+         }
+
+        function updateRowNumbers(){
+            sheetTbody.querySelectorAll('tr').forEach((tr, idx)=>{
+                const cell = tr.querySelector('td:last-child');
+                if(cell) cell.innerHTML=`<button class="small small-btn delete-btn" style="padding: 4px 8px;" onclick="removeRow(this)">X</button> ${idx+1}`;
+            });
+        }
+        
+        async function saveProgress(){
+            // --- FIX: Exclude selected row highlight from saved snapshot ---
+let lastSelectedRowIndex = -1;
+if (lastSelectedRow) {
+    // Remember index and remove highlight temporarily
+    lastSelectedRowIndex = Array.from(sheetTbody.children).indexOf(lastSelectedRow);
+    lastSelectedRow.classList.remove('selected-row');
+}
+
+// Take clean HTML without highlight
+const snapshotHTML = sheetTbody.innerHTML;
+
+// Restore highlight back for user view
+if (lastSelectedRowIndex > -1 && sheetTbody.children[lastSelectedRowIndex]) {
+    sheetTbody.children[lastSelectedRowIndex].classList.add('selected-row');
+}
+// --- END FIX ---
+
+unmergeCells();
+
+            const rowCount = sheetTbody.querySelectorAll('tr').length;
+            sheetTbody.innerHTML = snapshotHTML;
+            updateRowNumbers(); 
+            styleProgressRows();
+
+            const dateValue = snapshotDateEl.value; // This is 'YYYY-MM-DD'
+            let snapshotId = snapshotIdEl.value; // <-- Use 'let' instead of 'const'
+
+            if (!dateValue) {
+                return showToast('Please select a date for this snapshot.', true);
+            }
+
+            // --- NEW FORMATTING LOGIC ---
+            const parts = dateValue.split('-'); // [YYYY, MM, DD]
+            const formattedDate = `${parts[2]}/${parts[1]}/${parts[0]}`; // DD/MM/YYYY
+
+            // --- THIS IS THE FIX ---
+            // If we had a date loaded AND the new date is different,
+            // we must clear the ID to force a "Save As New".
+            if (loadedSnapshotDate && loadedSnapshotDate !== formattedDate) {
+                snapshotId = null;
+            }
+            // --- END OF FIX ---
+
+            if (!rowCount) return showToast('No rows to save.', true);
+            
+            try{
+ const res = await authFetch(`${API}/daily-progress`,{
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({
+                        id: snapshotId || null,
+                        date: formattedDate, // <-- Send the formatted DD/MM/YYYY date
+                        tableHTML: snapshotHTML,
+                        rowCount: rowCount
+                    })
+                });
+                const data = await res.json();
+                if(data.success){
+                    showToast(data.message);
+                    snapshotIdEl.value = '';
+loadedSnapshotDate = null;
+                    localStorage.removeItem('dailyProgressDraft');
+                    document.getElementById('autoSaveMsg').textContent = 'Snapshot saved!';
+                    loadSavedProgress();
+                } else {
+                    showToast(`Save failed: ${data.error}`, true);
+                }
+            } catch(err){
+                console.error(err);
+                showToast('Server error', true);
+            }
+        }
+
+        async function loadSavedProgress(){
+    try {
+        const res = await authFetch(`${API}/daily-progress`);
+        savedEntries = await res.json();
+
+        // ✅ Sort from newest → oldest properly (handles DD/MM/YYYY format)
+        savedEntries.sort((a, b) => {
+            const parseDate = d => {
+                if (!d) return 0;
+                const parts = d.split(/[./-]/);
+                return new Date(parts[2], parts[1] - 1, parts[0]).getTime();
+            };
+            return parseDate(b.date) - parseDate(a.date);
+        });
+
+        savedFiltered = savedEntries.slice();
+        savedPage = 1;
+        renderSaved();
     } catch (err) {
-        res.status(500).json({ message: "Email sending failed", error: err.toString() });
+        console.error(err);
+        document.getElementById('savedBody').innerHTML = '<tr><td colspan="3">Failed to load saved progress</td></tr>';
     }
-});
+}
 
-app.post("/register-verify", async (req, res) => {
-    const { email, otp } = req.body;
 
-    const pending = pendingVerifications[email];
-    if (!pending || pending.otp !== otp)
-        return res.status(400).json({ message: "Invalid OTP" });
+        function renderSaved(data=savedFiltered){
+            const start=(savedPage-1)*savedPerPage;
+            const end=start+savedPerPage;
+            const pageItems=data.slice(start,end);
+            const tbody=document.getElementById('savedBody');
+            tbody.innerHTML='';
 
-    const users = await readJsonFile(USERS_FILE, []);
-    users.push({ username: email, passwordHash: pending.passwordHash });
+            if(!pageItems.length){
+                tbody.innerHTML='<tr><td colspan="3">No saved snapshots</td></tr>';
+                document.getElementById('savedPageInfo').textContent = `Page 1 of 1`;
+                return;
+            }
 
-    await safeWriteJson(USERS_FILE, users);
-    delete pendingVerifications[email];
+            pageItems.forEach(item=>{
+                const tr=document.createElement('tr');
+                tr.innerHTML= `
+                    <td class="wrap"><strong>${item.date||''}</strong></td>
+                    <td class="wrap">${item.rowCount||'0'} rows</td>
+                    <td class="wrap">
+                        <div class="actions">
+                            <button class="small-btn preview-btn" onclick="previewSnapshot(${item.id})">Preview</button>
+                            <button class="small-btn edit-btn" onclick="loadSnapshot(${item.id})">Load / Edit</button>
+                            <button class="small-btn delete-btn" onclick="deleteSaved(${item.id})">Delete</button>
+                        </div>
+                    </td>`;
+                tbody.appendChild(tr);
+            });
+            const totalPages=Math.max(1,Math.ceil(data.length/savedPerPage));
+            document.getElementById('savedPageInfo').textContent=`Page ${savedPage} of ${totalPages}`;
+        }
+        
+        async function loadSnapshot(id) {
+            showConfirm('This will replace the current sheet. Are you sure?', async () => {
+                try {
+      const res = await authFetch(`${API}/daily-progress/${id}`);
 
-    res.json({ message: "Registration complete" });
-});
+                    if (!res.ok) throw new Error('Snapshot not found');
+                    
+                    const snapshot = await res.json();
+                    
+                    sheetTbody.innerHTML = snapshot.tableHTML;
 
-app.post("/login", async (req, res) => {
-    const { username, password } = req.body;
+                    // --- THIS IS THE FIX ---
+                    // snapshot.date is "DD.MM.YYYY" or "DD/MM/YYYY"
+                    const parts = snapshot.date.split(/[./-]/); // Split by dot, slash, or dash
+                    const inputDate = `${parts[2]}-${parts[1]}-${parts[0]}`; // YYYY-MM-DD
+ snapshotDateEl.value = inputDate; // <-- Set the YYYY-MM-DD value
+                    // --- END OF FIX ---
 
-    const users = await readJsonFile(USERS_FILE, []);
-    const user = users.find(u => u.username === username);
+            snapshotIdEl.value = snapshot.id;
+                    loadedSnapshotDate = snapshot.date; // <-- ADD THIS LINE
 
-    if (!user || !(await bcrypt.compare(password, user.passwordHash)))
-        return res.status(401).json({ message: "Invalid login" });
+ updateRowNumbers();
+ styleProgressRows();
 
-    const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: "1h" });
+ window.scrollTo(0, 0);
+ } catch (err) {
+ showToast(`Error loading snapshot: ${err.message}`, true);
+ }
+ }, 'edit-btn');
+ }
+        function nextSavedPage(){ if(savedPage<Math.ceil(savedFiltered.length/savedPerPage)){savedPage++; renderSaved();}}
+        function prevSavedPage(){ if(savedPage>1){savedPage--; renderSaved();}}
+        document.getElementById('savedSearch').addEventListener('input', e=>{
+            const term=e.target.value.trim().toLowerCase();
+            savedPage=1;
+            if(!term){
+                savedFiltered=savedEntries.slice();
+                renderSaved();
+                return;
+            }
+            savedFiltered=savedEntries.filter(item =>
+                (item.date||'').toLowerCase().includes(term)
+            );
+            renderSaved();
+        });
 
-    res.json({ message: "Login success", token });
-});
+        function deleteSaved(id){
+            showConfirm('Delete this saved snapshot? This cannot be undone.', () => {
+                authFetch(`${API}/daily-progress
+/${id}`, {method:'DELETE'})
+                    .then(r=>r.json())
+                    .then(data=>{
+                        if(data.success) {
+                            loadSavedProgress(); 
+                            showToast('Snapshot deleted.');
+                        }
+                        else showToast('Delete failed', true);
+                    })
+                    .catch(err=>{console.error(err); showToast('Server error', true); });
+            });
+        }
+        
+        function handleSheetPaste(e) {
+            const td = e.target.closest('td[contenteditable="true"]');
+            if (!td) return;
+            e.preventDefault();
+            const text = e.clipboardData.getData('text/plain');
+            const lines = text.split(/\r?\n/).filter(line => line.length > 0);
+            if (lines.length <= 1) {
+                td.textContent = text;
+                return;
+            }
+            const cellIndex = td.cellIndex;
+            const tr = td.parentElement;
+            const rowIndex = Array.from(sheetTbody.children).indexOf(tr);
+            const allRows = sheetTbody.querySelectorAll('tr');
+            lines.forEach((line, i) => {
+                const targetRowIndex = rowIndex + i;
+                let targetRow = allRows[targetRowIndex];
+                if (!targetRow) {
+                    addProgressRow(); 
+                    targetRow = sheetTbody.lastElementChild;
+                }
+                const targetCell = targetRow.children[cellIndex];
+                if (targetCell) {
+                    targetCell.textContent = line.trim();
+                }
+            });
+            updateRowNumbers();
+            styleProgressRows();
+        }
+        sheetTbody.addEventListener('paste', handleSheetPaste);
 
-// =================================================================
-// STATIC FILES
-// =================================================================
-app.use(express.static(__dirname, { extensions: ["html"] }));
+        function exportToExcel() {
+            showConfirm("Export the current 'Daily Work Progress' table to an Excel file?", () => {
+                const tableClone = document.getElementById('progressTable').cloneNode(true);
+                tableClone.querySelector('thead tr').removeChild(tableClone.querySelector('thead tr').lastElementChild);
+                tableClone.querySelectorAll('tbody tr').forEach(tr => {
+                    if (tr.lastElementChild) {
+                        tr.removeChild(tr.lastElementChild);
+                    }
+                });
+                const wb = XLSX.utils.table_to_book(tableClone, { sheet: "Daily Progress" });
+                let date = document.getElementById('snapshotDate').value || new Date().toISOString().substr(0, 10);
+                const fileName = `DailyProgress_${date}.xlsx`;
+                XLSX.writeFile(wb, fileName);
+            }, 'btn-export');
+        }
+        
+        async function importFromExcel(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-// =================================================================
-// START SERVER
-// =================================================================
-const PORT = process.env.PORT || 3000;
+            // 1. Read the file
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const data = e.target.result;
+                const wb = XLSX.read(data, { type: 'buffer' });
+                const ws = wb.Sheets[wb.SheetNames[0]];
+                
+                // 2. Convert to Array of Arrays to capture empty cells
+                const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, blankrows: false });
 
-app.listen(PORT, () => {
-    console.log(`✅ Server running on port ${PORT}`);
-});
+                if (aoa.length < 2) { // 1 row for header, 1 for data
+                    showToast("Import failed: The sheet is empty.", true);
+                    return;
+                }
 
+                // 3. Group all rows by their "Date" value
+                const dateGroups = {};
+                let currentDate = null; // This will "remember" the last date seen
+
+                // Loop from row 1 (skipping the header row 0)
+                for (let i = 1; i < aoa.length; i++) {
+                    const row = aoa[i];
+                    
+                    let dateValue = row[0]; // Get the value from the 'Date' column (index 0)
+
+                    // Check if this row has a new date
+                    if (dateValue) {
+                        let dateStr;
+                        if (typeof dateValue === 'number') {
+                            // It's an Excel serial date, convert it
+                            const excelDate = new Date((dateValue - (25567 + 2)) * 86400 * 1000); // UTC
+                            dateStr = excelDate.toISOString().substr(0, 10);
+                        } else {
+                            // It's a string, just trim it
+                            dateStr = String(dateValue).trim();
+                        }
+                        currentDate = dateStr; // Set the new "current date"
+                    }
+
+                    if (!currentDate) {
+                        continue; 
+                    }
+
+                    if (!dateGroups[currentDate]) {
+                        dateGroups[currentDate] = [];
+                    }
+
+                    const rowObj = {
+                        Date: currentDate,
+                        Division: row[1] || '',
+                        'Sub-Division/Location': row[2] || '',
+                        'Maintenance Activity Description': row[3] || '',
+                        'Man Power Engaged': row[4] || '',
+                        Status: row[5] || '',
+                        'Remarks/Issues': row[6] || ''
+                    };
+                    dateGroups[currentDate].push(rowObj);
+                }
+
+                // 4. Build the snapshot objects for the server
+                const snapshotsToSave = [];
+                for (const date in dateGroups) {
+                    const rows = dateGroups[date];
+                    let tableHTML = "";
+
+                    for (const row of rows) {
+                        tableHTML += `<tr>
+                            <td contenteditable="true">${row.Date || ''}</td>
+                            <td contenteditable="true">${row.Division || ''}</td>
+                            <td contenteditable="true">${row['Sub-Division/Location'] || ''}</td>
+                            <td contenteditable="true">${row['Maintenance Activity Description'] || ''}</td>
+                            <td contenteditable="true">${row['Man Power Engaged'] || ''}</td>
+                            <td contenteditable="true">${row.Status || ''}</td>
+                            <td contenteditable="true">${row['Remarks/Issues'] || ''}</td>
+                            <td></td>
+                        </tr>`;
+                    }
+
+                    snapshotsToSave.push({
+                        date: date,
+                        tableHTML: tableHTML,
+                        rowCount: rows.length
+                    });
+                }
+                
+                if (snapshotsToSave.length === 0) {
+                    showToast("Import failed. No valid dates found in the 'Date' column.", true);
+                    return;
+                }
+
+                // 5. Ask for confirmation
+                const msg = `Found ${snapshotsToSave.length} unique date(s). This will add or update ${snapshotsToSave.length} snapshots in your archive. Continue?`;
+                
+                showConfirm(msg, async () => {
+                    try {
+                        const res = await authFetch('${API}/daily-progress/batch-import', {
+                            method: 'POST',
+                            body: JSON.stringify(snapshotsToSave)
+                        });
+
+                        const resultData = await res.json();
+                        if (res.ok) {
+                            showToast(resultData.message);
+                            loadSavedProgress();
+                        } else {
+                            throw new Error(resultData.error || "Batch import failed");
+                        }
+                    } catch (err) {
+                        console.error("Batch import error:", err);
+                        showToast(err.message, true);
+                    }
+                }, 'btn-import-label');
+            };
+            
+            reader.onerror = function() { showToast("There was an error reading the file.", true); };
+            reader.readAsArrayBuffer(file);
+
+            event.target.value = null;
+        }
+
+
+        let selectedCells = [];
+        let lastSelectedRow = null; 
+        sheetTbody.addEventListener('click', e => {
+            const td = e.target.closest('td');
+            if (!td) return; 
+            const tr = td.parentElement;
+            if (lastSelectedRow) {
+                lastSelectedRow.classList.remove('selected-row');
+            }
+            tr.classList.add('selected-row');
+            lastSelectedRow = tr;
+            if (td === td.parentElement.lastElementChild) {
+                 selectedCells.forEach(c => c.style.background = '');
+                 selectedCells = [];
+                 return;
+            }
+            if (e.shiftKey) {
+                if (!selectedCells.includes(td)) {
+                    td.style.background = 'lightblue';
+                    selectedCells.push(td);
+                } else {
+                    td.style.background = '';
+                    selectedCells.splice(selectedCells.indexOf(td), 1);
+                }
+            } else {
+                selectedCells.forEach(c => c.style.background = '');
+                selectedCells = [td];
+                td.style.background = 'lightblue';
+            }
+        });
+        function mergeCells() {
+            if (selectedCells.length < 2) return showToast('Select 2+ cells with Shift+Click.', true);
+            const rows = selectedCells.map(c => Array.from(sheetTbody.rows).indexOf(c.parentElement));
+            const cols = selectedCells.map(c => Array.from(c.parentElement.children).indexOf(c));
+            const minRow = Math.min(...rows), maxRow = Math.max(...rows);
+            const minCol = Math.min(...cols), maxCol = Math.max(...cols);
+            const topLeft = sheetTbody.rows[minRow].children[minCol];
+            topLeft.setAttribute('rowspan', maxRow - minRow + 1);
+            topLeft.setAttribute('colspan', maxCol - minCol + 1);
+            for (const cell of selectedCells) {
+                if (cell !== topLeft) cell.remove();
+            }
+            selectedCells.forEach(c => c.style.background = '');
+            selectedCells = [];
+            updateRowNumbers();
+        }
+        function unmergeCells() {
+            sheetTbody.querySelectorAll('td[rowspan], td[colspan]').forEach(td => {
+                const rowIndex = Array.from(sheetTbody.rows).indexOf(td.parentElement);
+                const colIndex = Array.from(td.parentElement.children).indexOf(td);
+                const rowspan = parseInt(td.getAttribute('rowspan') || 1);
+                const colspan = parseInt(td.getAttribute('colspan') || 1);
+                td.removeAttribute('rowspan');
+                td.removeAttribute('colspan');
+                for (let r = rowIndex; r < rowIndex + rowspan; r++) {
+                    const targetRow = sheetTbody.rows[r];
+                    for (let c = colIndex; c < colIndex + colspan; c++) {
+                        if (r === rowIndex && c === colIndex) continue;
+                        const newTd = document.createElement('td');
+                        newTd.contentEditable = true;
+                        newTd.setAttribute('role','gridcell');
+                        if (c >= targetRow.children.length) {
+                             targetRow.appendChild(newTd);
+                        } else {
+                             targetRow.insertBefore(newTd, targetRow.children[c]);
+                        }
+                    }
+                }
+            });
+            updateRowNumbers();
+        }
+
+       async function previewSnapshot(id) {
+            const modal = document.getElementById('snapshotPreviewModal');
+            const contentEl = document.getElementById('snapshotFrame');
+            
+            contentEl.innerHTML = '<h4>Loading snapshot...</h4>';
+            modal.style.display = 'flex';
+
+            try {
+                const res = await authFetch(`${API}/daily-progress/${id}`);
+                if (!res.ok) throw new Error('Snapshot not found');
+                
+                const snapshot = await res.json();
+                
+                // Get the main table's headers HTML
+                const theadHTML = document.querySelector('#progressTable thead').innerHTML;
+                
+                // Construct the full, "neat" table for preview
+                contentEl.innerHTML = `
+                    <h3>Daily progress on: ${snapshot.date}</h3>
+                    <table id="previewTable">
+                        <thead>${theadHTML}</thead>
+                        <tbody>${snapshot.tableHTML}</tbody>
+                    </table>
+                `;
+                
+                
+                // --- FIX 1: Remove "Row" column from header ---
+                const previewTheadTR = contentEl.querySelector('#previewTable thead tr');
+                if (previewTheadTR && previewTheadTR.lastElementChild) {
+                    previewTheadTR.removeChild(previewTheadTR.lastElementChild); // Remove last <th> ("Row")
+                }
+                
+                const previewTbodyTRs = contentEl.querySelectorAll('#previewTable tbody tr');
+                
+                // --- NEW LOGIC: Hide duplicate dates (but not on new groups) ---
+                let previousDate = null;
+                previewTbodyTRs.forEach(tr => {
+                    const dateCell = tr.children[0];
+                    const divisionCell = tr.children[1]; // Get the Division cell
+                    
+                    if (dateCell) {
+                        const currentDate = dateCell.textContent;
+                        
+                        // Only clear the date if it's the same as the row above
+                        // AND the division cell for this row is empty.
+                        if (currentDate === previousDate && (divisionCell && divisionCell.textContent.trim() === '')) {
+                            dateCell.textContent = ''; // Clear the text
+                        } else if (currentDate.trim() !== '') {
+                            // This is a new date, store it
+                            previousDate = currentDate;
+                        }
+                    }
+                    // --- End of New Logic ---
+                    
+                    // Remove last <td> (the row/button cell)
+                    if (tr.lastElementChild) {
+                        tr.removeChild(tr.lastElementChild);
+                    }
+                });
+
+                // --- FIX 2: Remove 'contenteditable' from all preview cells ---
+                contentEl.querySelectorAll('#previewTable td[contenteditable="true"]').forEach(cell => {
+                    cell.removeAttribute('contenteditable');
+                    cell.style.background = 'none'; // Also remove the yellow-ish edit background
+                });
+
+            } catch (err) {
+                contentEl.innerHTML = `<h4>Error loading snapshot: ${err.message}</h4>`;
+            }
+        }
+        function closeSnapshotPreview() {
+            document.getElementById('snapshotPreviewModal').style.display = 'none';
+            document.getElementById('snapshotFrame').innerHTML = '';
+        }
+        function printSnapshot() {
+            const content = document.getElementById('snapshotFrame').innerHTML;
+            const printWindow = window.open('', '', 'height=800,width=1000');
+            printWindow.document.write('<html><head><title>Print Snapshot</title><style>body{font-family:Arial}h3{font-size:1.2rem}table{width:100%;border-collapse:collapse;margin-top:10px}th,td{border:1px solid #000;padding:8px;text-align:left;white-space:normal;word-break:break-word}th{background:#eee}td button{display:none}</style></head><body>');
+            printWindow.document.write(content);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            printWindow.focus(); 
+            setTimeout(() => { printWindow.print(); printWindow.close(); }, 250);
+        }
+        
+        /* --- MODIFIED: Manual Save Draft Logic --- */
+        const autoSaveMsgEl = document.getElementById('autoSaveMsg');
+
+        function saveDraft() {
+            const currentHTML = sheetTbody.innerHTML;
+            localStorage.setItem('dailyProgressDraft', currentHTML);
+            autoSaveMsgEl.textContent = `Draft saved at ${new Date().toLocaleTimeString()}`;
+            showToast('Draft saved locally.');
+        }
+        
+        function restoreDraft() {
+            const savedDraft = localStorage.getItem('dailyProgressDraft');
+            if (savedDraft) {
+                showConfirm('An unsaved draft was found. Do you want to restore it?', () => {
+                    sheetTbody.innerHTML = savedDraft;
+                    updateRowNumbers();
+                    styleProgressRows();
+                    showToast('Draft restored.');
+                }, 'restore-btn');
+                
+                // --- If they cancel, delete the draft ---
+                const originalCancelClick = confirmCancelBtn.onclick;
+                confirmCancelBtn.onclick = () => {
+                    originalCancelClick(); // Run original logic
+                    localStorage.removeItem('dailyProgressDraft');
+                    showToast('Draft discarded.');
+                };
+            }
+        }
+        
+        /* --- Collapsible Form Logic --- */
+        const formToggle = document.getElementById('formToggle');
+        const formWrapper = document.getElementById('formWrapper');
+        
+        formToggle.addEventListener('click', () => {
+            if (formWrapper.style.display === 'none') {
+                formWrapper.style.display = 'block';
+                formToggle.textContent = 'Add / Edit Record ➖';
+            } else {
+                formWrapper.style.display = 'none';
+                formToggle.textContent = 'Add / Edit Record ➕';
+            }
+        });
+
+        /* --- Drag-and-Drop Row Logic --- */
+        let draggedRow = null;
+
+        sheetTbody.addEventListener('dragstart', e => {
+            if (e.target.tagName === 'BUTTON') {
+                e.preventDefault();
+                return;
+            }
+            const tr = e.target.closest('tr');
+            if (tr) {
+                draggedRow = tr;
+                e.dataTransfer.effectAllowed = 'move';
+                setTimeout(() => tr.classList.add('dragging'), 0);
+            }
+        });
+
+        sheetTbody.addEventListener('dragend', e => {
+            if (draggedRow) {
+                draggedRow.classList.remove('dragging');
+            }
+            draggedRow = null;
+        });
+
+        sheetTbody.addEventListener('dragover', e => {
+            e.preventDefault();
+        });
+
+        sheetTbody.addEventListener('drop', e => {
+            e.preventDefault();
+            if (!draggedRow) return;
+
+            draggedRow.classList.remove('dragging');
+            const targetRow = e.target.closest('tr');
+
+            if (targetRow && targetRow !== draggedRow) {
+                const rect = targetRow.getBoundingClientRect();
+                const midY = rect.top + rect.height / 2;
+                if (e.clientY < midY) {
+                    targetRow.before(draggedRow);
+                } else {
+                    targetRow.after(draggedRow);
+                }
+            } else if (!targetRow) {
+                sheetTbody.appendChild(draggedRow);
+            }
+            
+            updateRowNumbers();
+            draggedRow = null;
+        });
+
+
+        /* =================================================================== */
+        /* ========================= INITIAL LOAD ========================== */
+        /* =================================================================== */
+        
+        loadRecords();
+        initSheet();
+        setDefaultDate(); 
+        loadSavedProgress();
+        restoreDraft();
+        
+    </script></body>
+
+</html>
