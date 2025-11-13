@@ -894,10 +894,16 @@ const authFetch = async (url, options = {}) => {
             currentPage = 1;
             renderRecords(filteredRecords, viewingTrash);
         }
-        function previewPDF(path) {
-            document.getElementById('pdfFrame').src = path;
-            document.getElementById('previewModal').style.display = 'flex';
-        }
+       const BACKEND =
+    location.hostname.includes("netlify.app")
+        ? "https:https://nttps-backend.onrender.com"
+        : "http://172.21.16.51:3000";
+
+function previewPDF(path) {
+    document.getElementById("pdfFrame").src = BACKEND + path;
+    document.getElementById("previewModal").style.display = "flex";
+}
+
 
         function closePreview() {
             document.getElementById('previewModal').style.display = 'none';
@@ -1888,4 +1894,5 @@ loadedSnapshotDate = null;
         restoreDraft();
         
     </script></body>
+
 </html>
