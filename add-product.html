@@ -897,14 +897,8 @@ const authFetch = async (url, options = {}) => {
        const BACKEND = "https://nttps-backend.onrender.com";
 
 function previewPDF(path) {
-    let url = path;
-
-    // Cloudinary URLs are already complete
-    if (!url.startsWith("http")) {
-        url = `${BACKEND}${path}`;
-    }
-
-    document.getElementById("pdfFrame").src = url;
+    const iframe = document.getElementById("pdfFrame");
+    iframe.src = path;
     document.getElementById("previewModal").style.display = "flex";
 }
 
@@ -1899,6 +1893,7 @@ loadedSnapshotDate = null;
     </script></body>
 
 </html>
+
 
 
 
