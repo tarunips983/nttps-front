@@ -7,153 +7,292 @@
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg">
   <style>
-    /* -------------------------
-       Base / Desktop CSS (unchanged)
-       ------------------------- */
-    :root{
-      --primary:#007bff;
-      --accent:#ff9900;
-      --dark:#232f3e;
-      --muted:#f0f4f8;
-    }
-    *{box-sizing:border-box}
-    body { margin:0; font-family: "Segoe UI", Arial, sans-serif; background:#f4f4f4; color:#222; -webkit-font-smoothing:antialiased; }
-    header { background:var(--dark); color:white; padding:15px 20px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 8px rgba(0,0,0,0.2); position:sticky; top:0; z-index:1000; }
-    header h1{margin:0;font-size:22px}
-    .nav-right{display:flex;align-items:center;gap:12px}
-    .nav-right input{padding:7px 10px;border-radius:4px;border:none;width:180px}
-    .nav-right a{color:white;text-decoration:none;font-weight:600}
-    .main-tab-btn{background:#4a5c70;color:#fff;border:0;padding:8px 14px;border-radius:6px;font-weight:700;cursor:pointer}
-    .main-tab-btn.active{background:var(--primary)}
-    main{width:100%;height:calc(100vh - 67px);display:flex}
-    .main-view{width:100%;height:100%;display:flex;flex-direction:row;background:white;display:none}
-    .main-view.active{display:flex}
-    .left-bar{width:220px;background:var(--muted);border-right:1px solid #ccc;overflow-y:auto;padding:15px;flex-shrink:0}
-    .left-bar h3{margin:0 0 12px 0;font-size:18px;color:var(--dark);border-bottom:2px solid #ccc;padding-bottom:8px}
-    .right-panel{flex:1;overflow:auto;display:flex;flex-direction:column;height:100%}
-    #pdf-grid-wrapper{flex:1;overflow-y:auto;height:100%;padding:20px}
-    .product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px}
-    .product{background:#fff;padding:15px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.12);display:flex;flex-direction:column;height:100%}
-    .product img{width:100%;height:160px;object-fit:contain;border-radius:6px;padding:10px;background:#fff}
-    .product-info{flex:1}
-    .product-info h3{font-size:1.05rem;margin:0 0 8px 0;color:var(--dark);line-height:1.3}
-    .product-info p{margin:6px 0;font-size:0.9rem;color:#333}
-    .view-btn{margin-top:auto;padding:8px 12px;border-radius:6px;border:0;background:var(--primary);color:#fff;font-weight:700;cursor:pointer}
-    footer{background:var(--dark);color:#fff;padding:18px;text-align:center}
+/* ---------- RESTORED: Desktop + Shared styles (unchanged) ---------- */
+body { margin:0; font-family: "Segoe UI", Arial, sans-serif; background:#f4f4f4; scroll-behavior: smooth; }
 
-    /* PDF modal for desktop (center) */
-    #productModal{display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.55);z-index:1200}
-    #productModal.active{display:flex}
-    #modalContent{background:#fff;border-radius:10px;width:95%;max-width:1000px;height:90vh;padding:12px;display:flex;flex-direction:column;position:relative;box-shadow:0 8px 30px rgba(0,0,0,0.25)}
-    #modalHeader{display:flex;align-items:center;gap:12px;padding:6px 8px;border-bottom:1px solid #eee}
-    #modalHeader h2{font-size:1.03rem;margin:0;line-height:1.2}
-    #modalHeader p{margin:0;color:var(--accent);font-weight:700}
-    #modalBody{flex:1;display:flex;align-items:stretch;justify-content:stretch;padding:8px}
-    #pdfFrame{width:100%;height:100%;border:0;border-radius:6px;background:#fff}
-    /* default small close icon */
-    #closeModal{position:absolute;top:10px;right:14px;cursor:pointer;font-size:20px;color:#c0392b;background:#fff;border-radius:6px;padding:6px;border:1px solid #ddd;z-index:1210}
+header { background:#232f3e; color:white; padding:15px 20px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 8px rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 1000; }
 
-    /* Mobile-specific redesign (ONLY mobile) */
-    @media (max-width: 768px) {
-      /* stack layout */
-      main{flex-direction:column;height:auto}
-      header{padding:10px}
-      header h1{font-size:16px}
-      .nav-right{width:100%;flex-wrap:wrap;padding-top:8px}
-      .nav-right input{width:100%}
-      .main-tab-btn{flex:1;padding:10px 8px}
-      /* show mobile filter button (visible only mobile) */
-      #mobileFilterBtn, #mobileDailyFilterBtn{
-        display:block;
-        width:calc(100% - 30px);
-        margin:10px 15px;
-        padding:12px;
-        border-radius:8px;
-        border:0;
-        font-weight:700;
-        color:#fff;
-        box-shadow:0 6px 20px rgba(0,0,0,0.08);
-      }
-      #mobileFilterBtn{background:var(--primary)}
-      #mobileDailyFilterBtn{background:#28a745}
+header h1 { margin:0; font-size:22px; }
 
-      /* hide the left bar from the normal flow */
-      .left-bar{
-        position:fixed;
-        left:0;
-        top:0;
-        height:100vh;
-        width:280px;            /* slightly wider on mobile */
-        z-index:1300;
-        transform:translateX(-110%); /* hidden by default off-screen left */
-        transition:transform .32s cubic-bezier(.2,.9,.2,1);
-        box-shadow: 6px 0 30px rgba(0,0,0,0.18);
-        padding:18px;
-        border-right: none;
-        background:#fff;
-      }
-      /* when active, slide in */
-      .left-bar.active{transform:translateX(0)}
-      /* ensure left-bar content scrolls */
-      .left-bar::-webkit-overflow-scrolling:touch;
+.nav-right { display:flex; align-items:center; gap:15px; }
 
-      /* push right-panel to top and 1-col grid */
-      .product-grid{grid-template-columns:1fr;gap:16px;padding:8px}
-      .product{padding:14px;border-radius:12px}
-      .product img{height:120px}
-      .product-info h3{font-size:0.95rem}
-      .product-info p{font-size:0.84rem}
+.nav-right input { padding:7px 10px; border-radius:4px; border:none; width:180px; }
 
-      /* MOBILE PDF modal — redesign (not full screen, but prominent, easy to close) */
-      #productModal{background:rgba(0,0,0,0.5);align-items:flex-end;padding:12px} /* appear from bottom */
-      #modalContent{
-        width:100%;
-        max-width:100%;
-        height:78vh;          /* large but not full screen */
-        border-radius:12px 12px 0 0;
-        padding:0;
-        overflow:hidden;
-        display:flex;
-        flex-direction:column;
-      }
-      /* big header inside modal */
-      #modalHeader{
-        padding:14px 16px;
-        align-items:center;
-        justify-content:space-between;
-        border-bottom:1px solid #eee;
-        background:#fff;
-      }
-      #modalHeader h2{font-size:1rem;margin:0}
-      #modalHeader p{margin:0}
-      /* make close button big and obvious */
-      #closeModal{
-        position:relative;
-        top:0;
-        right:0;
-        transform:none;
-        font-size:18px;
-        padding:10px 12px;
-        margin-left:8px;
-        border-radius:10px;
-        border:0;
-        background:#fff;
-        color:#c0392b;
-        box-shadow:0 4px 14px rgba(0,0,0,0.12);
-      }
-      /* toolbar under header with small actions */
-      #modalToolbar{display:flex;gap:8px;padding:10px;background:#fafafa;border-bottom:1px solid #f0f0f0}
-      #modalToolbar button{padding:8px 12px;border-radius:8px;border:0;background:#e9ecef;font-weight:700}
-      /* iframe area */
-      #modalBody{padding:0;height:calc(78vh - 92px)} /* header + toolbar ~92 */
-      #pdfFrame{height:100%;border-radius:0}
-      /* make it easy to swipe close area */
-      .drag-handle{height:6px;width:60px;background:#ddd;border-radius:999px;margin:10px auto 0}
-    }
+.nav-right a { color:white; text-decoration:none; font-weight:600; transition:0.2s; }
 
-    /* small utility */
-    .pdf-nav-header{background:var(--accent);padding:10px;border-radius:6px;color:white;font-weight:700;margin-bottom:8px;border:none;display:block;text-align:left}
-    .pdf-nav-content button{display:block;width:100%;padding:8px;border-radius:6px;border:0;margin:6px 0;background:#5a6c80;color:#fff}
+.nav-right a:hover { text-decoration:underline; transform:scale(1.05); }
+
+/* --- Main View Tab Buttons (in header) --- */
+.main-tab-btn {
+    background-color: #4a5c70;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+.main-tab-btn:hover { background-color: #5a6c80; }
+.main-tab-btn.active {
+    background-color: #007bff;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Product Cards (right panel) */
+#pdf-grid-wrapper {
+    flex: 1;
+    overflow-y: auto;
+    height: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+.product-grid { 
+    display:grid; 
+    grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); 
+    gap:20px; 
+}
+
+/* Card Layout Fix */
+.product { 
+    background:white; 
+    padding:15px; 
+    border-radius:10px; 
+    box-shadow:0 2px 6px rgba(0,0,0,0.15); 
+    transition: transform 0.3s, box-shadow 0.3s; 
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-sizing: border-box;
+    text-align: left;
+}
+.product:hover { transform:translateY(-4px); box-shadow:0 4px 12px rgba(0,0,0,0.2); }
+.product img { width:100%; height:160px; object-fit:contain; border-radius:6px; padding:10px; }
+
+/* Text wrapper */
+.product-info { flex-grow: 1; }
+.product-info h3 {
+    text-align: left;
+    font-size: 1.1rem;
+    color: #232f3e;
+    line-height: 1.4;
+}
+.product-info p {
+    text-align: left;
+    font-size: 0.9rem;
+    margin: 8px 0;
+}
+
+/* View button pushed to bottom */
+.product .view-btn { 
+    margin-top: auto;
+    width: 100%;
+    box-sizing: border-box;
+    padding:8px 14px; 
+    border:none; 
+    border-radius:5px; 
+    cursor:pointer; 
+    font-weight:bold; 
+    transition: all 0.2s;
+}
+.product .view-btn:hover { transform: scale(1.05); }
+.view-btn { background:#007bff; color:white; }
+
+/* Fancy Password Modal (desktop+mobile baseline) */
+#passwordModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 2000; animation: fadeIn 0.3s ease; }
+#passwordBox { background: white; padding: 25px 30px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); width: 300px; }
+#passwordBox h3 { margin-bottom: 15px; color: #232f3e; }
+#passwordInput { width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 15px; }
+#passwordBox button { padding: 8px 14px; border: none; border-radius: 6px; background: #007bff; color: white; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+#passwordBox button:hover { background: #0056b3; }
+
+/* PDF Modal baseline (desktop) */
+#productModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:1001; opacity:0; transition: opacity 0.3s ease; }
+#productModal.active { display:flex; opacity:1; }
+#modalContent { background:white; border-radius:10px; width:95%; max-width:1000px; height:90vh; padding:10px; position:relative; display:flex; flex-direction:column; }
+#modalContent iframe { flex:1; width:100%; border:none; border-radius:6px; min-height:73vh; }
+/* original close look (restored) */
+#closeModal { position:absolute; top:10px; right:15px; cursor:pointer; font-size:22px; color:red; z-index: 1002; }
+
+/* Scroll to top + footer */
+#scrollTopBtn { position: fixed; bottom: 25px; right: 25px; background: #232f3e; color: white; padding: 10px 14px; border-radius: 50%; font-size: 18px; cursor: pointer; display: none; transition: transform 0.2s; z-index: 999; }
+#scrollTopBtn:hover { transform: scale(1.15); background:#ff9900; }
+footer { background:#232f3e; color:white; text-align:center; padding:20px; margin-top:40px; font-size:14px; }
+
+@keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+
+/* Main container & views */
+main { width: 100%; height: calc(100vh - 67px); display: flex; }
+.main-view { width: 100%; height: 100%; display: flex; flex-direction: row; background: white; display: none; }
+.main-view.active { display: flex; }
+
+.left-bar { width: 220px; background: #f0f4f8; border-right: 1px solid #ccc; overflow-y: auto; padding: 15px; flex-shrink: 0; box-sizing: border-box; }
+.left-bar h3 { margin: 0 0 15px 0; font-size: 18px; color: #232f3e; border-bottom: 2px solid #ccc; padding-bottom: 10px; }
+
+.right-panel { flex: 1; overflow: auto; height: 100%; display: flex; flex-direction: column; }
+
+/* PDF nav buttons (desktop) */
+#pdf-nav-bar button { display: block; width: 100%; padding: 10px 12px; margin-bottom: 8px; border: none; border-radius: 5px; background: #007bff; color: white; cursor: pointer; text-align: left; font-weight: 600; font-size: 15px; box-sizing: border-box; }
+#pdf-nav-bar button:hover { background: #0056b3; }
+#pdf-nav-bar button.active { background: #28a745; }
+#pdf-nav-bar .pdf-nav-header { background: #ff9900; font-size: 16px; }
+#pdf-nav-bar .pdf-nav-header:hover { background: #e08000; }
+#pdf-nav-bar .pdf-nav-header.active { background: #c06000; }
+#pdf-nav-bar .pdf-nav-content { display: none; padding-left: 15px; margin-top: -5px; animation: fadeIn 0.3s ease; }
+#pdf-nav-bar .pdf-nav-content.active { display: block; }
+#pdf-nav-bar .pdf-nav-content button { background: #5a6c80; font-size: 14px; }
+
+/* Daily progress (desktop) */
+.date-list-item { display: block; width: 100%; padding: 10px; margin-bottom: 5px; border:none; border-radius: 5px; background: #007bff; color: white; cursor: pointer; text-align: left; font-weight: 600; box-sizing: border-box; }
+.date-list-item:hover { background: #0056b3; }
+.date-list-item.active { background: #28a745; }
+
+.right-bar-header { display:flex; justify-content:space-between; align-items:center; padding: 10px 20px; border-bottom: 1px solid #ccc; background: #f9f9f9; }
+.right-bar-header h3 { margin: 0; color: #232f3e; }
+.right-bar-header button { background: #007bff; color:white; border:none; border-radius: 5px; padding: 8px 14px; font-weight: bold; cursor: pointer; }
+.right-bar-header button:hover { background: #0056b3; }
+
+#inlineSnapshotFrame { flex:1; overflow:auto; padding:20px; }
+#inlineSnapshotFrame table { width:100%; border-collapse:collapse; display:table; max-height:none; overflow:visible; }
+#inlineSnapshotFrame th, #inlineSnapshotFrame td { border:1px solid #ccc; padding:8px; text-align:left; vertical-align:top; white-space:normal; word-break:break-word; }
+#inlineSnapshotFrame th { background:#f0f0f0; position:static; }
+#inlineSnapshotFrame td[contenteditable="true"] { background: none; }
+#inlineSnapshotFrame td button { display: none; }
+
+/* Header logo alignment + animations (unchanged) */
+.logo-title { display: flex; align-items: center; }
+.header-logo { height: 47px; width: auto; border-radius: 4px; background: #117816; }
+
+.nav-right a { transition: all 0.2s ease-in-out; }
+.main-tab-btn { transition: all 0.2s ease-in-out; }
+#pdf-nav-bar button, .date-list-item { transition: all 0.2s ease-in-out; }
+#pdf-nav-bar button:hover, .date-list-item:hover { transform: translateX(5px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+
+.product-grid { animation: fadeIn 0.5s ease-out forwards; }
+.product { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+
+#productModal, #passwordModal { animation: fadeIn 0.3s ease; }
+#modalContent, #passwordBox { animation: fadeIn 0.3s ease; }
+
+#pdf-nav-bar .pdf-nav-content { transition: max-height 0.4s ease-out, opacity 0.3s ease-out; overflow: hidden; max-height: 0; opacity: 0; }
+#pdf-nav-bar .pdf-nav-content.active { max-height: 500px; opacity: 1; }
+#pdf-nav-bar button.active { background: #28a745; }
+
+/* ---------- MOBILE-ONLY IMPROVEMENTS (scoped) ---------- */
+@media (max-width: 768px) {
+
+  /* Convert layout to stacked */
+  main {
+    flex-direction: column !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* header responsive */
+  header { flex-wrap: wrap; }
+  header h1 { font-size: 16px; }
+  .nav-right { width: 100%; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .nav-right input { width: 100%; font-size: 14px; }
+  .main-tab-btn { flex: 1; padding: 10px 0; font-size: 14px; }
+
+  /* Mobile control buttons (hidden by default; JS will show the relevant one) */
+  #mobileFilterBtn, #mobileDailyFilterBtn {
+    display: none;
+    width: 95%;
+    margin: 10px auto;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    color: #fff;
+  }
+  #mobileFilterBtn { background: #007bff; }
+  #mobileDailyFilterBtn { background: #28a745; }
+
+  /* Make product grid 1-column for mobile */
+  .product-grid {
+    grid-template-columns: 1fr !important;
+    gap: 18px;
+    padding: 10px;
+  }
+
+  .product { padding: 16px !important; border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
+  .product img { height: 140px !important; }
+  .product-info h3 { font-size: 1rem; }
+  .product-info p { font-size: 0.9rem; }
+
+  /* LEFT SIDEBAR: hidden off-canvas by default, slides from left when active */
+  .left-bar {
+    position: fixed;
+    top: 68px; /* below header */
+    left: 0;
+    transform: translateX(-110%);    /* off screen */
+    width: 82%;
+    max-width: 320px;
+    height: calc(100vh - 68px);
+    background: #f0f4f8;
+    padding: 12px;
+    border-right: none;
+    box-shadow: 2px 0 12px rgba(0,0,0,0.12);
+    transition: transform 0.28s ease, opacity 0.28s ease;
+    z-index: 1500;
+    overflow-y: auto;
+    border-radius: 0 8px 8px 0;
+  }
+  .left-bar.active {
+    transform: translateX(0);  /* slide in */
+  }
+
+  /* Hide large desktop left-bar visual anchors inside main flow */
+  .main-view > .left-bar { display: block; }
+
+  /* Adjust pdf nav buttons for touch */
+  #pdf-nav-bar button { padding: 12px; font-size: 15px; border-radius: 8px; margin-bottom: 10px; }
+  #pdf-nav-bar .pdf-nav-header { padding: 12px; border-radius: 8px; }
+
+  /* Modal: make it full-screen friendly but keep desktop modal unchanged */
+  #modalContent {
+    width: 100% !important;
+    height: calc(100vh - 56px) !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box;
+  }
+  #modalContent iframe { height: 100% !important; border-radius: 0 !important; }
+
+  /* Redesigned close button for mobile (bigger, clearer) */
+  #closeModal {
+    position: fixed;              /* fixed so user can always reach it */
+    top: 14px;
+    right: 14px;
+    z-index: 2002;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.95);
+    color: #d33;
+    font-size: 22px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+    border: 1px solid rgba(0,0,0,0.08);
+    cursor: pointer;
+  }
+
+  /* when modal open, keep body from scrolling (JS already sets this) */
+  body.modal-open { overflow: hidden; }
+
+  /* Inline snapshot frame adjustments for mobile */
+  #inlineSnapshotFrame { padding: 10px; }
+
+  /* Smaller table fonts on mobile */
+  table th, table td { font-size: 0.75rem !important; padding: 6px !important; }
+
+} /* end mobile improvements */
+
 
   </style>
 </head>
@@ -657,4 +796,5 @@
   </script>
 </body>
 </html>
+
 
