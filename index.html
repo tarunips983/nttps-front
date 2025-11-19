@@ -532,9 +532,161 @@
 #pdf-nav-bar button.active {
     background: #28a745;
 }
-/* --- End of New CSS --- */
+/* ============================================================
+   🔥 MOBILE VIEW UI UPGRADE — DESKTOP UNAFFECTED
+   Applies ONLY when width ≤ 768px
+   ============================================================ */
+@media (max-width: 768px) {
 
-/* --- End of New CSS --- */
+    /* Make layout vertical */
+    main {
+        flex-direction: column !important;
+        height: auto !important;
+    }
+
+    /* HEADER FIX */
+    header {
+        flex-wrap: wrap;
+        padding: 12px;
+    }
+
+    header h1 {
+        font-size: 16px;
+        margin-left: 5px;
+    }
+
+    .nav-right {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    .nav-right input {
+        width: 100% !important;
+        font-size: 14px;
+    }
+
+    .main-tab-btn {
+        flex: 1;
+        text-align: center;
+        padding: 10px 0;
+        font-size: 14px;
+    }
+
+    /* LEFT SIDEBAR becomes collapsible */
+    .left-bar {
+        width: 100% !important;
+        max-height: 0;
+        overflow: hidden;
+        padding: 0;
+        transition: max-height 0.3s ease;
+        border-right: none !important;
+        box-shadow: none !important;
+    }
+
+    .left-bar.active {
+        max-height: 600px;
+        padding: 15px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        background: white;
+    }
+
+    /* Mobile toggle button for sidebar */
+    #mobileFilterBtn {
+        display: block;
+        background: #007bff;
+        color: white;
+        padding: 10px 14px;
+        border-radius: 6px;
+        margin: 8px auto;
+        width: 94%;
+        border: none;
+        font-size: 15px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    /* PRODUCT CARDS MOBILE UPGRADE */
+    .product-grid {
+        grid-template-columns: 1fr !important;
+        padding: 10px;
+        gap: 18px !important;
+    }
+
+    .product {
+        padding: 18px !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    .product img {
+        height: 120px !important;
+        padding: 5px;
+    }
+
+    .product-info h3 {
+        font-size: 1rem !important;
+    }
+
+    .product-info p {
+        font-size: 0.85rem !important;
+        margin: 4px 0;
+    }
+
+    .view-btn {
+        font-size: 15px;
+        padding: 10px;
+        border-radius: 8px;
+    }
+
+    /* MODAL FULLSCREEN ON MOBILE */
+    #modalContent {
+        width: 100% !important;
+        height: 100vh !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+    }
+
+    #modalContent iframe {
+        height: calc(100vh - 50px) !important;
+    }
+
+    #closeModal {
+        top: 8px;
+        right: 10px;
+        font-size: 22px;
+        background: white;
+        padding: 4px 10px;
+        border-radius: 8px;
+        border: 1px solid #bbb;
+    }
+
+    /* DAILY PROGRESS MOBILE */
+    #inlineLeftBar {
+        width: 100% !important;
+        max-height: 0;
+        overflow: hidden;
+    }
+
+    #inlineLeftBar.active {
+        max-height: 700px;
+        padding: 15px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    #inlineSnapshotFrame {
+        padding: 10px !important;
+    }
+
+    table th, table td {
+        font-size: 0.75rem !important;
+        padding: 5px !important;
+    }
+}
+
 
 </style>
 </head>
@@ -554,6 +706,9 @@
     </header>
     
     <main>
+        <button id="mobileFilterBtn" onclick="
+    document.querySelector('.left-bar').classList.toggle('active');
+">
         <div id="pdf-view-container" class="main-view"> 
             <div id="pdf-nav-bar" class="left-bar">
                 <h3>Filter Records</h3>
@@ -599,7 +754,7 @@
                     </div>
                 </div>
             </div>
-
+</button>
             <div id="pdf-grid-wrapper" class="right-panel">
                 <div id="loader" class="loader"></div>
                 <div class="product-grid" id="product-list" style="display:none;"></div>
@@ -1034,4 +1189,5 @@
     window.addEventListener("load", loadRecords);
 </script>
 </body>
+
 </html>
