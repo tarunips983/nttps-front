@@ -900,20 +900,13 @@ const authFetch = async (url, options = {}) => {
         : "http://172.21.16.51:3000";
 
 function previewPDF(path) {
-    let finalUrl = path;
-
-    // If path already starts with http/https → Cloudinary → use directly
     if (path.startsWith("http")) {
-        finalUrl = path;
+        pdfFrame.src = path;   // Cloudinary URL
     } else {
-        // Backend-stored PDFs use relative paths
-        finalUrl = BACKEND + path;
+        pdfFrame.src = BACKEND + path;  // backend file
     }
-
-    document.getElementById("pdfFrame").src = finalUrl;
-    document.getElementById("previewModal").style.display = "flex";
+    previewModal.style.display = "flex";
 }
-
 
 
         function closePreview() {
@@ -1907,4 +1900,5 @@ loadedSnapshotDate = null;
     </script></body>
 
 </html>
+
 
