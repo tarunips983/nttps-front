@@ -1192,57 +1192,57 @@
             alert("⚠️ Could not connect to the login server.");
         }
     };
+/* ---------------------------------------------
+   MOBILE FILTER TOGGLE (PDF FILTER SIDEBAR)
+----------------------------------------------*/
 (function() {
+
     function initMobileFilterToggle() {
-      const btn = document.getElementById('mobileFilterBtn');
-      const sidebar = document.querySelector('#pdf-nav-bar');
-      if (!btn || !sidebar) return;
-
-      // toggle sidebar on click
-      btn.addEventListener('click', function(e) {
-        sidebar.classList.toggle('active');
-        const expanded = sidebar.classList.contains('active');
-        btn.setAttribute('aria-expanded', expanded);
-      });
-
-      // Optional: click outside to close (mobile user-friendly)
-      document.addEventListener('click', function(ev) {
-        if (!sidebar.classList.contains('active')) return;
-        // if clicked inside sidebar or button, do nothing
-        if (sidebar.contains(ev.target) || btn.contains(ev.target)) return;
-        sidebar.classList.remove('active');
-        btn.setAttribute('aria-expanded', 'false');
-      });
-    }
-(function() {
-    function initDailyFilterToggle() {
-        const btn = document.getElementById('mobileDailyFilterBtn');
-        const sidebar = document.getElementById('inlineLeftBar');
+        const btn = document.getElementById('mobileFilterBtn');
+        const sidebar = document.getElementById('pdf-nav-bar');
         if (!btn || !sidebar) return;
 
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
             sidebar.classList.toggle('active');
             btn.setAttribute('aria-expanded', sidebar.classList.contains('active'));
         });
 
-        document.addEventListener('click', function(ev) {
+        document.addEventListener('click', (e) => {
             if (!sidebar.classList.contains('active')) return;
-            if (sidebar.contains(ev.target) || btn.contains(ev.target)) return;
+            if (sidebar.contains(e.target) || btn.contains(e.target)) return;
             sidebar.classList.remove('active');
             btn.setAttribute('aria-expanded', 'false');
         });
     }
 
-    document.addEventListener('DOMContentLoaded', initDailyFilterToggle);
+    function initDailyFilterToggle() {
+        const btn = document.getElementById('mobileDailyFilterBtn');
+        const sidebar = document.getElementById('inlineLeftBar');
+        if (!btn || !sidebar) return;
+
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            sidebar.classList.toggle('active');
+            btn.setAttribute('aria-expanded', sidebar.classList.contains('active'));
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!sidebar.classList.contains('active')) return;
+            if (sidebar.contains(e.target) || btn.contains(e.target)) return;
+            sidebar.classList.remove('active');
+            btn.setAttribute('aria-expanded', 'false');
+        });
+    }
+
+    // Init when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+        initMobileFilterToggle();
+        initDailyFilterToggle();
+    });
+
 })();
 
-    // run after DOM ready
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initMobileFilterToggle);
-    } else {
-      initMobileFilterToggle();
-    }
-  })();
     // Scroll to top button
     const scrollTopBtn = document.getElementById("scrollTopBtn");
     const rightPanels = document.querySelectorAll(".right-panel");
@@ -1270,6 +1270,7 @@
 </body>
 
 </html>
+
 
 
 
