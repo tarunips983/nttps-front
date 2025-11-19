@@ -533,9 +533,7 @@
 }
 
 
-#mobileFilterBtn {
-    display: none;
-}
+
      /* ============================================================
    🔥 PERFECT MOBILE FIX (Only mobile, desktop untouched)
    ============================================================ */
@@ -577,8 +575,9 @@
     }
 
     /* MOBILE FILTER BUTTON */
+
     #mobileFilterBtn {
-        display: block;
+        display: block !important;
         background: #007bff;
         color: white;
         width: 95%;
@@ -589,6 +588,20 @@
         font-weight: bold;
         border: none;
     }
+
+    #mobileDailyFilterBtn {
+        display: block !important;
+        background: #28a745;
+        color: white;
+        width: 95%;
+        margin: 10px auto;
+        padding: 12px;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: bold;
+        border: none;
+    }
+
 
     /* SIDEBAR collapsed by default */
     .left-bar {
@@ -632,18 +645,7 @@
     .product-info p {
         font-size: 0.85rem;
     }
-            #mobileDailyFilterBtn {
-    display: block;
-    background: #28a745;
-    color: white;
-    width: 95%;
-    margin: 10px auto;
-    padding: 12px;
-    border-radius: 6px;
-    font-size: 16px;
-    font-weight: bold;
-    border: none;
-}
+            
 
 #inlineLeftBar {
     width: 100% !important;
@@ -1272,6 +1274,7 @@
 </body>
 
 </html>
+
 
 
 
