@@ -1,1244 +1,658 @@
-<!DOCTYPE html>
-
+<!doctype html>
 <html lang="en">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <title>TM&CAM - PDF Records</title>
-
-<link style="border-radius: 4px;" rel="icon" href="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg">
-
- <link rel="stylesheet" href="style.css"> 
-    <style>
-
-    /* ✅ Base Layout */
-
-    body { margin:0; font-family: "Segoe UI", Arial, sans-serif; background:#f4f4f4; scroll-behavior: smooth; }
-
-    header { background:#232f3e; color:white; padding:15px 20px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 8px rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 1000; }
-
-    header h1 { margin:0; font-size:22px; }
-
-    .nav-right { display:flex; align-items:center; gap:15px; }
-
-    .nav-right input { padding:7px 10px; border-radius:4px; border:none; width:180px; }
-
-    .nav-right a { color:white; text-decoration:none; font-weight:600; transition:0.2s; }
-
-    .nav-right a:hover { text-decoration:underline; transform:scale(1.05); }
-
-
-
-    /* --- ⬇️ Main View Tab Buttons (in header) ⬇️ --- */
-
-    .main-tab-btn {
-
-        background-color: #4a5c70;
-
-        color: white;
-
-        border: none;
-
-        padding: 8px 16px;
-
-        border-radius: 6px;
-
-        font-size: 15px;
-
-        font-weight: bold;
-
-        cursor: pointer;
-
-        transition: background 0.3s, transform 0.2s;
-
+  <meta charset="utf-8" />
+  <title>TM&CAM - PDF Records</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" href="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg">
+  <style>
+    /* -------------------------
+       Base / Desktop CSS (unchanged)
+       ------------------------- */
+    :root{
+      --primary:#007bff;
+      --accent:#ff9900;
+      --dark:#232f3e;
+      --muted:#f0f4f8;
     }
-
-    .main-tab-btn:hover { background-color: #5a6c80; }
-
-    .main-tab-btn.active {
-
-        background-color: #007bff;
-
-        box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
-
-    }
-
-    
-
-    /* 🔹 Product Cards (in the right panel) */
-
-    #pdf-grid-wrapper {
-
-        flex: 1;
-
-        overflow-y: auto;
-
-        height: 100%;
-
-        padding: 20px;
-
-        box-sizing: border-box;
-
-    }
-
-    .product-grid { 
-
-        display:grid; 
-
-        grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); 
-
-        gap:20px; 
-
-    }
-
-    /* --- Card Layout Fix --- */
-
-    .product { 
-
-        background:white; 
-
-        padding:15px; 
-
-        border-radius:10px; 
-
-        box-shadow:0 2px 6px rgba(0,0,0,0.15); 
-
-        transition: transform 0.3s, box-shadow 0.3s; 
-
-        /* 1. Use Flexbox to control layout */
-
-        display: flex;
-
-        flex-direction: column;
-
-        height: 100%;
-
-        box-sizing: border-box;
-
-        text-align: left;
-
-    }
-
-    .product:hover { transform:translateY(-4px); box-shadow:0 4px 12px rgba(0,0,0,0.2); }
-
-    .product img { width:100%; height:160px; object-fit:contain; border-radius:6px; padding:10px; }
-
-    
-
-    /* 2. Text wrapper grows to fill space */
-
-    .product-info {
-
-        flex-grow: 1;
-
-    }
-
-    .product-info h3 {
-
-        text-align: left;
-
-        font-size: 1.1rem;
-
-        color: #232f3e;
-
-        line-height: 1.4; /* Add line height */
-
-    }
-
-    .product-info p {
-
-        text-align: left;
-
-        font-size: 0.9rem;
-
-        margin: 8px 0;
-
-    }
-
-    
-
-    /* 3. Button is pushed to the bottom */
-
-    .product .view-btn { 
-
-        margin-top: auto; /* PUSHES BUTTON TO THE BOTTOM */
-
-        width: 100%;
-
-        box-sizing: border-box;
-
-        margin-left: 0;
-
-        margin-right: 0;
-
-        margin-bottom: 0;
-
-        padding:8px 14px; 
-
-        border:none; 
-
-        border-radius:5px; 
-
-        cursor:pointer; 
-
-        font-weight:bold; 
-
-        transition: all 0.2s;
-
-    }
-
-    .product .view-btn:hover { transform: scale(1.05); } /* Softer hover */
-
-    .view-btn { background:#007bff; color:white; }
-
-    /* --- End Card Fix --- */
-
-
-
-
-
-    /* 🔹 Fancy Password Modal */
-
-    #passwordModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 2000; animation: fadeIn 0.3s ease; }
-
-    #passwordBox { background: white; padding: 25px 30px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); width: 300px; }
-
-    #passwordBox h3 { margin-bottom: 15px; color: #232f3e; }
-
-    #passwordInput { width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 15px; }
-
-    #passwordBox button { padding: 8px 14px; border: none; border-radius: 6px; background: #007bff; color: white; font-weight: bold; cursor: pointer; transition: background 0.2s; }
-
-    #passwordBox button:hover { background: #0056b3; }
-
-
-
-    /* 🔹 PDF Modal (Now only for PDFs) */
-
-    #productModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:1001; opacity:0; transition: opacity 0.3s ease; }
-
-    #productModal.active { display:flex; opacity:1; }
-
-    #modalContent { background:white; border-radius:10px; width:95%; max-width:1000px; height:90vh; padding:10px; position:relative; display:flex; flex-direction:column; }
-
-    #modalContent iframe { flex:1; width:100%; border:none; border-radius:6px; min-height:73vh; }
-
-    #closeModal { position:absolute; top:10px; right:15px; cursor:pointer; font-size:22px; color:red; z-index: 1002; }
-
-
-
-    /* 🔹 Scroll to top */
-
-    #scrollTopBtn { position: fixed; bottom: 25px; right: 25px; background: #232f3e; color: white; padding: 10px 14px; border-radius: 50%; font-size: 18px; cursor: pointer; display: none; transition: transform 0.2s; z-index: 999; }
-
-    #scrollTopBtn:hover { transform: scale(1.15); background:#ff9900; }
-
-    footer { background:#232f3e; color:white; text-align:center; padding:20px; margin-top:40px; font-size:14px; }
-
-    @keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
-
-
-
-    /* --- ⬇️ Main Container Layout Styles ⬇️ --- */
-
-    main {
-
-        width: 100%;
-
-        height: calc(100vh - 67px); 
-
-        display: flex;
-
-    }
-
-    .main-view {
-
-        width: 100%;
-
-        height: 100%;
-
-        display: flex;
-
-        flex-direction: row;
-
-        background: white;
-
-        display: none;
-
-    }
-
-    .main-view.active {
-
-        display: flex;
-
-    }
-
-    .left-bar {
-
-        width: 220px;
-
-        background: #f0f4f8;
-
-        border-right: 1px solid #ccc;
-
-        overflow-y: auto;
-
-        padding: 15px;
-
-        flex-shrink: 0;
-
-        box-sizing: border-box;
-
-    }
-
-    .left-bar h3 {
-
-        margin: 0 0 15px 0;
-
-        font-size: 18px;
-
-        color: #232f3e;
-
-        border-bottom: 2px solid #ccc;
-
-        padding-bottom: 10px;
-
-    }
-
-    .right-panel {
-
-        flex: 1;
-
-        overflow: auto;
-
-        height: 100%;
-
-        display: flex;
-
-        flex-direction: column;
-
-    }
-
-
-
-    /* --- PDF View Specific --- */
-
-    #pdf-nav-bar button {
-
-        display: block;
-
-        width: 100%;
-
-        padding: 10px 12px;
-
-        margin-bottom: 8px;
-
-        border: none;
-
-        border-radius: 5px;
-
-        background: #007bff;
-
-        color: white;
-
-        cursor: pointer;
-
-        text-align: left;
-
-        font-weight: 600;
-
-        font-size: 15px;
-
-        box-sizing: border-box;
-
-    }
-
-    #pdf-nav-bar button:hover { background: #0056b3; }
-
-    #pdf-nav-bar button.active { background: #28a745; }
-
-    #pdf-nav-bar .pdf-nav-header {
-
-        background: #ff9900;
-
-        font-size: 16px;
-
-    }
-
-    #pdf-nav-bar .pdf-nav-header:hover { background: #e08000; }
-
-    #pdf-nav-bar .pdf-nav-header.active { background: #c06000; }
-
-    
-
-    #pdf-nav-bar .pdf-nav-content {
-
-        display: none;
-
-        padding-left: 15px;
-
-        margin-top: -5px;
-
-        animation: fadeIn 0.3s ease;
-
-    }
-
-    #pdf-nav-bar .pdf-nav-content.active {
-
-        display: block;
-
-    }
-
-    #pdf-nav-bar .pdf-nav-content button {
-
-        background: #5a6c80;
-
-        font-size: 14px;
-
-    }
-
-
-
-    /* --- Daily Progress View Specific --- */
-
-    .date-list-item { 
-
-        display: block; width: 100%; padding: 10px; margin-bottom: 5px; border:none; 
-
-        border-radius: 5px; background: #007bff; color: white; cursor: pointer; 
-
-        text-align: left; font-weight: 600; box-sizing: border-box;
-
-    }
-
-    .date-list-item:hover { background: #0056b3; }
-
-    .date-list-item.active { background: #28a745; }
-
-
-
-    .right-bar-header { display:flex; justify-content:space-between; align-items:center; padding: 10px 20px; border-bottom: 1px solid #ccc; background: #f9f9f9; }
-
-    .right-bar-header h3 { margin: 0; color: #232f3e; }
-
-    .right-bar-header button { background: #007bff; color:white; border:none; border-radius: 5px; padding: 8px 14px; font-weight: bold; cursor: pointer; }
-
-    .right-bar-header button:hover { background: #0056b3; }
-
-    
-
-    #inlineSnapshotFrame { flex:1; overflow:auto; padding:20px; }
-
-    #inlineSnapshotFrame table { width:100%; border-collapse:collapse; display:table; max-height:none; overflow:visible; }
-
-    #inlineSnapshotFrame th, #inlineSnapshotFrame td { border:1px solid #ccc; padding:8px; text-align:left; vertical-align:top; white-space:normal; word-break:break-word; }
-
-    #inlineSnapshotFrame th { background:#f0f0f0; position:static; }
-
-    #inlineSnapshotFrame td[contenteditable="true"] { background: none; }
-
-    #inlineSnapshotFrame td button { display: none; }
-
-    /* --- ⬆️ END: Main Container Layout Styles ⬆️ --- */
-
-/* --- NEW: Header Logo & Title Alignment --- */
-
-.logo-title {
-
-    display: flex;
-
-    align-items: center;
-
- 
-}
-
-
-.header-logo {
-
-    height: 47px;
-
-    width: auto;
-
-    border-radius: 4px;
-
-    background: #117816;
-
-}
-/* --- NEW: Smooth Transitions & Animations --- */
-
-/* 1. Header Links (Add Record, Login) */
-.nav-right a {
-    transition: all 0.2s ease-in-out;
-}
-
-/* 2. Main Tab Buttons (PDF's Records, Daily Progress) */
-.main-tab-btn {
-    transition: all 0.2s ease-in-out;
-}
-
-/* 3. Left Sidebar Buttons (PDF & Daily Progress) */
-#pdf-nav-bar button,
-.date-list-item {
-    transition: all 0.2s ease-in-out;
-}
-#pdf-nav-bar button:hover,
-.date-list-item:hover {
-    transform: translateX(5px); /* Slides button to the right on hover */
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Adds a subtle shadow */
-}
-
-/* 4. PDF Card Grid */
-.product-grid {
-    animation: fadeIn 0.5s ease-out forwards; /* Fades in the whole grid */
-}
-.product {
-    /* Enhances your existing transition */
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-/* 5. Modal Popups (Smoother fade-in) */
-@keyframes fadeIn {
-    from { 
-        opacity: 0; 
-        transform: translateY(10px); /* Starts slightly lower */
-    }
-    to { 
-        opacity: 1; 
-        transform: translateY(0); 
-    }
-}
-#productModal, #passwordModal {
-    animation: fadeIn 0.3s ease;
-}
-#modalContent, #passwordBox {
-    animation: fadeIn 0.3s ease;
-}
-
-/* 6. Accordion Content (Smooth slide-down) */
-#pdf-nav-bar .pdf-nav-content {
-    transition: max-height 0.4s ease-out, opacity 0.3s ease-out;
-    overflow: hidden;
-    max-height: 0; /* Start closed */
-    opacity: 0;
-}
-#pdf-nav-bar .pdf-nav-content.active {
-    max-height: 500px; /* Set to a height larger than it will ever be */
-    opacity: 1;
-    
-}
-#pdf-nav-bar button.active {
-    background: #28a745;
-}
-
-/* ============================================================
-   🔥 PERFECT MOBILE FIX (Only mobile, desktop untouched)
-   ============================================================ */
-@media (max-width: 768px) {
-
-    /* Turn desktop layout into stacked */
-    main {
-        flex-direction: column !important;
-        height: auto !important;
-        overflow: visible !important;
-    }
-
-    /* HEADER FIX */
-    header {
-        flex-wrap: wrap;
-    }
-
-    header h1 {
-        font-size: 16px;
-    }
-
-    .nav-right {
-        width: 100%;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 10px;
-    }
-
-    .nav-right input {
-        width: 100%;
-        font-size: 14px;
-    }
-
-    .main-tab-btn {
-        flex: 1;
-        padding: 10px 0;
-        font-size: 14px;
-    }
-
-    /* MOBILE FILTER BUTTONS */
-    #mobileFilterBtn,
-    #mobileDailyFilterBtn {
-        display: none; /* JS will enable the correct button */
-        width: 95%;
-        margin: 10px auto;
-        padding: 12px;
-        border-radius: 6px;
-        font-size: 16px;
-        font-weight: bold;
-        border: none;
-        color: #fff;
-    }
-
-    #mobileFilterBtn {
-        background: #007bff;
-    }
-
-    #mobileDailyFilterBtn {
-        background: #28a745;
-    }
-
-    /* LEFT SIDEBAR DEFAULT HIDDEN */
-    .left-bar {
-        width: 100% !important;
-        max-height: 0 !important;
-        overflow: hidden !important;
-        padding: 0 !important;
+    *{box-sizing:border-box}
+    body { margin:0; font-family: "Segoe UI", Arial, sans-serif; background:#f4f4f4; color:#222; -webkit-font-smoothing:antialiased; }
+    header { background:var(--dark); color:white; padding:15px 20px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 8px rgba(0,0,0,0.2); position:sticky; top:0; z-index:1000; }
+    header h1{margin:0;font-size:22px}
+    .nav-right{display:flex;align-items:center;gap:12px}
+    .nav-right input{padding:7px 10px;border-radius:4px;border:none;width:180px}
+    .nav-right a{color:white;text-decoration:none;font-weight:600}
+    .main-tab-btn{background:#4a5c70;color:#fff;border:0;padding:8px 14px;border-radius:6px;font-weight:700;cursor:pointer}
+    .main-tab-btn.active{background:var(--primary)}
+    main{width:100%;height:calc(100vh - 67px);display:flex}
+    .main-view{width:100%;height:100%;display:flex;flex-direction:row;background:white;display:none}
+    .main-view.active{display:flex}
+    .left-bar{width:220px;background:var(--muted);border-right:1px solid #ccc;overflow-y:auto;padding:15px;flex-shrink:0}
+    .left-bar h3{margin:0 0 12px 0;font-size:18px;color:var(--dark);border-bottom:2px solid #ccc;padding-bottom:8px}
+    .right-panel{flex:1;overflow:auto;display:flex;flex-direction:column;height:100%}
+    #pdf-grid-wrapper{flex:1;overflow-y:auto;height:100%;padding:20px}
+    .product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px}
+    .product{background:#fff;padding:15px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.12);display:flex;flex-direction:column;height:100%}
+    .product img{width:100%;height:160px;object-fit:contain;border-radius:6px;padding:10px;background:#fff}
+    .product-info{flex:1}
+    .product-info h3{font-size:1.05rem;margin:0 0 8px 0;color:var(--dark);line-height:1.3}
+    .product-info p{margin:6px 0;font-size:0.9rem;color:#333}
+    .view-btn{margin-top:auto;padding:8px 12px;border-radius:6px;border:0;background:var(--primary);color:#fff;font-weight:700;cursor:pointer}
+    footer{background:var(--dark);color:#fff;padding:18px;text-align:center}
+
+    /* PDF modal for desktop (center) */
+    #productModal{display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.55);z-index:1200}
+    #productModal.active{display:flex}
+    #modalContent{background:#fff;border-radius:10px;width:95%;max-width:1000px;height:90vh;padding:12px;display:flex;flex-direction:column;position:relative;box-shadow:0 8px 30px rgba(0,0,0,0.25)}
+    #modalHeader{display:flex;align-items:center;gap:12px;padding:6px 8px;border-bottom:1px solid #eee}
+    #modalHeader h2{font-size:1.03rem;margin:0;line-height:1.2}
+    #modalHeader p{margin:0;color:var(--accent);font-weight:700}
+    #modalBody{flex:1;display:flex;align-items:stretch;justify-content:stretch;padding:8px}
+    #pdfFrame{width:100%;height:100%;border:0;border-radius:6px;background:#fff}
+    /* default small close icon */
+    #closeModal{position:absolute;top:10px;right:14px;cursor:pointer;font-size:20px;color:#c0392b;background:#fff;border-radius:6px;padding:6px;border:1px solid #ddd;z-index:1210}
+
+    /* Mobile-specific redesign (ONLY mobile) */
+    @media (max-width: 768px) {
+      /* stack layout */
+      main{flex-direction:column;height:auto}
+      header{padding:10px}
+      header h1{font-size:16px}
+      .nav-right{width:100%;flex-wrap:wrap;padding-top:8px}
+      .nav-right input{width:100%}
+      .main-tab-btn{flex:1;padding:10px 8px}
+      /* show mobile filter button (visible only mobile) */
+      #mobileFilterBtn, #mobileDailyFilterBtn{
+        display:block;
+        width:calc(100% - 30px);
+        margin:10px 15px;
+        padding:12px;
+        border-radius:8px;
+        border:0;
+        font-weight:700;
+        color:#fff;
+        box-shadow:0 6px 20px rgba(0,0,0,0.08);
+      }
+      #mobileFilterBtn{background:var(--primary)}
+      #mobileDailyFilterBtn{background:#28a745}
+
+      /* hide the left bar from the normal flow */
+      .left-bar{
+        position:fixed;
+        left:0;
+        top:0;
+        height:100vh;
+        width:280px;            /* slightly wider on mobile */
+        z-index:1300;
+        transform:translateX(-110%); /* hidden by default off-screen left */
+        transition:transform .32s cubic-bezier(.2,.9,.2,1);
+        box-shadow: 6px 0 30px rgba(0,0,0,0.18);
+        padding:18px;
         border-right: none;
-        background: #ffffff;
-        transition: max-height 0.35s ease, padding 0.35s ease;
+        background:#fff;
+      }
+      /* when active, slide in */
+      .left-bar.active{transform:translateX(0)}
+      /* ensure left-bar content scrolls */
+      .left-bar::-webkit-overflow-scrolling:touch;
+
+      /* push right-panel to top and 1-col grid */
+      .product-grid{grid-template-columns:1fr;gap:16px;padding:8px}
+      .product{padding:14px;border-radius:12px}
+      .product img{height:120px}
+      .product-info h3{font-size:0.95rem}
+      .product-info p{font-size:0.84rem}
+
+      /* MOBILE PDF modal — redesign (not full screen, but prominent, easy to close) */
+      #productModal{background:rgba(0,0,0,0.5);align-items:flex-end;padding:12px} /* appear from bottom */
+      #modalContent{
+        width:100%;
+        max-width:100%;
+        height:78vh;          /* large but not full screen */
+        border-radius:12px 12px 0 0;
+        padding:0;
+        overflow:hidden;
+        display:flex;
+        flex-direction:column;
+      }
+      /* big header inside modal */
+      #modalHeader{
+        padding:14px 16px;
+        align-items:center;
+        justify-content:space-between;
+        border-bottom:1px solid #eee;
+        background:#fff;
+      }
+      #modalHeader h2{font-size:1rem;margin:0}
+      #modalHeader p{margin:0}
+      /* make close button big and obvious */
+      #closeModal{
+        position:relative;
+        top:0;
+        right:0;
+        transform:none;
+        font-size:18px;
+        padding:10px 12px;
+        margin-left:8px;
+        border-radius:10px;
+        border:0;
+        background:#fff;
+        color:#c0392b;
+        box-shadow:0 4px 14px rgba(0,0,0,0.12);
+      }
+      /* toolbar under header with small actions */
+      #modalToolbar{display:flex;gap:8px;padding:10px;background:#fafafa;border-bottom:1px solid #f0f0f0}
+      #modalToolbar button{padding:8px 12px;border-radius:8px;border:0;background:#e9ecef;font-weight:700}
+      /* iframe area */
+      #modalBody{padding:0;height:calc(78vh - 92px)} /* header + toolbar ~92 */
+      #pdfFrame{height:100%;border-radius:0}
+      /* make it easy to swipe close area */
+      .drag-handle{height:6px;width:60px;background:#ddd;border-radius:999px;margin:10px auto 0}
     }
 
-    /* WHEN ACTIVE – FULLY EXPAND */
-    .left-bar.active {
-        max-height: 700px !important;
-        padding: 15px !important;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-    }
+    /* small utility */
+    .pdf-nav-header{background:var(--accent);padding:10px;border-radius:6px;color:white;font-weight:700;margin-bottom:8px;border:none;display:block;text-align:left}
+    .pdf-nav-content button{display:block;width:100%;padding:8px;border-radius:6px;border:0;margin:6px 0;background:#5a6c80;color:#fff}
 
-    /* PRODUCT GRID → 1 COLUMN */
-    .product-grid {
-        grid-template-columns: 1fr !important;
-        gap: 20px;
-        padding: 10px;
-    }
-
-    .product {
-        padding: 18px !important;
-        border-radius: 12px;
-        box-shadow: 0 3px 12px rgba(0,0,0,0.20);
-    }
-
-    .product img {
-        height: 140px !important;
-    }
-
-    .product-info h3 {
-        font-size: 1rem;
-    }
-
-    .product-info p {
-        font-size: 0.85rem;
-    }
-
-    /* FULLSCREEN PDF MODAL */
-    #modalContent {
-        width: 100% !important;
-        height: 100vh !important;
-        border-radius: 0 !important;
-        padding: 0 !important;
-    }
-
-    #modalContent iframe {
-        height: calc(100vh - 60px) !important;
-    }
-
-    #closeModal {
-        top: 10px;
-        right: 10px;
-        font-size: 24px;
-        background: white;
-        padding: 6px 12px;
-        border-radius: 8px;
-        border: 1px solid #aaa;
-    }
-
-    /* TABLE FONT SIZE */
-    table th, table td {
-        font-size: 0.75rem !important;
-        padding: 5px !important;
-    }
-}
-
-</style>
+  </style>
 </head>
 <body>
-    <header>
-        <div class="logo-title">
-            <img src="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg" alt="APGENCO Logo" class="header-logo">
-            <h1> TM&CAM - PDF Records</h1>
-        </div>
-        <div class="nav-right">
-            <input type="text" id="searchInput" placeholder="Search by Work, PR No, or Send To..." />
-            <button id="viewTabPdf" class="main-tab-btn" onclick="showMainView('pdf')">📄 PDF's Records</button>
-            <button id="viewTabProgress" class="main-tab-btn" onclick="showMainView('progress')">📅 Daily Progress</button>
-            <a href="javascript:void(0)" onclick="openPasswordModal()" title="Add New Record">➕ Add Record</a>
-            <a href="login.html" id="loginLink" title="Login Page">🔐 Login</a>
-        </div>
-    </header>
-    
-    <main>
-       <!-- PDF FILTER BUTTON -->
-<button id="mobileFilterBtn">📂 Filters</button>
-
-<!-- DAILY FILTER BUTTON -->
-<button id="mobileDailyFilterBtn" style="display:none;">📂 Daily Filters</button>
-
-
-        <div id="pdf-view-container" class="main-view"> 
-            <div id="pdf-nav-bar" class="left-bar">
-                <h3>Filter Records</h3>
-                <button class="pdf-nav-btn show-all active" onclick="showAllPDFs(this)">📂 Show All</button>
-                
-                <div class="pdf-nav-section">
-                    <button class="pdf-nav-header" onclick="togglePdfNav(this)">Sub Div-I</button>
-                    <div class="pdf-nav-content">
-                        <button onclick="filterRecords('Sub Div-I', 'PR', this)">PRs</button>
-                        <button onclick="filterRecords('Sub Div-I', 'Estimate', this)">Estimates</button>
-                        <button onclick="filterRecords('Sub Div-I', 'Drawing', this)">Drawings</button>
-                        <button onclick="filterRecords('Sub Div-I', 'Other Record', this)">Other Records</button>
-                    </div>
-                </div>
-                
-                <div class="pdf-nav-section">
-                    <button class="pdf-nav-header" onclick="togglePdfNav(this)">Sub Div-II</button>
-                    <div class="pdf-nav-content">
-                        <button onclick="filterRecords('Sub Div-II', 'PR', this)">PRs</button>
-                        <button onclick="filterRecords('Sub Div-II', 'Estimate', this)">Estimates</button>
-                        <button onclick="filterRecords('Sub Div-II', 'Drawing', this)">Drawings</button>
-                        <button onclick="filterRecords('Sub Div-II', 'Other Record', this)">Other Records</button>
-                    </div>
-                </div>
-
-                <div class="pdf-nav-section">
-                    <button class="pdf-nav-header" onclick="togglePdfNav(this)">Sub Div-III</button>
-                    <div class="pdf-nav-content">
-                        <button onclick="filterRecords('Sub Div-III', 'PR', this)">PRs</button>
-                        <button onclick="filterRecords('Sub Div-III', 'Estimate', this)">Estimates</button>
-                        <button onclick="filterRecords('Sub Div-III', 'Drawing', this)">Drawings</button>
-                        <button onclick="filterRecords('Sub Div-III', 'Other Record', this)">Other Records</button>
-                    </div>
-                </div>
-
-                <div class="pdf-nav-section">
-                    <button class="pdf-nav-header" onclick="togglePdfNav(this)">Sub Div-IV</button>
-                    <div class="pdf-nav-content">
-                        <button onclick="filterRecords('Sub Div-IV', 'PR', this)">PRs</button>
-                        <button onclick="filterRecords('Sub Div-IV', 'Estimate', this)">Estimates</button>
-                        <button onclick="filterRecords('Sub Div-IV', 'Drawing', this)">Drawings</button>
-                        <button onclick="filterRecords('Sub Div-IV', 'Other Record', this)">Other Records</button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="pdf-grid-wrapper" class="right-panel">
-                <div id="loader" class="loader"></div>
-                <div class="product-grid" id="product-list" style="display:none;"></div>
-            </div>
-        </div>
-
-        <div id="daily-progress-container" class="main-view">
-            <div id="inlineLeftBar" class="left-bar">
-                <h3>Daily Progress</h3>
-                <div id="inlineDateList"><p>Loading dates...</p></div>
-            </div>
-            <div id="inlineRightBar" class="right-panel">
-                <div class="right-bar-header">
-                    <h3 id="inlineSnapshotTitle">Select a date to view</h3>
-                    <button id="inlinePrintBtn" onclick="printDailyProgress()" style="display:none;">🖨️ Print</button>
-                </div>
-                <div id="inlineSnapshotFrame">
-                    <p style="padding: 20px; color: #555;">Please select a date from the list on the left.</p>
-                </div>
-            </div>
-        </div>
-
-        <div id="productModal">
-            <div id="modalContent">
-                <span id="closeModal" onclick="closeModal()">❌</span>
-                <h2 id="modalName"></h2>
-                <p id="modalPR" style="font-weight:bold; color:#ff9900;"></p>
-                <iframe id="pdfFrame"></iframe>
-            </div>
-        </div>
-
-        <div id="passwordModal">
-        <div id="passwordBox">
-            <h3>🔐 Enter Admin Credentials</h3>
-            
-            <input type="text" id="usernameInput" placeholder="Username..." 
-                   style="width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 10px; box-sizing: border-box;">
-            
-            <input type="password" id="passwordInput" placeholder="Enter password..." />
-            
-            <div style="margin-top:10px;">
-                <button onclick="verifyPassword()">Submit</button>
-                <button onclick="closePasswordModal()" style="background:#dc3545;margin-left:8px;">Cancel</button>
-            </div>
-        </div>
+  <header>
+    <div style="display:flex;align-items:center;gap:12px">
+      <img src="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg"
+           alt="logo" style="height:42px;border-radius:4px;background:#fff;padding:2px">
+      <h1>TM&CAM - PDF Records</h1>
     </div>
-    </main>
-    
-    <footer>
-        <p>🔗 Contact | 🛠️ Help | 🔐 Privacy</p>
-        <p>© 2025 MyWeb. Built by Tarun</p>
-    </footer>
 
-    <button id="scrollTopBtn" title="Scroll to Top">⬆️</button>
+    <div class="nav-right">
+      <input id="searchInput" placeholder="Search by Work, PR No, or Send To..." />
+      <button id="viewTabPdf" class="main-tab-btn" onclick="showMainView('pdf')">📄 PDF's Records</button>
+      <button id="viewTabProgress" class="main-tab-btn" onclick="showMainView('progress')">📅 Daily Progress</button>
+      <a href="javascript:void(0)" onclick="openPasswordModal()" title="Add New Record">➕ Add Record</a>
+      <a href="login.html" id="loginLink" title="Login Page">🔐 Login</a>
+    </div>
+  </header>
 
-<script type="module">
+  <!-- Mobile toggles (visible on mobile only by CSS) -->
+  <button id="mobileFilterBtn" style="display:none;">📂 Filters</button>
+  <button id="mobileDailyFilterBtn" style="display:none;">📂 Daily Filters</button>
+
+  <main>
+    <!-- PDF View -->
+    <div id="pdf-view-container" class="main-view">
+      <aside id="pdf-nav-bar" class="left-bar" aria-hidden="true">
+        <h3>Filter Records</h3>
+        <button class="pdf-nav-btn show-all active" onclick="showAllPDFs(this)">📂 Show All</button>
+
+        <div>
+          <button class="pdf-nav-header" onclick="togglePdfNav(this)">Sub Div-I</button>
+          <div class="pdf-nav-content">
+            <button onclick="filterRecords('Sub Div-I','PR', this)">PRs</button>
+            <button onclick="filterRecords('Sub Div-I','Estimate', this)">Estimates</button>
+            <button onclick="filterRecords('Sub Div-I','Drawing', this)">Drawings</button>
+            <button onclick="filterRecords('Sub Div-I','Other Record', this)">Other Records</button>
+          </div>
+        </div>
+
+        <div>
+          <button class="pdf-nav-header" onclick="togglePdfNav(this)">Sub Div-II</button>
+          <div class="pdf-nav-content">
+            <button onclick="filterRecords('Sub Div-II','PR', this)">PRs</button>
+            <button onclick="filterRecords('Sub Div-II','Estimate', this)">Estimates</button>
+            <button onclick="filterRecords('Sub Div-II','Drawing', this)">Drawings</button>
+            <button onclick="filterRecords('Sub Div-II','Other Record', this)">Other Records</button>
+          </div>
+        </div>
+
+        <div>
+          <button class="pdf-nav-header" onclick="togglePdfNav(this)">Sub Div-III</button>
+          <div class="pdf-nav-content">
+            <button onclick="filterRecords('Sub Div-III','PR', this)">PRs</button>
+            <button onclick="filterRecords('Sub Div-III','Estimate', this)">Estimates</button>
+            <button onclick="filterRecords('Sub Div-III','Drawing', this)">Drawings</button>
+            <button onclick="filterRecords('Sub Div-III','Other Record', this)">Other Records</button>
+          </div>
+        </div>
+
+        <div>
+          <button class="pdf-nav-header" onclick="togglePdfNav(this)">Sub Div-IV</button>
+          <div class="pdf-nav-content">
+            <button onclick="filterRecords('Sub Div-IV','PR', this)">PRs</button>
+            <button onclick="filterRecords('Sub Div-IV','Estimate', this)">Estimates</button>
+            <button onclick="filterRecords('Sub Div-IV','Drawing', this)">Drawings</button>
+            <button onclick="filterRecords('Sub Div-IV','Other Record', this)">Other Records</button>
+          </div>
+        </div>
+      </aside>
+
+      <section id="pdf-grid-wrapper" class="right-panel">
+        <div id="loader" style="text-align:center;padding:20px">Loading...</div>
+        <div class="product-grid" id="product-list" style="display:none"></div>
+      </section>
+    </div>
+
+    <!-- Daily Progress view -->
+    <div id="daily-progress-container" class="main-view">
+      <aside id="inlineLeftBar" class="left-bar" aria-hidden="true">
+        <h3>Daily Progress</h3>
+        <div id="inlineDateList"><p>Loading dates...</p></div>
+      </aside>
+
+      <section id="inlineRightBar" class="right-panel">
+        <div class="right-bar-header" style="padding:12px 16px;border-bottom:1px solid #eee;background:#fff">
+          <h3 id="inlineSnapshotTitle" style="margin:0">Select a date to view</h3>
+          <button id="inlinePrintBtn" onclick="printDailyProgress()" style="display:none">🖨️ Print</button>
+        </div>
+        <div id="inlineSnapshotFrame" style="flex:1;padding:20px">
+          <p style="color:#555">Please select a date from the list on the left.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- PDF Modal -->
+  <div id="productModal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div id="modalContent" role="document">
+      <div id="modalHeader">
+        <div style="display:flex;align-items:center;gap:12px">
+          <h2 id="modalName">Title</h2>
+          <p id="modalPR">PR No:</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <!-- toolbar (mobile) -->
+          <div id="modalToolbar" style="display:none">
+            <button id="openInNewBtn" title="Open PDF in new tab">Open</button>
+            <button id="downloadBtn" title="Download PDF">Download</button>
+          </div>
+          <button id="closeModal" aria-label="Close PDF">✕</button>
+        </div>
+      </div>
+
+      <!-- small drag-handle (mobile look) -->
+      <div class="drag-handle" style="display:none"></div>
+
+      <div id="modalBody">
+        <iframe id="pdfFrame" title="PDF viewer" src="about:blank"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- Password modal (unchanged) -->
+  <div id="passwordModal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:1400">
+    <div id="passwordBox" style="background:#fff;padding:20px;border-radius:12px;min-width:280px;max-width:360px">
+      <h3 style="margin-top:0">🔐 Enter Admin Credentials</h3>
+      <input id="usernameInput" placeholder="Username" style="width:100%;padding:8px;margin-bottom:8px">
+      <input id="passwordInput" type="password" placeholder="Password" style="width:100%;padding:8px;margin-bottom:10px">
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button onclick="verifyPassword()" style="background:var(--primary);color:#fff;padding:8px 12px;border:0;border-radius:6px">Submit</button>
+        <button onclick="closePasswordModal()" style="background:#dc3545;color:#fff;padding:8px 12px;border:0;border-radius:6px">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>🔗 Contact | 🛠️ Help | 🔐 Privacy</p>
+    <p>© 2025 MyWeb. Built by Tarun</p>
+  </footer>
+
+  <button id="scrollTopBtn" title="Scroll to Top" style="position:fixed;right:18px;bottom:18px;display:none;background:var(--dark);color:#fff;border-radius:50%;border:0;padding:10px;z-index:2000">⬆️</button>
+
+  <script>
+    // Server URL unchanged
     const SERVER_URL = "https://nttps-backend.onrender.com";
     let allRecords = [];
 
-    // --- Main View Elements ---
+    // DOM refs
     const pdfView = document.getElementById("pdf-view-container");
     const progressView = document.getElementById("daily-progress-container");
     const viewTabPdf = document.getElementById("viewTabPdf");
     const viewTabProgress = document.getElementById("viewTabProgress");
     const pdfNav = document.getElementById("pdf-nav-bar");
 
-    // Load all records from server
-    async function loadRecords() {
-        try {
-            const res = await fetch(`${SERVER_URL}/records`);
-            allRecords = await res.json();
-            document.getElementById("loader").style.display = "none";
-            document.getElementById("product-list").style.display = "grid";
-            renderRecords(allRecords);
-            // Default to PDF view on load
-            showMainView('pdf'); 
-        } catch (err) {
-            console.error(err);
-            document.getElementById("loader").style.display = "none";
-            document.getElementById("product-list").innerHTML = "<p style='text-align:center;color:red;'>⚠️ Unable to load records.</p>";
-        }
+    const mobileFilterBtn = document.getElementById("mobileFilterBtn");
+    const mobileDailyFilterBtn = document.getElementById("mobileDailyFilterBtn");
+
+    // Set initial mobile buttons visibility depending on width
+    function updateMobileButtons(){
+      if(window.innerWidth <= 768){
+        mobileFilterBtn.style.display = "block";
+        mobileDailyFilterBtn.style.display = "block";
+      } else {
+        mobileFilterBtn.style.display = "none";
+        mobileDailyFilterBtn.style.display = "none";
+        // ensure sidebars visible on desktop
+        pdfNav.classList.remove("active");
+        document.getElementById("inlineLeftBar")?.classList?.remove("active");
+      }
+    }
+    window.addEventListener("resize", updateMobileButtons);
+    updateMobileButtons();
+
+    // Load records
+    async function loadRecords(){
+      try{
+        const res = await fetch(`${SERVER_URL}/records`);
+        allRecords = await res.json();
+      }catch(e){
+        console.error("Failed to load records", e);
+        allRecords = []; // fallback
+      } finally {
+        document.getElementById("loader").style.display = "none";
+        document.getElementById("product-list").style.display = "grid";
+        renderRecords(allRecords);
+        showMainView('pdf');
+      }
     }
 
-    /**
-     * --- NEW: Smart Summary Function ---
-     * Cleans up long titles before they are displayed.
-     */
-    function summarize(text) {
-        if (!text) return "Untitled Record";
-        
-        // 1. Remove common prefixes
-        let cleanText = text.replace(/Indent for (the )?Procurement of /i, "");
-        
-        // 2. Capitalize the first letter
-        cleanText = cleanText.charAt(0).toUpperCase() + cleanText.slice(1);
-        
-        // 3. Smart truncate (e.g., "3-way...Turbine" becomes "3-way...DN65")
-        if (cleanText.includes("3-Way Temperature Regulators")) {
-             return "3-Way Temperature Regulators # DN50 & DN65";
-        }
-        
-        // 4. General truncate if still too long
-        if (cleanText.length > 100) { 
-            cleanText = cleanText.substring(0, 100) + "...";
-        }
-        return cleanText;
+    // summary helper
+    function summarize(text){
+      if(!text) return "Untitled Record";
+      let clean = text.replace(/Indent for (the )?Procurement of /i, "");
+      clean = clean.charAt(0).toUpperCase() + clean.slice(1);
+      if(clean.includes("3-Way Temperature Regulators")) return "3-Way Temperature Regulators # DN50 & DN65";
+      if(clean.length > 100) clean = clean.substring(0,100) + "...";
+      return clean;
     }
 
-    // Render records into the grid
-    function renderRecords(records) {
-        const container = document.getElementById("product-list");
-        if (!records.length) {
-            container.innerHTML = "<h3 style='text-align:center; color:gray; margin-top: 40px;'>No records found matching your filter.</h3>";
-            return;
-        }
-        container.innerHTML = records.map(r => {
-            // Safely encode the entire record object as a JSON string
-            const recordData = JSON.stringify(r).replace(/'/g, '&apos;');
-
-            return `
-            <div class="product">
-                <img src="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg" alt="APGENCO">
-                
-                <div class="product-info">
-                    <h3>${summarize(r.workName)}</h3>
-                    <p><strong>PR No:</strong> ${r.prNo}</p>
-                    <p><strong>Sub Div:</strong> ${r.subDivision || "N/A"}</p>
-                    <p><strong>Type:</strong> ${r.recordType || "N/A"}</p>
-                </div>
-
-                <button class="view-btn" onclick='showPDF(${recordData})'>View PDF</button>
+    // render records
+    function renderRecords(records){
+      const container = document.getElementById("product-list");
+      if(!records || !records.length){
+        container.innerHTML = "<h3 style='text-align:center;color:gray;margin-top:40px;'>No records found.</h3>";
+        return;
+      }
+      container.innerHTML = records.map(r => {
+        const recordData = JSON.stringify(r).replace(/'/g, "&apos;");
+        return `
+          <div class="product" role="article">
+            <img src="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg" alt="APGENCO logo" />
+            <div class="product-info">
+              <h3>${summarize(r.workName)}</h3>
+              <p><strong>PR No:</strong> ${r.prNo || 'N/A'}</p>
+              <p><strong>Sub Div:</strong> ${r.subDivision || 'N/A'}</p>
+              <p><strong>Type:</strong> ${r.recordType || 'N/A'}</p>
             </div>
-            `;
-        }).join("");
+            <button class="view-btn" onclick='showPDF(${recordData})'>View PDF</button>
+          </div>
+        `;
+      }).join("");
     }
 
-    // Search functionality
-    document.getElementById("searchInput").addEventListener("input", e => {
-        showMainView('pdf'); // Switch to PDF view on search
-        const key = e.target.value.toLowerCase();
-        const filtered = allRecords.filter(r => 
-            (r.workName || '').toLowerCase().includes(key) || 
-            (r.prNo || '').toLowerCase().includes(key) ||
-            (r.sendTo || '').toLowerCase().includes(key)
-        );
-        renderRecords(filtered);
+    // search
+    document.getElementById("searchInput").addEventListener("input", e=>{
+      showMainView('pdf');
+      const key = e.target.value.toLowerCase();
+      const filtered = allRecords.filter(r => ((r.workName||'').toLowerCase().includes(key) || (r.prNo||'').toLowerCase().includes(key) || (r.sendTo||'').toLowerCase().includes(key)));
+      renderRecords(filtered);
     });
 
-    // --- ⬇️ Main View Switching Logic ⬇️ ---
-   window.showMainView = function(viewName) {
-
-    const pdfBtn = document.getElementById("mobileFilterBtn");
-    const dailyBtn = document.getElementById("mobileDailyFilterBtn");
-
-    if (viewName === 'progress') {
-        // switch to daily progress
+    // Show main view
+    window.showMainView = function(viewName){
+      if(viewName === 'progress'){
         pdfView.classList.remove('active');
         progressView.classList.add('active');
-
         viewTabPdf.classList.remove('active');
         viewTabProgress.classList.add('active');
-
-        // Reset both
-pdfBtn.style.display = "none";
-dailyBtn.style.display = "none";
-
-// Enable correct button for mobile only
-if (window.innerWidth <= 768) {
-    if (viewName === 'pdf') pdfBtn.style.display = "block";
-    if (viewName === 'progress') dailyBtn.style.display = "block";
-}
-
-
-
+        // mobile button states
+        if(window.innerWidth <= 768){
+          mobileFilterBtn.style.display = 'none';
+          mobileDailyFilterBtn.style.display = 'block';
+        }
         loadDailyProgressDates();
-
-    } else {
-        // switch to PDF view
+      } else {
         pdfView.classList.add('active');
         progressView.classList.remove('active');
-
         viewTabPdf.classList.add('active');
         viewTabProgress.classList.remove('active');
-
-        // Reset both
-pdfBtn.style.display = "none";
-dailyBtn.style.display = "none";
-
-// Enable correct button for mobile only
-if (window.innerWidth <= 768) {
-    if (viewName === 'pdf') pdfBtn.style.display = "block";
-    if (viewName === 'progress') dailyBtn.style.display = "block";
-}
-
-    }
-}
-
-
-    // --- ⬇️ PDF Filtering Logic ⬇️ ---
-    function clearPdfNavActive() {
-        pdfNav.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-    }
-
-    // New Filter function
-    window.filterRecords = function(subDiv, type, btn) {
-        clearPdfNavActive();
-        btn.classList.add('active');
-        // Also keep the parent header active
-        btn.closest('.pdf-nav-section').querySelector('.pdf-nav-header').classList.add('active');
-        
-        const filtered = allRecords.filter(r => r.subDivision === subDiv && r.recordType === type);
-        renderRecords(filtered);
-    };
-
-    // New Accordion toggle
-    window.togglePdfNav = function(headerButton) {
-        headerButton.classList.toggle('active');
-        const content = headerButton.nextElementSibling;
-        if (content) content.classList.toggle('active');
-    };
-
-    // Show all PDFs
-    window.showAllPDFs = function(btn) {
-        clearPdfNavActive();
-        if(btn) btn.classList.add('active');
-        renderRecords(allRecords);
-    };
-    // --- ⬆️ END: PDF Filtering Logic ⬆️ ---
-
-
-    // --- PDF Modal Logic (MODIFIED) ---
-    window.showPDF = function(record) {
-        // Destructure the object
-        const { pdfPath, workName, prNo } = record;
-        let path = pdfPath; // Use 'let' so we can modify it
-
-        if (!path) return alert("No PDF file associated with this record.");
-        if (!path.startsWith("/uploads/")) path = "/uploads/" + path.replace(/^uploads[\\/]/, "");
-        
-        document.getElementById("modalName").textContent = workName;
-        document.getElementById("modalPR").textContent = "PR No: " + prNo;
-        document.getElementById("pdfFrame").src = `${SERVER_URL}${path}`;
-        document.getElementById("productModal").classList.add("active");
-        document.body.style.overflow = "hidden";
-    };
-
-    window.closeModal = function() {
-        document.getElementById("productModal").classList.remove("active");
-        document.getElementById("pdfFrame").src = "about:blank"; // Stop PDF loading
-        document.body.style.overflow = "auto";
-    };
-
-    // --- Inline Daily Progress Functions ---
-    async function loadDailyProgressDates() {
-        const dateList = document.getElementById("inlineDateList");
-        
-        // Only load if it's not already populated
-        if (dateList.innerHTML.includes("Loading") || dateList.innerHTML.includes("Error") || dateList.innerHTML.includes("No snapshots")) {
-            try {
-                const res = await fetch(`${SERVER_URL}/daily-progress`);
-                const snapshots = await res.json();
-                
-                if (!snapshots.length) {
-                    dateList.innerHTML = "<p>No snapshots found.</p>";
-                    return;
-                }
-                snapshots.sort((a,b) => (b.date || '').localeCompare(a.date));
-                dateList.innerHTML = snapshots.map(s => 
-                    `<button class="date-list-item" onclick="loadInlineSnapshot(${s.id}, '${s.date}', this)">
-                        ${s.date} (${s.rowCount} rows)
-                    </button>`
-                ).join("");
-
-            } catch (err) {
-                console.error("Failed to load snapshots:", err);
-                dateList.innerHTML = "<p style='color:red;'>Error loading dates.</p>";
-            }
+        if(window.innerWidth <= 768){
+          mobileFilterBtn.style.display = 'block';
+          mobileDailyFilterBtn.style.display = 'none';
         }
+      }
     }
 
-    window.loadInlineSnapshot = async function(id, dateStr, btn) {
-        const snapshotTitle = document.getElementById("inlineSnapshotTitle");
-        const snapshotFrame = document.getElementById("inlineSnapshotFrame");
-        const printSnapshotBtn = document.getElementById("inlinePrintBtn");
-
-        document.querySelectorAll(".date-list-item").forEach(b => b.classList.remove("active"));
-        if(btn) btn.classList.add("active");
-
-        snapshotTitle.textContent = "Loading...";
-        snapshotFrame.innerHTML = "<p>Loading snapshot...</p>";
-        printSnapshotBtn.style.display = "none";
-
-        try {
-            const res = await fetch(`${SERVER_URL}/daily-progress/${id}`);
-            if (!res.ok) throw new Error("Snapshot not found");
-            
-            const snapshot = await res.json();
-            
-            const theadHTML = `
-                <tr>
-                    <th style="width:120px">Date</th>
-                    <th style="width:120px">Division</th>
-                    <th style="width:160px">Sub-Division/Location</th>
-                    <th style="min-width:500px">Maintenance Activity Description</th>
-                    <th style="width:140px">Man Power Engaged</th>
-                    <th style="width:140px">Status</th>
-                    <th style="min-width:200px">Remarks/Issues</th>
-                </tr>
-            `;
-
-            snapshotTitle.textContent = `Daily Progress on: ${snapshot.date}`;
-            snapshotFrame.innerHTML = `
-                <table id="previewTable">
-                    <thead>${theadHTML}</thead>
-                    <tbody>${snapshot.tableHTML}</tbody>
-                </table>
-            `;
-            printSnapshotBtn.style.display = "block";
-
-            // Clean the table
-            const previewTbodyTRs = snapshotFrame.querySelectorAll('#previewTable tbody tr');
-            
-            let previousDate = null;
-            previewTbodyTRs.forEach(tr => {
-                const dateCell = tr.children[0];
-                const divisionCell = tr.children[1]; 
-
-                if (dateCell) {
-                    const currentDate = dateCell.textContent;
-                    
-                    if (currentDate === previousDate && (divisionCell && divisionCell.textContent.trim() === '')) {
-                        dateCell.textContent = '';
-                    } else if (currentDate.trim() !== '') {
-                        previousDate = currentDate;
-                    }
-                }
-
-                if (tr.lastElementChild) {
-                    tr.removeChild(tr.lastElementChild); 
-                }
-            });
-            snapshotFrame.querySelectorAll('#previewTable td[contenteditable="true"]').forEach(cell => {
-                cell.removeAttribute('contenteditable');
-                cell.style.background = 'none';
-            });
-
-        } catch (err) {
-            snapshotTitle.textContent = "Error";
-            snapshotFrame.innerHTML = `<p style='color:red;'>Error loading snapshot: ${err.message}</p>`;
-        }
+    // filtering & accordion
+    function clearPdfNavActive(){
+      pdfNav.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
     }
-
-    window.printDailyProgress = function() {
-        const content = document.getElementById("inlineSnapshotFrame").innerHTML;
-        const title = document.getElementById("inlineSnapshotTitle").textContent;
-        const printWindow = window.open('', '', 'height=800,width=1000');
-        
-        printWindow.document.write('<html><head><title>Print Snapshot</title>');
-        printWindow.document.write(`
-            <style>
-                body { font-family: Arial, sans-serif; }
-                h3 { font-size: 1.2rem; }
-                table { width:100%; border-collapse:collapse; margin-top: 10px; }
-                th, td { border:1px solid #000; padding: 8px; text-align:left; white-space:normal; word-break:break-word; }
-                th { background:#eee; }
-                td button { display: none; } 
-            </style>
-        `);
-        printWindow.document.write('</head><body>');
-        printWindow.document.write(`<h3>${title}</h3>`);
-        printWindow.document.write(content);
-        printWindow.document.write('</body></html>');
-        printWindow.document.close();
-        printWindow.focus();
-        
-        setTimeout(() => {
-            printWindow.print();
-            printWindow.close();
-        }, 250);
-    }
-
-    // --- Password modal ---
-    window.openPasswordModal = function() {
-        document.getElementById("passwordModal").style.display = "flex";
-        document.getElementById("usernameInput").focus(); // --- MODIFIED ---
+    window.filterRecords = function(subDiv, type, btn){
+      clearPdfNavActive();
+      if(btn) btn.classList.add('active');
+      const header = btn?.closest?.('.pdf-nav-section')?.querySelector('.pdf-nav-header');
+      if(header) header.classList.add('active');
+      const filtered = allRecords.filter(r => r.subDivision === subDiv && r.recordType === type);
+      renderRecords(filtered);
+      // if mobile — close sidebar after selecting
+      if(window.innerWidth <= 768){
+        pdfNav.classList.remove('active');
+      }
     };
-    window.closePasswordModal = function() {
-        document.getElementById("passwordModal").style.display = "none";
-        document.getElementById("usernameInput").value = "";
-        document.getElementById("passwordInput").value = "";
+    window.togglePdfNav = function(headerButton){
+      headerButton.classList.toggle('active');
+      const content = headerButton.nextElementSibling;
+      if(content) content.classList.toggle('active');
+    };
+    window.showAllPDFs = function(btn){
+      clearPdfNavActive();
+      if(btn) btn.classList.add('active');
+      renderRecords(allRecords);
+      if(window.innerWidth <= 768) pdfNav.classList.remove('active');
     };
 
-    document.getElementById("passwordInput").addEventListener("keydown", function(event) {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            verifyPassword();
-        }
+    // PDF modal logic (redesigned close etc)
+    const productModal = document.getElementById('productModal');
+    const modalName = document.getElementById('modalName');
+    const modalPR = document.getElementById('modalPR');
+    const pdfFrame = document.getElementById('pdfFrame');
+    const closeModalBtn = document.getElementById('closeModal');
+    const modalToolbar = document.getElementById('modalToolbar');
+    const openInNewBtn = document.getElementById('openInNewBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    window.showPDF = function(record){
+      const { pdfPath, workName, prNo } = record || {};
+      let path = pdfPath;
+      if(!path) return alert("No PDF associated with this record.");
+      if(!path.startsWith("/uploads/")) path = "/uploads/" + path.replace(/^uploads[\\/]/,'');
+      modalName.textContent = workName || 'PDF';
+      modalPR.textContent = "PR No: " + (prNo || 'N/A');
+      pdfFrame.src = `${SERVER_URL}${path}`;
+      productModal.classList.add('active');
+      productModal.setAttribute('aria-hidden','false');
+      document.body.style.overflow = 'hidden';
+
+      // setup toolbar buttons (open/download) — safe fallbacks
+      openInNewBtn.onclick = ()=> window.open(`${SERVER_URL}${path}`, '_blank');
+      downloadBtn.onclick = ()=> {
+        const a = document.createElement('a');
+        a.href = `${SERVER_URL}${path}`;
+        a.download = (prNo || 'document') + '.pdf';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      };
+
+      // show toolbar on mobile
+      if(window.innerWidth <= 768){
+        modalToolbar.style.display = 'flex';
+        document.querySelector('.drag-handle').style.display = 'block';
+      } else {
+        modalToolbar.style.display = 'none';
+        document.querySelector('.drag-handle').style.display = 'none';
+      }
+    };
+
+    function closeModal(){
+      productModal.classList.remove('active');
+      productModal.setAttribute('aria-hidden','true');
+      pdfFrame.src = 'about:blank';
+      document.body.style.overflow = 'auto';
+    }
+    closeModalBtn.addEventListener('click', closeModal);
+
+    // clicking outside modal content closes on mobile for easier UX
+    productModal.addEventListener('click', (e)=>{
+      if(window.innerWidth <= 768){
+        if(e.target === productModal) closeModal();
+      }
     });
-    
-    // --- MODIFIED: Added username input ---
-    window.verifyPassword = async function() {
-        const usernameInput = document.getElementById("usernameInput");
-        const passInput = document.getElementById("passwordInput");
-        const username = usernameInput.value.trim();
-        const pass = passInput.value.trim();
 
-        if (!username || !pass) {
-            alert("Please enter a username and password.");
-            return;
-        }
+    // daily progress code (unchanged logic)
+    async function loadDailyProgressDates(){
+      const dateList = document.getElementById('inlineDateList');
+      try {
+        const res = await fetch(`${SERVER_URL}/daily-progress`);
+        const snapshots = await res.json();
+        if(!snapshots.length){ dateList.innerHTML = "<p>No snapshots found.</p>"; return; }
+        snapshots.sort((a,b)=> (b.date||'').localeCompare(a.date));
+        dateList.innerHTML = snapshots.map(s=>`<button class="date-list-item" onclick="loadInlineSnapshot(${s.id}, '${s.date}', this)">${s.date} (${s.rowCount} rows)</button>`).join('');
+      } catch(e){
+        console.error("Failed to load snapshots:", e);
+        dateList.innerHTML = "<p style='color:red'>Error loading dates.</p>";
+      }
+    }
 
-        try {
-            const response = await fetch(`${SERVER_URL}/login`, { 
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ username: username, password: pass })
-            });
+    window.loadInlineSnapshot = async function(id, dateStr, btn){
+      const title = document.getElementById('inlineSnapshotTitle');
+      const frame = document.getElementById('inlineSnapshotFrame');
+      const printBtn = document.getElementById('inlinePrintBtn');
 
-            if (response.ok) {
-                const data = await response.json(); 
-                
-                localStorage.setItem('adminToken', data.token);
+      document.querySelectorAll('.date-list-item').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
 
-                closePasswordModal();
-                window.location.href = "add-product.html";
+      title.textContent = 'Loading...';
+      frame.innerHTML = "<p>Loading snapshot...</p>";
+      printBtn.style.display = 'none';
 
-            } else {
-                const errorData = await response.json();
-                alert(`❌ ${errorData.message || 'Incorrect username or password!'}`);
-                usernameInput.value = "";
-                passInput.value = "";
-                usernameInput.focus();
-            }
-        } catch (err) {
-            console.error("Login error:", err);
-            alert("⚠️ Could not connect to the login server.");
-        }
-    };
-/* ----------------------------------------------------------
-   🔥 UNIVERSAL MOBILE TOGGLE (PDF + Daily Progress)
------------------------------------------------------------*/
-(function () {
+      try {
+        const res = await fetch(`${SERVER_URL}/daily-progress/${id}`);
+        if(!res.ok) throw new Error('Snapshot not found');
+        const snapshot = await res.json();
 
-    function toggleSidebar(buttonId, sidebarId) {
-        const btn = document.getElementById(buttonId);
-        const sidebar = document.getElementById(sidebarId);
+        const thead = `<tr>
+          <th style="width:120px">Date</th><th style="width:120px">Division</th>
+          <th style="width:160px">Sub-Division/Location</th><th style="min-width:500px">Maintenance Activity Description</th>
+          <th style="width:140px">Man Power Engaged</th><th style="width:140px">Status</th><th style="min-width:200px">Remarks/Issues</th>
+        </tr>`;
 
-        if (!btn || !sidebar) return;
+        title.textContent = `Daily Progress on: ${snapshot.date}`;
+        frame.innerHTML = `<table id="previewTable"><thead>${thead}</thead><tbody>${snapshot.tableHTML}</tbody></table>`;
+        printBtn.style.display = 'block';
 
-        btn.addEventListener("click", function (e) {
-            e.stopPropagation();
-            sidebar.classList.toggle("active");
+        // minor cleaning (same as before)
+        const rows = frame.querySelectorAll('#previewTable tbody tr');
+        let prevDate = null;
+        rows.forEach(tr=>{
+          const dateCell = tr.children[0];
+          const divisionCell = tr.children[1];
+          if(dateCell){
+            const cur = dateCell.textContent;
+            if(cur === prevDate && divisionCell && divisionCell.textContent.trim()==='') dateCell.textContent = '';
+            else if(cur.trim() !== '') prevDate = cur;
+          }
+          if(tr.lastElementChild) tr.removeChild(tr.lastElementChild);
+        });
+        frame.querySelectorAll('#previewTable td[contenteditable="true"]').forEach(td=>{
+          td.removeAttribute('contenteditable');
+          td.style.background = 'none';
         });
 
-        document.addEventListener("click", function (e) {
-            if (!sidebar.classList.contains("active")) return;
-            if (sidebar.contains(e.target) || btn.contains(e.target)) return;
-            sidebar.classList.remove("active");
-        });
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-        toggleSidebar("mobileFilterBtn", "pdf-nav-bar");     // PDF filters
-        toggleSidebar("mobileDailyFilterBtn", "inlineLeftBar"); // Daily filters
-    });
-
-})();
-
-
-    // Scroll to top button
-    const scrollTopBtn = document.getElementById("scrollTopBtn");
-    const rightPanels = document.querySelectorAll(".right-panel");
-
-    rightPanels.forEach(panel => {
-        panel.onscroll = () => { scrollTopBtn.style.display = panel.scrollTop > 200 ? "block" : "none"; };
-    });
-    
-    scrollTopBtn.onclick = () => { 
-        document.getElementById('pdf-grid-wrapper').scrollTo({ top: 0, behavior: "smooth" });
-        document.getElementById('inlineRightBar').scrollTo({ top: 0, behavior: "smooth" });
+        // close the left pane on mobile so user sees the table
+        if(window.innerWidth <= 768){
+          document.getElementById('inlineLeftBar')?.classList?.remove('active');
+        }
+      } catch(err){
+        console.error(err);
+        title.textContent = 'Error';
+        frame.innerHTML = `<p style='color:red;'>Error loading snapshot: ${err.message}</p>`;
+      }
     };
 
-    // Global key listeners
-    window.addEventListener("keydown", e => { 
-        if(e.key === "Escape") {
-            closeModal();
-            closePasswordModal();
+    window.printDailyProgress = function(){
+      const content = document.getElementById('inlineSnapshotFrame').innerHTML;
+      const title = document.getElementById('inlineSnapshotTitle').textContent;
+      const w = window.open('','print','height=800,width=1000');
+      w.document.write('<html><head><title>Print Snapshot</title>');
+      w.document.write(`<style>body{font-family:Arial}table{width:100%;border-collapse:collapse}th,td{border:1px solid #000;padding:8px;text-align:left}</style>`);
+      w.document.write('</head><body>');
+      w.document.write(`<h3>${title}</h3>`);
+      w.document.write(content);
+      w.document.write('</body></html>');
+      w.document.close();
+      w.focus();
+      setTimeout(()=>{ w.print(); w.close(); },250);
+    };
+
+    // password modal helpers
+    window.openPasswordModal = function(){ document.getElementById('passwordModal').style.display='flex'; document.getElementById('usernameInput').focus(); }
+    window.closePasswordModal = function(){ document.getElementById('passwordModal').style.display='none'; document.getElementById('usernameInput').value=''; document.getElementById('passwordInput').value=''; }
+    document.getElementById('passwordInput').addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); verifyPassword(); }})
+
+    window.verifyPassword = async function(){
+      const username = document.getElementById('usernameInput').value.trim();
+      const pass = document.getElementById('passwordInput').value.trim();
+      if(!username || !pass){ alert('Please enter a username and password.'); return; }
+      try{
+        const res = await fetch(`${SERVER_URL}/login`, { method:'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ username, password: pass })});
+        if(res.ok){
+          const data = await res.json();
+          localStorage.setItem('adminToken', data.token);
+          closePasswordModal();
+          window.location.href = 'add-product.html';
+        } else {
+          const err = await res.json();
+          alert('❌ ' + (err.message || 'Incorrect username or password!'));
         }
+      } catch(e){
+        console.error('Login error', e);
+        alert('⚠️ Could not connect to the login server.');
+      }
+    };
+
+    // Mobile sidebar toggles (slide-in from LEFT)
+    function toggleSidebar(buttonId, sidebarId){
+      const btn = document.getElementById(buttonId);
+      const sidebar = document.getElementById(sidebarId);
+      if(!btn || !sidebar) return;
+      btn.addEventListener('click', (ev)=>{
+        ev.stopPropagation();
+        // toggle active class which moves sidebar in
+        const active = sidebar.classList.toggle('active');
+        // for accessibility aria-hidden
+        sidebar.setAttribute('aria-hidden', (!active).toString());
+      });
+      // click outside closes
+      document.addEventListener('click', (e)=>{
+        if(!sidebar.classList.contains('active')) return;
+        if(sidebar.contains(e.target) || btn.contains(e.target)) return;
+        sidebar.classList.remove('active');
+        sidebar.setAttribute('aria-hidden','true');
+      });
+    }
+    document.addEventListener('DOMContentLoaded', ()=>{
+      toggleSidebar('mobileFilterBtn','pdf-nav-bar');
+      toggleSidebar('mobileDailyFilterBtn','inlineLeftBar');
     });
 
-    // Load records on page load
-    window.addEventListener("load", loadRecords);
-</script>
+    // Scroll to top behaviour
+    const scrollTopBtn = document.getElementById('scrollTopBtn');
+    const rightPanels = document.querySelectorAll('.right-panel');
+    rightPanels.forEach(p=>{
+      p.onscroll = ()=> { scrollTopBtn.style.display = p.scrollTop > 240 ? 'block' : 'none'; }
+    });
+    scrollTopBtn.addEventListener('click', ()=>{
+      document.getElementById('pdf-grid-wrapper').scrollTo({ top: 0, behavior: 'smooth' });
+      document.getElementById('inlineRightBar')?.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // global key: esc closes modal & sidebar
+    window.addEventListener('keydown', (e)=>{
+      if(e.key === 'Escape'){ closeModal(); document.querySelectorAll('.left-bar.active').forEach(el=>el.classList.remove('active')); }
+    });
+
+    // initialize
+    window.addEventListener('load', loadRecords);
+
+  </script>
 </body>
-
 </html>
-
-
-
-
-
-
-
