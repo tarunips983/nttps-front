@@ -531,6 +531,8 @@
 #pdf-nav-bar button.active {
     background: #28a745;
 }
+
+
 #mobileFilterBtn { display: none; border: none; box-shadow: none; }
      /* ============================================================
    🔥 PERFECT MOBILE FIX (Only mobile, desktop untouched)
@@ -628,6 +630,31 @@
     .product-info p {
         font-size: 0.85rem;
     }
+            #mobileDailyFilterBtn {
+    display: block;
+    background: #28a745;
+    color: white;
+    width: 95%;
+    margin: 10px auto;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+}
+
+#inlineLeftBar {
+    width: 100% !important;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+#inlineLeftBar.active {
+    max-height: 700px;
+    padding: 15px;
+    background: white;
+}
 
     /* FULL SCREEN PDF VIEW */
     #modalContent {
@@ -689,11 +716,12 @@
     </header>
     
     <main>
-       <button id="mobileFilterBtn" aria-controls="pdf-nav-bar" aria-expanded="false" 
-    onclick="document.querySelector('.left-bar').classList.toggle('active'); 
-             this.setAttribute('aria-expanded', document.querySelector('.left-bar').classList.contains('active'));">
-    📂 Filters
-</button>
+       <!-- PDF FILTER BUTTON -->
+<button id="mobileFilterBtn">📂 Filters</button>
+
+<!-- DAILY FILTER BUTTON -->
+<button id="mobileDailyFilterBtn" style="display:none;">📂 Daily Filters</button>
+
 
         <div id="pdf-view-container" class="main-view"> 
             <div id="pdf-nav-bar" class="left-bar">
@@ -890,22 +918,37 @@
     });
 
     // --- ⬇️ Main View Switching Logic ⬇️ ---
-    window.showMainView = function(viewName) {
-        if (viewName === 'progress') {
-            pdfView.classList.remove('active');
-            progressView.classList.add('active');
-            viewTabPdf.classList.remove('active');
-            viewTabProgress.classList.add('active');
-            // Load the dates for the progress view
-            loadDailyProgressDates(); 
-        } else {
-            // Default to PDF view
-            pdfView.classList.add('active');
-            progressView.classList.remove('active');
-            viewTabPdf.classList.add('active');
-            viewTabProgress.classList.remove('active');
-        }
+   window.showMainView = function(viewName) {
+
+    const pdfBtn = document.getElementById("mobileFilterBtn");
+    const dailyBtn = document.getElementById("mobileDailyFilterBtn");
+
+    if (viewName === 'progress') {
+        // switch to daily progress
+        pdfView.classList.remove('active');
+        progressView.classList.add('active');
+
+        viewTabPdf.classList.remove('active');
+        viewTabProgress.classList.add('active');
+
+        pdfBtn.style.display = "none";      // hide PDF filter button
+        dailyBtn.style.display = "block";   // show DAILY filter button
+
+        loadDailyProgressDates();
+
+    } else {
+        // switch to PDF view
+        pdfView.classList.add('active');
+        progressView.classList.remove('active');
+
+        viewTabPdf.classList.add('active');
+        viewTabProgress.classList.remove('active');
+
+        pdfBtn.style.display = "block";     // show PDF filter button
+        dailyBtn.style.display = "none";    // hide DAILY button
     }
+}
+
 
     // --- ⬇️ PDF Filtering Logic ⬇️ ---
     function clearPdfNavActive() {
@@ -1171,6 +1214,27 @@
         btn.setAttribute('aria-expanded', 'false');
       });
     }
+(function() {
+    function initDailyFilterToggle() {
+        const btn = document.getElementById('mobileDailyFilterBtn');
+        const sidebar = document.getElementById('inlineLeftBar');
+        if (!btn || !sidebar) return;
+
+        btn.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+            btn.setAttribute('aria-expanded', sidebar.classList.contains('active'));
+        });
+
+        document.addEventListener('click', function(ev) {
+            if (!sidebar.classList.contains('active')) return;
+            if (sidebar.contains(ev.target) || btn.contains(ev.target)) return;
+            sidebar.classList.remove('active');
+            btn.setAttribute('aria-expanded', 'false');
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', initDailyFilterToggle);
+})();
 
     // run after DOM ready
     if (document.readyState === 'loading') {
@@ -1206,5 +1270,6 @@
 </body>
 
 </html>
+
 
 
