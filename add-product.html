@@ -900,9 +900,20 @@ const authFetch = async (url, options = {}) => {
         : "http://172.21.16.51:3000";
 
 function previewPDF(path) {
-    document.getElementById("pdfFrame").src = BACKEND + path;
+    let finalUrl = path;
+
+    // If path already starts with http/https → Cloudinary → use directly
+    if (path.startsWith("http")) {
+        finalUrl = path;
+    } else {
+        // Backend-stored PDFs use relative paths
+        finalUrl = BACKEND + path;
+    }
+
+    document.getElementById("pdfFrame").src = finalUrl;
     document.getElementById("previewModal").style.display = "flex";
 }
+
 
 
         function closePreview() {
@@ -1058,7 +1069,7 @@ function previewPDF(path) {
 
         function downloadPDF(path) {
             const a = document.createElement('a');
-            a.href = path;
+            a.href = path.startsWith("http") ? path : BACKEND + path;
             a.download = path.split('/').pop();
             document.body.appendChild(a);
             a.click();
@@ -1896,3 +1907,4 @@ loadedSnapshotDate = null;
     </script></body>
 
 </html>
+
