@@ -532,14 +532,12 @@
     background: #28a745;
 }
 
-
-
-     /* ============================================================
+/* ============================================================
    🔥 PERFECT MOBILE FIX (Only mobile, desktop untouched)
    ============================================================ */
 @media (max-width: 768px) {
 
-    /* Disable desktop layout */
+    /* Turn desktop layout into stacked */
     main {
         flex-direction: column !important;
         height: auto !important;
@@ -574,12 +572,10 @@
         font-size: 14px;
     }
 
-    /* MOBILE FILTER BUTTON */
-
-    #mobileFilterBtn {
-        display: block !important;
-        background: #007bff;
-        color: white;
+    /* MOBILE FILTER BUTTONS */
+    #mobileFilterBtn,
+    #mobileDailyFilterBtn {
+        display: none; /* JS will enable the correct button */
         width: 95%;
         margin: 10px auto;
         padding: 12px;
@@ -587,47 +583,42 @@
         font-size: 16px;
         font-weight: bold;
         border: none;
+        color: #fff;
+    }
+
+    #mobileFilterBtn {
+        background: #007bff;
     }
 
     #mobileDailyFilterBtn {
-        display: block !important;
         background: #28a745;
-        color: white;
-        width: 95%;
-        margin: 10px auto;
-        padding: 12px;
-        border-radius: 6px;
-        font-size: 16px;
-        font-weight: bold;
-        border: none;
     }
 
-
-    /* SIDEBAR collapsed by default */
+    /* LEFT SIDEBAR DEFAULT HIDDEN */
     .left-bar {
         width: 100% !important;
-        max-height: 0;
-        overflow: hidden;
-        padding: 0;
-        transition: max-height 0.3s ease;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        padding: 0 !important;
         border-right: none;
         background: #ffffff;
+        transition: max-height 0.35s ease, padding 0.35s ease;
     }
 
+    /* WHEN ACTIVE – FULLY EXPAND */
     .left-bar.active {
-        max-height: 1000px;
-        padding: 15px;
+        max-height: 700px !important;
+        padding: 15px !important;
         box-shadow: 0 2px 10px rgba(0,0,0,0.15);
     }
 
-    /* PRODUCT GRID 1 COLUMN */
+    /* PRODUCT GRID → 1 COLUMN */
     .product-grid {
         grid-template-columns: 1fr !important;
         gap: 20px;
         padding: 10px;
     }
 
-    /* CARDS BIGGER AND CLEAN */
     .product {
         padding: 18px !important;
         border-radius: 12px;
@@ -645,22 +636,8 @@
     .product-info p {
         font-size: 0.85rem;
     }
-            
 
-#inlineLeftBar {
-    width: 100% !important;
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-}
-
-#inlineLeftBar.active {
-    max-height: 700px;
-    padding: 15px;
-    background: white;
-}
-
-    /* FULL SCREEN PDF VIEW */
+    /* FULLSCREEN PDF MODAL */
     #modalContent {
         width: 100% !important;
         height: 100vh !important;
@@ -675,32 +652,19 @@
     #closeModal {
         top: 10px;
         right: 10px;
-        font-size: 25px;
+        font-size: 24px;
         background: white;
         padding: 6px 12px;
         border-radius: 8px;
         border: 1px solid #aaa;
     }
 
-    /* DAILY PROGRESS MOBILE */
-    #inlineLeftBar {
-        width: 100% !important;
-        max-height: 0;
-        overflow: hidden;
-    }
-
-    #inlineLeftBar.active {
-        max-height: 700px;
-        padding: 15px;
-        background: white;
-    }
-
+    /* TABLE FONT SIZE */
     table th, table td {
         font-size: 0.75rem !important;
         padding: 5px !important;
     }
 }
-
 
 </style>
 </head>
@@ -935,8 +899,17 @@
         viewTabPdf.classList.remove('active');
         viewTabProgress.classList.add('active');
 
-        pdfBtn.style.display = "none";      // hide PDF filter button
-        dailyBtn.style.display = "block";   // show DAILY filter button
+        // Reset both
+pdfBtn.style.display = "none";
+dailyBtn.style.display = "none";
+
+// Enable correct button for mobile only
+if (window.innerWidth <= 768) {
+    if (viewName === 'pdf') pdfBtn.style.display = "block";
+    if (viewName === 'progress') dailyBtn.style.display = "block";
+}
+
+
 
         loadDailyProgressDates();
 
@@ -948,8 +921,16 @@
         viewTabPdf.classList.add('active');
         viewTabProgress.classList.remove('active');
 
-        pdfBtn.style.display = "block";     // show PDF filter button
-        dailyBtn.style.display = "none";    // hide DAILY button
+        // Reset both
+pdfBtn.style.display = "none";
+dailyBtn.style.display = "none";
+
+// Enable correct button for mobile only
+if (window.innerWidth <= 768) {
+    if (viewName === 'pdf') pdfBtn.style.display = "block";
+    if (viewName === 'progress') dailyBtn.style.display = "block";
+}
+
     }
 }
 
@@ -1196,56 +1177,36 @@
             alert("⚠️ Could not connect to the login server.");
         }
     };
-/* ---------------------------------------------
-   MOBILE FILTER TOGGLE (PDF FILTER SIDEBAR)
-----------------------------------------------*/
-(function() {
+/* ----------------------------------------------------------
+   🔥 UNIVERSAL MOBILE TOGGLE (PDF + Daily Progress)
+-----------------------------------------------------------*/
+(function () {
 
-    function initMobileFilterToggle() {
-        const btn = document.getElementById('mobileFilterBtn');
-        const sidebar = document.getElementById('pdf-nav-bar');
+    function toggleSidebar(buttonId, sidebarId) {
+        const btn = document.getElementById(buttonId);
+        const sidebar = document.getElementById(sidebarId);
+
         if (!btn || !sidebar) return;
 
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener("click", function (e) {
             e.stopPropagation();
-            sidebar.classList.toggle('active');
-            btn.setAttribute('aria-expanded', sidebar.classList.contains('active'));
+            sidebar.classList.toggle("active");
         });
 
-        document.addEventListener('click', (e) => {
-            if (!sidebar.classList.contains('active')) return;
+        document.addEventListener("click", function (e) {
+            if (!sidebar.classList.contains("active")) return;
             if (sidebar.contains(e.target) || btn.contains(e.target)) return;
-            sidebar.classList.remove('active');
-            btn.setAttribute('aria-expanded', 'false');
+            sidebar.classList.remove("active");
         });
     }
 
-    function initDailyFilterToggle() {
-        const btn = document.getElementById('mobileDailyFilterBtn');
-        const sidebar = document.getElementById('inlineLeftBar');
-        if (!btn || !sidebar) return;
-
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            sidebar.classList.toggle('active');
-            btn.setAttribute('aria-expanded', sidebar.classList.contains('active'));
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!sidebar.classList.contains('active')) return;
-            if (sidebar.contains(e.target) || btn.contains(e.target)) return;
-            sidebar.classList.remove('active');
-            btn.setAttribute('aria-expanded', 'false');
-        });
-    }
-
-    // Init when DOM is ready
-    document.addEventListener('DOMContentLoaded', () => {
-        initMobileFilterToggle();
-        initDailyFilterToggle();
+    document.addEventListener("DOMContentLoaded", () => {
+        toggleSidebar("mobileFilterBtn", "pdf-nav-bar");     // PDF filters
+        toggleSidebar("mobileDailyFilterBtn", "inlineLeftBar"); // Daily filters
     });
 
 })();
+
 
     // Scroll to top button
     const scrollTopBtn = document.getElementById("scrollTopBtn");
@@ -1274,6 +1235,7 @@
 </body>
 
 </html>
+
 
 
 
