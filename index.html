@@ -706,9 +706,11 @@
     </header>
     
     <main>
-        <button id="mobileFilterBtn" onclick="
-    document.querySelector('.left-bar').classList.toggle('active');
-">
+        <button id="mobileFilterBtn"
+        onclick="document.querySelector('.left-bar').classList.toggle('active')">
+    📂 Filters
+</button>
+
         <div id="pdf-view-container" class="main-view"> 
             <div id="pdf-nav-bar" class="left-bar">
                 <h3>Filter Records</h3>
@@ -754,7 +756,7 @@
                     </div>
                 </div>
             </div>
-</button>
+
             <div id="pdf-grid-wrapper" class="right-panel">
                 <div id="loader" class="loader"></div>
                 <div class="product-grid" id="product-list" style="display:none;"></div>
@@ -1191,3 +1193,4 @@
 </body>
 
 </html>
+
