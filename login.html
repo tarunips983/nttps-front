@@ -247,74 +247,85 @@
 
 
     async function handleRegister() {
-      const email = emailField.value.trim();
-      const password = passwordField.value;
-      const confirmPassword = confirmPasswordField.value;
-      const inviteCode = inviteCodeField.value.trim();
+  const email = emailField.value.trim();
+  const password = passwordField.value;
+  const confirmPassword = confirmPasswordField.value;
+  const inviteCode = inviteCodeField.value.trim();
 
-      if (password !== confirmPassword) {
-        showMessage(errorMsg, "Passwords do not match.");
-        return;
-      }
+  if (password !== confirmPassword) {
+    showMessage(errorMsg, "Passwords do not match.");
+    return;
+  }
 
-      try {
-        const response = await fetch(`${SERVER_URL}/register-send-otp`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password, inviteCode })
-        });
+  try {
+    const response = await fetch(`${SERVER_URL}/register-send-otp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password, inviteCode })
+    });
 
-        const data = await response.json();
+    const data = await response.json();
 
-        if (response.ok) {
-          showMessage(successMsg, data.message, false);
-          isVerifyMode = true;
-          formTitle.innerHTML = "✉️ Check Your Email";
-          submitButton.textContent = "Verify & Register";
-          emailField.disabled = true;
-          passwordField.style.display = "none";
-          confirmPasswordField.style.display = "none";
-          inviteCodeField.style.display = "none";
-          otpField.style.display = "block";
-          otpField.required = true;
-        } else {
-          showMessage(errorMsg, data.message || "Registration failed.");
-        }
-      } catch (err) {
-        console.error("Registration error:", err);
-        showMessage(errorMsg, "Could not connect to server.");
-      }
+    if (response.ok) {
+      showMessage(successMsg, data.message, false);
+      isVerifyMode = true;
+
+      formTitle.innerHTML = "✉️ Check Your Email";
+      submitButton.textContent = "Verify & Register";
+
+      // keep password stored for final verification
+      window.tempPassword = password;
+
+      emailField.disabled = true;
+      passwordField.disabled = true;
+      confirmPasswordField.disabled = true;
+      inviteCodeField.disabled = true;
+
+      otpField.style.display = "block";
+      otpField.required = true;
+    } else {
+      showMessage(errorMsg, data.message || "Registration failed.");
     }
+  } catch (err) {
+    console.error("Registration error:", err);
+    showMessage(errorMsg, "Could not connect to server.");
+  }
+}
 
-    async function handleVerify() {
-      const email = emailField.value.trim();
-      const otp = otpField.value.trim();
 
-      try {
-        const response = await fetch(`${SERVER_URL}/register-verify`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, otp })
-        });
+   async function handleVerify() {
+  const email = emailField.value.trim();
+  const otp = otpField.value.trim();
+  const password = window.tempPassword; // saved earlier
 
-        const data = await response.json();
+  try {
+    const response = await fetch(`${SERVER_URL}/register-verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, otp, password })
+    });
 
-        if (response.ok) {
-          showMessage(successMsg, data.message, false);
-          setTimeout(() => {
-            emailField.disabled = false;
-            otpField.required = false;
-            toggleMode();
-          }, 2000);
-        } else {
-          showMessage(errorMsg, data.message || "Verification failed.");
-        }
-      } catch (err) {
-        console.error("Verification error:", err);
-        showMessage(errorMsg, "Could not connect to server.");
-      }
+    const data = await response.json();
+
+    if (response.ok) {
+      showMessage(successMsg, data.message, false);
+
+      setTimeout(() => {
+        emailField.disabled = false;
+        toggleMode();
+      }, 2000);
+
+    } else {
+      showMessage(errorMsg, data.message || "Verification failed.");
     }
+  } catch (err) {
+    console.error("Verification error:", err);
+    showMessage(errorMsg, "Could not connect to server.");
+  }
+}
+
   </script>
 </body>
 </html>
+
 
