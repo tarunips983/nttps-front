@@ -258,10 +258,10 @@
   }
 
   try {
-    const response = await fetch(`${SERVER_URL}/register-send-otp`, {
+    const response = await fetch("https://YOUR-VERCEL-APP.vercel.app/api/send-otp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, inviteCode })
+      body: JSON.stringify({ email, inviteCode })
     });
 
     const data = await response.json();
@@ -327,6 +327,7 @@
   </script>
 </body>
 </html>
+
 
 
 
