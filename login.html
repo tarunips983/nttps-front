@@ -258,7 +258,7 @@
   }
 
   try {
-    const response = await fetch("nttps-email.vercel.app", {
+    const response = await fetch("https://nttps-email.vercel.app/api/send-otp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, inviteCode })
@@ -327,6 +327,7 @@
   </script>
 </body>
 </html>
+
 
 
 
