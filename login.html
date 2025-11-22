@@ -219,30 +219,32 @@
     });
 
     async function handleLogin() {
-      const username = emailField.value.trim();
-      const password = passwordField.value;
+  const email = emailField.value.trim();
+  const password = passwordField.value;
 
-      try {
-        const response = await fetch(`${SERVER_URL}/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, password })
-        });
+  try {
+    const response = await fetch(`${SERVER_URL}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
 
-        if (response.ok) {
-          const data = await response.json();
-          localStorage.setItem("adminToken", data.token);
-          localStorage.removeItem("isAdmin");
-          window.location.href = "add-product.html";
-        } else {
-          const data = await response.json().catch(() => ({}));
-          showMessage(errorMsg, data.message || "Invalid email or password");
-        }
-      } catch (err) {
-        console.error("Login fetch error:", err);
-        showMessage(errorMsg, "Error connecting to server.");
-      }
+    const data = await response.json();
+
+    if (response.ok) {
+      // store Supabase session token
+      localStorage.setItem("adminToken", data.access_token);
+
+      window.location.href = "add-product.html";
+    } else {
+      showMessage(errorMsg, data.message || "Invalid email or password");
     }
+  } catch (err) {
+    console.error("Login fetch error:", err);
+    showMessage(errorMsg, "Error connecting to server.");
+  }
+}
+
 
     async function handleRegister() {
       const email = emailField.value.trim();
@@ -315,3 +317,4 @@
   </script>
 </body>
 </html>
+
