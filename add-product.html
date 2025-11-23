@@ -591,7 +591,7 @@ const API = "https://nttps-backend.onrender.com";
 
 const authFetch = async (url, options = {}) => {
     const token = localStorage.getItem("adminToken");
-    
+
     const headers = new Headers(options.headers || {});
 
     if (token) {
@@ -599,23 +599,20 @@ const authFetch = async (url, options = {}) => {
     }
 
     const isFormData = options.body instanceof FormData;
-
     if (!isFormData && !headers.has("Content-Type")) {
         headers.set("Content-Type", "application/json");
     }
 
     const res = await fetch(url, { ...options, headers });
 
-    // Auto logout on unauthorized
-    if (response.status === 401 || response.status === 403) {
+    // ✅ FIXED (use res, not response)
+    if (res.status === 401 || res.status === 403) {
         showToast("Session expired. Please log in again.", true);
-        setTimeout(() => logout(), 1200);
+        setTimeout(logout, 1500);
     }
-   
+
     return res;
 };
-
-
         
 
         /* ----------------- Tab switching ----------------- */
@@ -1889,6 +1886,7 @@ loadedSnapshotDate = null;
     </script></body>
 
 </html>
+
 
 
 
