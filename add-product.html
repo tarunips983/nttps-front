@@ -4,11 +4,11 @@
     <script>
         const token = localStorage.getItem('adminToken');
         const isAdmin = localStorage.getItem('isAdmin');
-
-        if (!token && isAdmin !== "true") {
-            alert("You must be logged in to access this page.");
-            window.location.href = "login.html";
-        }
+        
+        if (!token || isAdmin !== "true") {
+  alert("You must be logged in to access this page.");
+  window.location.href = "login.html";
+}
     </script>
     <meta charset="UTF-8" />
     <title>Admin - PDF Database + Daily Progress</title>
@@ -583,38 +583,40 @@
 
 
     <script>
-const API = "https://nttps-backend.onrender.com";
-        // =================================================================
-        // Security & Auth (Unchanged)
-        // =================================================================
-        const adminToken = localStorage.getItem('adminToken');
-
-const authFetch = async (url, options = {}) => {
-    const token = localStorage.getItem("adminToken");
-
-    const headers = new Headers(options.headers || {});
-
-    if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-    }
-
-    const isFormData = options.body instanceof FormData;
-    if (!isFormData && !headers.has("Content-Type")) {
-        headers.set("Content-Type", "application/json");
-    }
-
-    const res = await fetch(url, { ...options, headers });
-
-    // ✅ FIXED (use res, not response)
-    if (res.status === 401 || res.status === 403) {
-        showToast("Session expired. Please log in again.", true);
-        setTimeout(logout, 1500);
-    }
-
-    return res;
-};
         
+const API = "https://nttps-backend.onrender.com";
 
+// Safe auth wrapper for all API calls
+async function authFetch(url, options = {}) {
+  // Always read the latest token from localStorage
+  const token = localStorage.getItem("adminToken");
+  const headers = new Headers(options.headers || {});
+
+  // Attach token if present
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  // Only set JSON header when not sending FormData
+  const isFormData = options.body instanceof FormData;
+  if (!isFormData && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+
+  const res = await fetch(url, { ...options, headers });
+
+  // 401 → real session expired → logout
+  if (res.status === 401) {
+    showToast("Session expired. Please log in again.", true);
+    setTimeout(logout, 1500);
+  }
+  // 403 → forbidden, but DON'T auto logout (just show message)
+  else if (res.status === 403) {
+    showToast("Forbidden (403): check that you are logged in and token is valid.", true);
+  }
+
+  return res;
+}
         /* ----------------- Tab switching ----------------- */
         function showPanel(name) {
             document.getElementById('pdfPanel').classList.remove('active');
@@ -1886,6 +1888,7 @@ loadedSnapshotDate = null;
     </script></body>
 
 </html>
+
 
 
 
