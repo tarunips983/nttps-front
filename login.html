@@ -259,23 +259,21 @@
 
   try {
     const response = await fetch("https://nttps-email.vercel.app/api/send-otp", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ email, password, inviteCode })
-});
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password, inviteCode }),
+    });
 
     const data = await response.json();
 
     if (response.ok) {
-      showMessage(successMsg, data.message, false);
+      showMessage(successMsg, data.message || "OTP sent", false);
       isVerifyMode = true;
 
       formTitle.innerHTML = "✉️ Check Your Email";
       submitButton.textContent = "Verify & Register";
 
-      // keep password stored for final verification
-      window.tempPassword = password;
-
+      // lock fields while waiting for OTP
       emailField.disabled = true;
       passwordField.disabled = true;
       confirmPasswordField.disabled = true;
@@ -296,25 +294,29 @@
    async function handleVerify() {
   const email = emailField.value.trim();
   const otp = otpField.value.trim();
-  const password = window.tempPassword; // saved earlier
 
   try {
-    const response = await fetch(`${SERVER_URL}/register-verify`, {
+    const response = await fetch("https://nttps-email.vercel.app/api/verify-otp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, otp, password })
+      body: JSON.stringify({ email, otp }),
     });
 
     const data = await response.json();
 
     if (response.ok) {
-      showMessage(successMsg, data.message, false);
+      showMessage(successMsg, data.message || "Registration complete", false);
 
+      // after successful registration, reset form back to login mode
       setTimeout(() => {
         emailField.disabled = false;
-        toggleMode();
-      }, 2000);
+        passwordField.disabled = false;
+        confirmPasswordField.disabled = false;
+        inviteCodeField.disabled = false;
+        otpField.required = false;
 
+        toggleMode(); // switch back to login
+      }, 1500);
     } else {
       showMessage(errorMsg, data.message || "Verification failed.");
     }
@@ -324,9 +326,11 @@
   }
 }
 
+
   </script>
 </body>
 </html>
+
 
 
 
