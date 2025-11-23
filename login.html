@@ -21,11 +21,12 @@
     }
 
     .login-container {
+      width: 350px;
+      max-width: 90%;
+      padding: 25px;
       background: white;
-      padding: 30px 40px;
-      border-radius: 12px;
-      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-      width: 320px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
       text-align: center;
     }
 
@@ -116,6 +117,33 @@
     .home-button:hover {
       background-color: #e0e0e0;
     }
+    /* Make login page responsive on mobile */
+@media (max-width: 600px) {
+  body {
+    background-size: cover;
+    background-position: center;
+    background-attachment: scroll; /* better for mobile */
+  }
+
+  .login-container {
+    width: 90% !important;       /* Expand on phones */
+    max-width: 350px !important; /* Still looks neat */
+    padding: 20px !important;
+    margin: 0 auto;
+    transform: scale(1) !important;  /* Ensure full scaling */
+  }
+
+  .login-container input,
+  .login-container button {
+    font-size: 16px !important;  /* Mobile-friendly */
+    padding: 10px !important;
+  }
+
+  .login-container h3 {
+    font-size: 18px !important;
+  }
+}
+
   </style>
 </head>
 
@@ -329,6 +357,7 @@ if (response.ok) {
   </script>
 </body>
 </html>
+
 
 
 
