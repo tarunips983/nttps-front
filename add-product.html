@@ -590,34 +590,31 @@ const API = "https://nttps-backend.onrender.com";
         const adminToken = localStorage.getItem('adminToken');
 
 const authFetch = async (url, options = {}) => {
+    const token = localStorage.getItem("adminToken");   // <-- ALWAYS fresh
+
     const headers = new Headers(options.headers || {});
 
-    // ✅ Add token
-    if (adminToken) {
-        headers.append('Authorization', `Bearer ${adminToken}`);
+    // Add token ALWAYS
+    if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
     }
 
-    // ✅ Correct FormData check
-    const isFormData = options.body && options.body.constructor === FormData;
-
-    // ✅ Only add JSON header when NOT sending FormData
-    if (!isFormData) {
-        if (!headers.has('Content-Type')) {
-            headers.set('Content-Type', 'application/json');
-        }
+    // Auto set JSON header unless FormData
+    const isFormData = options.body instanceof FormData;
+    if (!isFormData && !headers.has("Content-Type")) {
+        headers.set("Content-Type", "application/json");
     }
 
-    // ✅ Perform request
     const res = await fetch(url, { ...options, headers });
 
-    // ✅ Auto logout on token expiry
     if (res.status === 401 || res.status === 403) {
         showToast("Session expired. Please log in again.", true);
-        setTimeout(logout, 2000);
+        setTimeout(logout, 1500);
     }
 
     return res;
 };
+
 
         
 
@@ -1310,16 +1307,15 @@ unmergeCells();
             if (!rowCount) return showToast('No rows to save.', true);
             
             try{
- const res = await authFetch(`${API}/daily-progress`,{
-                    method:'POST',
-                    headers:{'Content-Type':'application/json'},
-                    body:JSON.stringify({
-                        id: snapshotId || null,
-                        date: formattedDate, // <-- Send the formatted DD/MM/YYYY date
-                        tableHTML: snapshotHTML,
-                        rowCount: rowCount
-                    })
-                });
+ const res = await authFetch(`${API}/daily-progress`, {
+    method: 'POST',
+    body: JSON.stringify({
+        id: snapshotId || null,
+        date: formattedDate,
+        tableHTML: snapshotHTML,
+        rowCount: rowCount
+    })
+});
                 const data = await res.json();
                 if(data.success){
                     showToast(data.message);
@@ -1893,6 +1889,7 @@ loadedSnapshotDate = null;
     </script></body>
 
 </html>
+
 
 
 
