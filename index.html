@@ -590,37 +590,55 @@ main { width: 100%; height: calc(100vh - 67px); display: flex; }
     const downloadBtn = document.getElementById('downloadBtn');
 
     window.showPDF = function(record){
-      const { pdfPath, workName, prNo } = record || {};
-      let path = pdfPath;
-      if(!path) return alert("No PDF associated with this record.");
-      if(!path.startsWith("/uploads/")) path = "/uploads/" + path.replace(/^uploads[\\/]/,'');
-      modalName.textContent = workName || 'PDF';
-      modalPR.textContent = "PR No: " + (prNo || 'N/A');
-      pdfFrame.src = `${SERVER_URL}${path}`;
-      productModal.classList.add('active');
-      productModal.setAttribute('aria-hidden','false');
-      document.body.style.overflow = 'hidden';
+  const { pdfPath, workName, prNo } = record || {};
+  if (!pdfPath) return alert("No PDF associated with this record.");
 
-      // setup toolbar buttons (open/download) — safe fallbacks
-      openInNewBtn.onclick = ()=> window.open(`${SERVER_URL}${path}`, '_blank');
-      downloadBtn.onclick = ()=> {
-        const a = document.createElement('a');
-        a.href = `${SERVER_URL}${path}`;
-        a.download = (prNo || 'document') + '.pdf';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      };
+  let finalUrl;
 
-      // show toolbar on mobile
-      if(window.innerWidth <= 768){
-        modalToolbar.style.display = 'flex';
-        document.querySelector('.drag-handle').style.display = 'block';
-      } else {
-        modalToolbar.style.display = 'none';
-        document.querySelector('.drag-handle').style.display = 'none';
-      }
-    };
+  // 👉 CASE 1: Supabase URL (starts with http)
+  if (pdfPath.startsWith("http")) {
+    finalUrl = pdfPath;
+  }
+  // 👉 CASE 2: File stored on backend
+  else {
+    let path = pdfPath;
+    if (!path.startsWith("/uploads/")) {
+      path = "/uploads/" + path.replace(/^uploads[\\/]/, "");
+    }
+    finalUrl = `${SERVER_URL}${path}`;
+  }
+
+  modalName.textContent = workName || 'PDF';
+  modalPR.textContent = "PR No: " + (prNo || 'N/A');
+
+  // Load PDF
+  pdfFrame.src = finalUrl;
+
+  productModal.classList.add('active');
+  productModal.setAttribute('aria-hidden','false');
+  document.body.style.overflow = 'hidden';
+
+  // Buttons
+  openInNewBtn.onclick = ()=> window.open(finalUrl, "_blank");
+  downloadBtn.onclick = ()=> {
+    const a = document.createElement("a");
+    a.href = finalUrl;
+    a.download = (prNo || "document") + ".pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  };
+
+  // Mobile toolbar visibility
+  if (window.innerWidth <= 768) {
+    modalToolbar.style.display = "flex";
+    document.querySelector(".drag-handle").style.display = "block";
+  } else {
+    modalToolbar.style.display = "none";
+    document.querySelector(".drag-handle").style.display = "none";
+  }
+};
+
 
     function closeModal(){
       productModal.classList.remove('active');
@@ -796,6 +814,7 @@ main { width: 100%; height: calc(100vh - 67px); display: flex; }
   </script>
 </body>
 </html>
+
 
 
 
