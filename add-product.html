@@ -590,22 +590,25 @@ const API = "https://nttps-backend.onrender.com";
         const adminToken = localStorage.getItem('adminToken');
 
 const authFetch = async (url, options = {}) => {
-    const token = localStorage.getItem("adminToken");   // <-- ALWAYS fresh
+    const token = localStorage.getItem("adminToken");
 
+    // FIXED
     const headers = new Headers(options.headers || {});
 
-    // Add token ALWAYS
     if (token) {
         headers.set("Authorization", `Bearer ${token}`);
     }
 
-    // Auto set JSON header unless FormData
+    // Auto JSON header unless FormData
     const isFormData = options.body instanceof FormData;
     if (!isFormData && !headers.has("Content-Type")) {
         headers.set("Content-Type", "application/json");
     }
 
-    const res = await fetch(url, { ...options, headers });
+    const res = await fetch(url, {
+        ...options,
+        headers
+    });
 
     if (res.status === 401 || res.status === 403) {
         showToast("Session expired. Please log in again.", true);
@@ -1889,6 +1892,7 @@ loadedSnapshotDate = null;
     </script></body>
 
 </html>
+
 
 
 
