@@ -117,35 +117,43 @@
     .home-button:hover {
       background-color: #e0e0e0;
     }
-    /* MOBILE FIX — make login box large and centered like APGENCO */
-@media (max-width: 768px) {
+    /* MOBILE FULL WIDTH LOGIN BOX */
+@media (max-width: 600px) {
+
   body {
+    padding: 0;
+    margin: 0;
+    height: 100vh;
     background-size: cover;
     background-position: center;
-    background-attachment: scroll;
   }
 
   .login-container {
-    width: 90%;
-    max-width: 380px;
-    padding: 30px 25px;
-    border-radius: 14px;
-    transform: scale(1.45);   /* makes the login box BIGGER */
-    background: rgba(255, 255, 255, 0.95);
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0;
+    padding: 20px 20px;
+    box-sizing: border-box;
+    border-radius: 0px !important;  /* Remove round borders */
+    top: auto;
   }
 
-  .login-container input {
-    font-size: 16px;
-    padding: 12px;
+  .login-container form {
+    width: 100% !important;
   }
 
-  .login-container button {
+  input {
+    width: 100% !important;
     font-size: 17px;
     padding: 12px;
   }
+
+  button {
+    width: 100% !important;
+    padding: 12px;
+    font-size: 16px;
+  }
 }
-
-
   </style>
 </head>
 
@@ -359,6 +367,7 @@ if (response.ok) {
   </script>
 </body>
 </html>
+
 
 
 
