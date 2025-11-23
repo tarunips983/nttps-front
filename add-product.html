@@ -607,11 +607,7 @@ const authFetch = async (url, options = {}) => {
     const res = await fetch(url, { ...options, headers });
 
     // Auto logout if unauthorized
-    if (res.status === 401 || res.status === 403) {
-        showToast("Session expired. Please log in again.", true);
-        setTimeout(() => logout(), 1200);
-    }
-
+   
     return res;
 };
 
@@ -1889,6 +1885,7 @@ loadedSnapshotDate = null;
     </script></body>
 
 </html>
+
 
 
 
