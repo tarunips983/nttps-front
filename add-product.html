@@ -591,28 +591,25 @@ const API = "https://nttps-backend.onrender.com";
 
 const authFetch = async (url, options = {}) => {
     const token = localStorage.getItem("adminToken");
-
-    // FIXED
+    
     const headers = new Headers(options.headers || {});
 
     if (token) {
         headers.set("Authorization", `Bearer ${token}`);
     }
 
-    // Auto JSON header unless FormData
     const isFormData = options.body instanceof FormData;
+
     if (!isFormData && !headers.has("Content-Type")) {
         headers.set("Content-Type", "application/json");
     }
 
-    const res = await fetch(url, {
-        ...options,
-        headers
-    });
+    const res = await fetch(url, { ...options, headers });
 
+    // Auto logout if unauthorized
     if (res.status === 401 || res.status === 403) {
         showToast("Session expired. Please log in again.", true);
-        setTimeout(logout, 1500);
+        setTimeout(() => logout(), 1200);
     }
 
     return res;
@@ -1064,11 +1061,11 @@ function previewPDF(path) {
 
         function goHome() { window.location.href = 'index.html'; }
         
-        function logout() { 
-            localStorage.setItem("adminToken", data.token);
-localStorage.setItem("isAdmin", "true");
-            window.location.href = 'login.html';
-        }
+        function logout() {
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("isAdmin");
+    window.location.href = "login.html";
+}
 
         async function autoExtractPDF() {
             const fileInput = document.getElementById("pdfFile");
@@ -1892,6 +1889,7 @@ loadedSnapshotDate = null;
     </script></body>
 
 </html>
+
 
 
 
