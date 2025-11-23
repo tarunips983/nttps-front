@@ -528,28 +528,31 @@ main { width: 100%; height: calc(100vh - 67px); display: flex; }
 
     // Show main view
     window.showMainView = function(viewName){
-      if(viewName === 'progress'){
-        pdfView.classList.remove('active');
-        progressView.classList.add('active');
-        viewTabPdf.classList.remove('active');
-        viewTabProgress.classList.add('active');
-        // mobile button states
-        if(window.innerWidth <= 768){
-          mobileFilterBtn.style.display = 'none';
-          mobileDailyFilterBtn.style.display = 'block';
-        }
-        loadDailyProgressDates();
-      } else {
-        pdfView.classList.add('active');
-        progressView.classList.remove('active');
-        viewTabPdf.classList.add('active');
-        viewTabProgress.classList.remove('active');
-        if(window.innerWidth <= 768){
-          mobileFilterBtn.style.display = 'block';
-          mobileDailyFilterBtn.style.display = 'none';
-        }
+  if(viewName === 'progress'){
+      pdfView.classList.remove('active');
+      progressView.classList.add('active');
+      viewTabPdf.classList.remove('active');
+      viewTabProgress.classList.add('active');
+
+      if(window.innerWidth <= 768){
+        mobileFilterBtn.style.display = 'none';
+        mobileDailyFilterBtn.style.display = 'block';
       }
-    }
+
+      loadDailyProgressDates();
+  } 
+  else {   // PDF view
+      pdfView.classList.add('active');
+      progressView.classList.remove('active');
+      viewTabPdf.classList.add('active');
+      viewTabProgress.classList.remove('active');
+
+      if(window.innerWidth <= 768){
+        mobileFilterBtn.style.display = 'block';
+        mobileDailyFilterBtn.style.display = 'none';   // ← THIS HIDES DAILY FILTER BUTTON
+      }
+  }
+}
 
     // filtering & accordion
     function clearPdfNavActive(){
@@ -814,6 +817,7 @@ main { width: 100%; height: calc(100vh - 67px); display: flex; }
   </script>
 </body>
 </html>
+
 
 
 
