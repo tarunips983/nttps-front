@@ -230,13 +230,10 @@
     });
 
     const data = await response.json();
-
-    if (response.ok) {
-      // store your backend token correctly
-      localStorage.setItem("adminToken", data.token);
-      localStorage.setItem("isAdmin", "true");
-
-      window.location.href = "add-product.html";
+if (response.ok) {
+  localStorage.setItem("adminToken", data.token);
+  localStorage.setItem("isAdmin", "true");
+  window.location.href = "add-product.html";
     } else {
       showMessage(errorMsg, data.message || "Invalid email or password");
     }
@@ -332,6 +329,7 @@
   </script>
 </body>
 </html>
+
 
 
 
