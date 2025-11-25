@@ -963,20 +963,19 @@ window.toggleMenu = function () {
       document.getElementById('inlineRightBar')?.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    function applyUserSettings() {
-const dark = localStorage.getItem("darkMode") === "true";
+function applyUserSettings() {
+    const dark = localStorage.getItem("darkMode") === "true";
 
     if (dark) {
-    document.body.classList.add("dark-mode");
-    document.querySelector("header").classList.add("dark-mode");
-    document.getElementById("dropdownMenu").classList.add("dark-mode");
+        document.body.classList.add("dark-mode");
+        document.querySelector("header").classList.add("dark-mode");
+        document.getElementById("dropdownMenu").classList.add("dark-mode");
 
-    document.querySelectorAll(".left-bar").forEach(el => el.classList.add("dark-mode"));
-    document.querySelectorAll(".product").forEach(el => el.classList.add("dark-mode"));
-    document.querySelectorAll(".product-info h3").forEach(el => el.style.color = "#fff");
-    document.querySelectorAll(".product-info p").forEach(el => el.style.color = "#ddd");
-}
-
+        document.querySelectorAll(".left-bar").forEach(el => el.classList.add("dark-mode"));
+        document.querySelectorAll(".product").forEach(el => el.classList.add("dark-mode"));
+        document.querySelectorAll(".product-info h3").forEach(el => el.style.color = "#fff");
+        document.querySelectorAll(".product-info p").forEach(el => el.style.color = "#ddd");
+    }
 
     // CARD SIZE
     const size = localStorage.getItem("cardSize") || "normal";
@@ -1001,19 +1000,29 @@ const dark = localStorage.getItem("darkMode") === "true";
     if (!anim) {
         document.querySelectorAll("*").forEach(e => e.style.animation = "none");
     }
+} // ✅ ← THIS WAS MISSING
+//--------------------------------------------------
+// CLOSING OF applyUserSettings() FIXES ERROR
+//--------------------------------------------------
 
-    // global key: esc closes modal & sidebar
-    window.addEventListener('keydown', (e)=>{
-      if(e.key === 'Escape'){ closeModal(); document.querySelectorAll('.left-bar.active').forEach(el=>el.classList.remove('active')); }
-    });
+// ESC KEY → close modal + sidebars
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeModal();
+        document.querySelectorAll('.left-bar.active').forEach(el => el.classList.remove('active'));
+    }
+});
 
-    window.addEventListener("load", () => {
-        applyUserSettings();
-        loadRecords();
-    });
+// PAGE LOAD INIT
+window.addEventListener("load", () => {
+    applyUserSettings();
+    loadRecords();
+});
+
   </script>
 </body>
 </html>
+
 
 
 
