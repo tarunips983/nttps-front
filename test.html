@@ -1,68 +1,321 @@
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Permanent Imprest Letter - APGENCO</title>
+
 <style>
-.active {
-    display: none;
-}
-#box {
-    width: 100px;
-    height: 100px;
-    background: red;
-    transition: 1s; /* smooth animation */
+/* ---------- PRINT SETTINGS ---------- */
+@page {
+  size: A4;
+  margin: 0.5in;            /* exact 0.5" margin all sides */
 }
 
-.active1 {
-    transform: translateX(200px); /* move right */
+@media print {
+  .form-box { display: none !important; }
+  .page { box-shadow: none !important; margin: 0 !important; }
+  body { background: #ffffff !important; }
 }
-.panel { display: none; }
-.panel.active { display: block; }
+
+/* ---------- GENERAL ---------- */
+body {
+  background: #eaeaea;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+.form-box {
+  width: 210mm;
+  margin: 10px auto;
+  padding: 15px;
+  background: #ffffff;
+  box-shadow: 0 0 5px rgba(0,0,0,0.3);
+}
+
+.form-box label {
+  font-size: 13px;
+}
+
+.form-box input {
+  width: 100%;
+  padding: 6px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.form-box button {
+  margin-top: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* ---------- A4 LETTER PAGE ---------- */
+.page {
+  width: 210mm;
+  min-height: 297mm;
+  background: #ffffff;
+  margin: 15px auto;
+  padding: 0.5in; /* same as @page */
+  box-shadow: 0 0 6px rgba(0,0,0,0.3);
+  font-family: "Palatino Linotype", "Times New Roman", serif;
+  font-size: 13.5pt;
+  line-height: 1.35;
+}
+
+/* Header */
+.title {
+  text-align: center;
+  font-weight: bold;
+  text-decoration: underline;
+  margin-bottom: 12px;
+}
+
+/* From / To block – centered, two columns, wide gap */
+.fromto-wrapper {
+  width: 87%;               /* controls overall width of From/To block */
+  margin: 33px auto 0 auto; /* centered under header, medium top gap */
+}
+
+.fromto {
+  display: flex;
+  justify-content: space-between; /* far apart inside wrapper */
+}
+
+.fromblock, .toblock {
+  width: 37%;
+  white-space: pre-line;
+  font-size: 13.5pt;
+}
+
+/* Subject centered */
+.subject {
+  text-align: justify;
+  /*font-weight: bold;*/
+  margin-top: 50px;
+}
+
+.star{
+    text-align: center;
+    font-weight: bold;
+    margin-top: 23px;
+}
+
+/* Paragraph with first-line indent */
+.para {
+  margin-top: 22px;
+  text-align: justify;
+  text-indent: 32px;       /* first line indent */
+}
+
+/* Enclosures */
+.encl {
+  margin-top: 40px;
+}
+
+/* Signature – centered but slightly to the right */
+.signature {
+  margin-top: 45px;
+  width: 40%;
+  margin-left: 45%;        /* centers block but nudges to right */
+  text-align: center;
+  line-height: 1.35;
+}
+
+.home-button {
+    display: block;
+    width: fit-content;
+    padding: 8px 12px;
+    background-color: #f0f0f0;
+    color: #333;
+    text-decoration: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+    margin-bottom: 10px;
+}
+
 </style>
+</head>
+<body>
 
-        <title>My First Web Page</title>
-    </head>
-    <body>
-<button Id="btn" >Press here </button>
-<button id="btn1">Animate</button>
-<button id="btn2">for para</button>
-<button id="tab1">Tab 1</button>
-<button id="tab2">Tab 2</button>
+<!-- ========= INPUT FORM ========= -->
+<div class="form-box">
+<a class="home-button" href="index.html">← Home</a>
+  <h3>Permanent Imprest Letter – Input</h3>
 
-<div id="panel1" class="panel active">Tab 1 content</div>
-<div id="panel2" class="panel">Tab 2 content</div>
-<div id="box"></div>
-        <h1 id="title">Hello, World!</h1>
-        <p id="para">This is my first paragraph on a simple HTML page.</p>
+  <label>Employee Name</label>
+  <input id="empName" value="A.Bala Prasad">
+
+  <label>Employee ID</label>
+  <input id="empId" value="1071260">
+
+  <label>Designation (Full)</label>
+  <input id="desig" value="Dy. Executive Engineer">
+
+  <label>Designation (Short)</label>
+  <input id="desigShort" value="DyEE">
+
+  <label>Office Line 1</label>
+  <input id="office1" value="O/o EE/ TM&CAM/SD-I,">
+
+  <label>Office Line 2</label>
+  <input id="office2" value="Stage-V/Dr.NTTPS,">
+
+  <label>Office Line 3</label>
+  <input id="office3" value="Ibrahimpatnam-521456.">
+
+  <label>Financial Year</label>
+  <input id="finYear" value="2025 - 26">
+
+  <label>Unit Description (for Subject)</label>
+  <input id="unitDesc" value="Dr.NTTPS–Stage-V-1X800MW-TM&CAM Division">
+
+  <label>Amount (Rs.)</label>
+  <input id="amount" value="5000">
+
+  <label>SAP Doc No.</label>
+  <input id="sap" value="6400000588">
+
+  <label>HR Amount (Rs.)</label>
+  <input id="hrAmount" value="5000">
+
+  <button onclick="updateLetter()">Preview</button>
+  <button onclick="window.print()">Print / Save as PDF</button>
+</div>
+
+<!-- ========= LETTER PAGE ========= -->
+<div class="page">
+
+  <div class="title">
+    ANDHRA PRADESH POWER GENERATION CORPORATION LTD
+  </div>
+
+  <!-- From / To centered, side by side -->
+  <div class="fromto-wrapper">
+    <div class="fromto">
+      <div class="fromblock" id="fromBlock">
+From
+A.Bala Prasad (Emp Id:1071260)
+Dy. Executive Engineer,
+O/o EE/ TM&CAM/SD-I,
+Stage-V/Dr.NTTPS,
+Ibrahimpatnam-521456.
+      </div>
+      <div class="toblock" id="toBlock">
+To
+The Chief Engineer
+Operation & Maintenance,
+Dr.NTTPS,
+Ibrahimpatnam-521456.
+      </div>
+    </div>
+  </div>
+
+  <!-- NO Lr.No line here -->
+
+  <!-- Subject (center) -->
+  <div class="subject" id="subjectLine">
+    Sub :- Opening of Permanent Imprest – Requested – Reg.
+  </div>
+
+ <div class="star" id="">
+    *****
+  </div>
+
+  <!-- Main paragraph -->
+  <div class="para" id="mainPara">
+It is requested to arrange for opening of Permanent Imprest in favour of Sri A.Bala Prasad, DyEE/Mechl./TM&CAM Sub.Div.I/Stage-V/Dr.NTTPS to meet the incidental expenditure in the Main Turbine Sub division for an amount of Rs.5,000.00 (Rupees Five Thousand Only) for the financial year 2025-26. Necessary Hand Receipt is herewith enclosed.
+  </div>
+
+  <!-- Enclosures -->
+  <div class="encl" id="enclBlock">
+<b>Encl:</b><br>
+1) SAP Doc.No.: 6400000588<br>
+2) 1No. HR original for Rs.5,000.00
+  </div>
+
+  <!-- Signature block (center-ish, shifted right) -->
+  <div class="signature" id="signBlock">
+Yours faithfully,<br><br><br>
+Dy. Executive Engineer<br>
+O/o EE/ TM&CAM/Sub.Div.I /Stage-V<br>
+Ibrahimpatnam-521456.
+  </div>
+
+</div>
+
 <script>
-document.getElementById("btn").addEventListener("click", function() {
-if (document.getElementById("title").classList.contains("active")) {
-document.getElementById("title").classList.remove("active");
-} else {
-document.getElementById("title").classList.add("active");
+function formatIN(x){
+  return Number(x).toLocaleString("en-IN",{minimumFractionDigits:2, maximumFractionDigits:2});
 }
-});
+function toWords(n){
+  n = Math.round(Number(n));
+  const a=["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten",
+           "Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen",
+           "Eighteen","Nineteen"];
+  const b=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+  function w(num){
+    if(num<20) return a[num];
+    if(num<100) return b[Math.floor(num/10)] + (num%10 ? " " + a[num%10] : "");
+    if(num<1000) return a[Math.floor(num/100)] + " Hundred" + (num%100 ? " " + w(num%100) : "");
+    if(num<100000) return w(Math.floor(num/1000)) + " Thousand" + (num%1000 ? " " + w(num%1000) : "");
+    if(num<10000000) return w(Math.floor(num/100000)) + " Lakh" + (num%100000 ? " " + w(num%100000) : "");
+    return w(Math.floor(num/10000000)) + " Crore" + (num%10000000 ? " " + w(num%10000000) : "");
+  }
+  return w(n) + " Only";
+}
 
-document.getElementById("btn1").addEventListener("click", () => {
-    document.getElementById("box").classList.toggle("active1");
-});
+function updateLetter(){
+  const emp   = document.getElementById("empName").value || "";
+  const empId = document.getElementById("empId").value || "";
+  const des   = document.getElementById("desig").value || "";
+  const desS  = document.getElementById("desigShort").value || "";
+  const o1    = document.getElementById("office1").value || "";
+  const o2    = document.getElementById("office2").value || "";
+  const o3    = document.getElementById("office3").value || "";
+  const fy    = document.getElementById("finYear").value || "";
+  const unit  = document.getElementById("unitDesc").value || "";
+  const amt   = document.getElementById("amount").value || "0";
+  const sap   = document.getElementById("sap").value || "";
+  const hr    = document.getElementById("hrAmount").value || "0";
 
-document.getElementById("btn2").addEventListener("click", ()=> {
-const para = document.getElementById("para");
+  // From block – keep exact lines, just replace values
+  document.getElementById("fromBlock").textContent =
+`From
+${emp} (Emp Id:${empId})
+${des},
+${o1}
+${o2}
+${o3}`;
 
-para.classList.toggle("active");
+  // Subject line – centered, same style
+  document.getElementById("subjectLine").textContent =
+`Sub :- ${unit} – ${emp}, ${desS}/Mechl. Opening of Permanent Imprest for the financial year ${fy} – Requested - Reg.`;
 
-});
-document.getElementById("tab1").onclick = () => {
-    document.getElementById("panel1").classList.add("active");
-    document.getElementById("panel2").classList.remove("active");
-};
+  // Main paragraph with indent
+  document.getElementById("mainPara").textContent =
+`It is requested to arrange for opening of Permanent Imprest in favour of Sri ${emp}, ${desS}/Mechl./TM&CAM Sub.Div.I/Stage-V/Dr.NTTPS to meet the incidental expenditure in the Main Turbine Sub division for an amount of Rs.${formatIN(amt)} (Rupees ${toWords(amt)}) for the financial year ${fy}. Necessary Hand Receipt is herewith enclosed.`;
 
-document.getElementById("tab2").onclick = () => {
-    document.getElementById("panel2").classList.add("active");
-    document.getElementById("panel1").classList.remove("active");
-};
+  // Enclosures
+  document.getElementById("enclBlock").innerHTML =
+`<b>Encl:</b><br>
+1) SAP Doc.No.: ${sap}<br>
+2) 1No. HR original for Rs.${formatIN(hr)}`;
+
+  // Signature block – same text, dynamic designation & address
+  document.getElementById("signBlock").innerHTML =
+`Yours faithfully,<br><br><br>
+${des}<br>
+O/o EE/ TM&CAM/Sub.Div.I /Stage-V<br>
+${o3}`;
+}
+
+// initialise once
+updateLetter();
 </script>
-    </body>
-    </html>
+
+</body>
+</html>
