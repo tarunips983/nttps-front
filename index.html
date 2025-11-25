@@ -901,25 +901,29 @@ main { width: 100%; height: calc(100vh - 67px); display: flex; }
     document.getElementById('passwordInput').addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); verifyPassword(); }})
 
     window.verifyPassword = async function(){
-      const username = document.getElementById('usernameInput').value.trim();
-      const pass = document.getElementById('passwordInput').value.trim();
-      if(!username || !pass){ alert('Please enter a username and password.'); return; }
-      try{
-        const res = await fetch(`${SERVER_URL}/login`, { method:'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ username, password: pass })});
-        if(res.ok){
-          const data = await res.json();
-          localStorage.setItem('adminToken', data.token);
-          closePasswordModal();
-          window.location.href = 'add-product.html';
-        } else {
-          const err = await res.json();
-          alert('❌ ' + (err.message || 'Incorrect username or password!'));
-        }
-      } catch(e){
-        console.error('Login error', e);
-        alert('⚠️ Could not connect to the login server.');
-      }
-    };
+  const username = document.getElementById('usernameInput').value.trim();
+  const pass = document.getElementById('passwordInput').value.trim();
+  if(!username || !pass){ alert('Please enter a username and password.'); return; }
+  try{
+    const res = await fetch(`${SERVER_URL}/login`, {
+      method:'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email: username, password: pass })  // <-- FIXED HERE
+    });
+    if(res.ok){
+      const data = await res.json();
+      localStorage.setItem('adminToken', data.token);
+      closePasswordModal();
+      window.location.href = 'add-product.html';
+    } else {
+      const err = await res.json();
+      alert('❌ ' + (err.message || 'Incorrect email or password!'));
+    }
+  } catch(e){
+    console.error('Login error', e);
+    alert('⚠️ Could not connect to the login server.');
+  }
+};
 
     // Mobile sidebar toggles (slide-in from LEFT)
     function toggleSidebar(buttonId, sidebarId){
@@ -1022,6 +1026,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
