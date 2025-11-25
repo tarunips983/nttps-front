@@ -1007,14 +1007,14 @@ const dark = localStorage.getItem("darkMode") === "true";
       if(e.key === 'Escape'){ closeModal(); document.querySelectorAll('.left-bar.active').forEach(el=>el.classList.remove('active')); }
     });
 
-    // initialize
     window.addEventListener("load", () => {
-    applyUserSettings();
-    loadRecords();
-    }
+        applyUserSettings();
+        loadRecords();
+    });
   </script>
 </body>
 </html>
+
 
 
 
