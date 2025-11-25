@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Settings – TM&CAM</title>
+<link rel="icon" href="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg">
+
+<style>
+    body {
+        font-family: Segoe UI, Arial, sans-serif;
+        background: #f4f4f4;
+        margin: 0;
+        padding: 0;
+    }
+
+    header {
+        background: #232f3e;
+        padding: 15px;
+        color: white;
+        font-size: 22px;
+        font-weight: bold;
+    }
+
+    .container {
+        width: 90%;
+        max-width: 700px;
+        margin: 30px auto;
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+
+    h2 {
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .setting-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .setting-item:last-child {
+        border-bottom: none;
+    }
+
+    select, input[type="checkbox"] {
+        padding: 7px;
+        font-size: 15px;
+        border-radius: 6px;
+    }
+
+    .reset-btn {
+        margin-top: 25px;
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+        border: none;
+        background: #d9534f;
+        color: white;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .reset-btn:hover {
+        background: #c9302c;
+    }
+
+    .save-msg {
+        text-align: center;
+        margin-top: 15px;
+        font-size: 15px;
+        color: green;
+        display: none;
+    }
+.save-btn, .home-btn {
+    margin-top: 15px;
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.save-btn { background: #007bff; color: white; }
+.save-btn:hover { background: #0056b3; }
+
+.home-btn { background: #28a745; color: white; }
+.home-btn:hover { background: #1e7e34; }
+
+</style>
+</head>
+
+<body>
+
+<header>⚙ Settings</header>
+
+<div class="container">
+<button class="save-btn" onclick="saveAllSettings()">Save Settings</button>
+<button class="home-btn" onclick="window.location.href='index.html'">🏠 Home</button>
+
+    <h2>Customize Your Experience</h2>
+
+    <!-- DARK MODE -->
+    <div class="setting-item">
+        <span>Dark Mode</span>
+        <input type="checkbox" id="darkModeToggle">
+    </div>
+
+    <!-- CARD SIZE -->
+    <div class="setting-item">
+        <span>Card Size</span>
+        <select id="cardSize">
+            <option value="small">Compact</option>
+            <option value="normal">Normal (Default)</option>
+            <option value="large">Large</option>
+        </select>
+    </div>
+
+    <!-- GRID COLUMNS -->
+    <div class="setting-item">
+        <span>Grid Columns</span>
+        <select id="gridCols">
+            <option value="2">2 Columns</option>
+            <option value="3">3 Columns (Default)</option>
+            <option value="4">4 Columns</option>
+        </select>
+    </div>
+
+    <!-- ANIMATIONS -->
+    <div class="setting-item">
+        <span>Enable Animations</span>
+        <input type="checkbox" id="enableAnim">
+    </div>
+
+    <!-- SCROLL BUTTON -->
+    <div class="setting-item">
+        <span>Show Scroll-To-Top Button</span>
+        <input type="checkbox" id="scrollBtnToggle">
+    </div>
+
+    <button class="reset-btn" onclick="resetSettings()">Reset All Settings</button>
+
+    <div id="saveMsg" class="save-msg">Settings Saved ✔</div>
+</div>
+
+<script>
+
+// Load saved settings
+window.onload = function () {
+    applySavedSettings();
+};
+
+function saveAllSettings() {
+    saveSetting("darkMode", document.getElementById("darkModeToggle").checked);
+    saveSetting("cardSize", document.getElementById("cardSize").value);
+    saveSetting("gridColumns", document.getElementById("gridCols").value);
+    saveSetting("enableAnim", document.getElementById("enableAnim").checked);
+    saveSetting("scrollBtn", document.getElementById("scrollBtnToggle").checked);
+
+    alert("Settings saved successfully!");
+}
+
+
+// Save setting to storage + show message
+function saveSetting(key, value) {
+    localStorage.setItem(key, value);
+    document.getElementById("saveMsg").style.display = "block";
+    setTimeout(() => document.getElementById("saveMsg").style.display = "none", 2000);
+}
+
+function applySavedSettings() {
+    // Dark Mode
+    document.getElementById("darkModeToggle").checked =
+        localStorage.getItem("darkMode") === "true";
+
+    // Card Size
+    document.getElementById("cardSize").value =
+        localStorage.getItem("cardSize") || "normal";
+
+    // PDF Grid Columns
+    document.getElementById("gridCols").value =
+        localStorage.getItem("gridColumns") || "3";
+
+    // Animations
+    document.getElementById("enableAnim").checked =
+        localStorage.getItem("enableAnim") === "true";
+
+    // Scroll-To-Top Button
+    document.getElementById("scrollBtnToggle").checked =
+        localStorage.getItem("scrollBtn") === "true";
+}
+
+// Event Listeners
+document.getElementById("darkModeToggle").onchange = (e) =>
+    saveSetting("darkMode", e.target.checked);
+
+document.getElementById("cardSize").onchange = (e) =>
+    saveSetting("cardSize", e.target.value);
+
+document.getElementById("gridCols").onchange = (e) =>
+    saveSetting("gridColumns", e.target.value);
+
+document.getElementById("enableAnim").onchange = (e) =>
+    saveSetting("enableAnim", e.target.checked);
+
+document.getElementById("scrollBtnToggle").onchange = (e) =>
+    saveSetting("scrollBtn", e.target.checked);
+
+// Reset Button
+function resetSettings() {
+    localStorage.clear();
+    alert("Settings reset. Reloading...");
+    location.reload();
+}
+</script>
+
+</body>
+</html>
