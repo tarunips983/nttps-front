@@ -83,7 +83,149 @@ header h1 { margin:0; font-size:22px; }
     font-size: 0.9rem;
     margin: 8px 0;
 }
+   /* --- End Card Fix --- */
+/* =============================== */
+/* 🌙 DARK MODE FIX - FULL SYSTEM */
+/* =============================== */
 
+/* Dark overall background */
+body.dark-mode {
+    background: #121212 !important;
+    color: #ffffff !important;
+}
+
+/* Header */
+header.dark-mode {
+    background: #0d0d0d !important;
+    color: white !important;
+}
+
+/* Search bar */
+header.dark-mode input {
+    background: #1e1e1e !important;
+    color: white !important;
+    border: 1px solid #555 !important;
+}
+
+/* Top Nav Buttons */
+header.dark-mode .main-tab-btn,
+header.dark-mode a {
+    color: white !important;
+}
+
+/* Left Sidebar */
+.left-bar.dark-mode {
+    background: #1a1a1a !important;
+    color: white !important;
+}
+
+.left-bar.dark-mode button {
+    color: white !important;
+}
+
+/* Product Cards */
+.product.dark-mode {
+    background: #1f1f1f !important;
+    border: 1px solid #333 !important;
+    color: white !important;
+}
+
+/* Card headings */
+.product.dark-mode .product-info h3 {
+    color: #ffffff !important;
+}
+
+/* Card text */
+.product.dark-mode .product-info p {
+    color: #cccccc !important;
+}
+
+/* View PDF button */
+.product.dark-mode .view-btn {
+    background: #0066ff !important;
+    color: white !important;
+}
+
+/* Modal Dark */
+#modalContent.dark-mode {
+    background: #1f1f1f !important;
+    color: white !important;
+}
+
+#modalContent.dark-mode iframe {
+    background: #000 !important;
+}
+
+/* Dropdown Menu Dark Mode */
+.dropdown-menu.dark-mode {
+    background: #0f0f0f !important;
+    border-color: #333 !important;
+}
+
+.dropdown-menu.dark-mode a {
+    color: #ffffff !important;
+}
+
+.dropdown-menu.dark-mode a:hover {
+    background: #222 !important;
+}
+
+header.dark-mode input::placeholder {
+    color: #bbb !important;
+}
+
+
+/* 🔥 Burger Menu Icon */
+.burger-menu {
+    font-size: 26px;
+    cursor: pointer;
+    margin-right: 12px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    transition: background 0.2s;
+    display: none; /* Hidden on desktop (shows on small screens if you want) */
+}
+
+/* Show burger always */
+.burger-menu {
+    display: block;
+}
+
+/* Hover effect */
+.burger-menu:hover {
+    background: rgba(255,255,255,0.15);
+}
+
+/* 🔽 Dropdown Menu */
+.dropdown-menu {
+    position: absolute;
+    top: 70px;
+    right: 10px;
+    background: #232f3e;
+    border-radius: 8px;
+    width: 220px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    display: none;
+    flex-direction: column;
+    padding: 10px 0;
+    z-index: 2000;
+    animation: fadeIn 0.25s ease;
+}
+
+.dropdown-menu a {
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    font-size: 15px;
+    display: block;
+}
+
+.dropdown-menu a:hover {
+    background: #20bbd8;
+    cursor: pointer;
+}
+
+    
 /* View button pushed to bottom */
 .product .view-btn { 
     margin-top: auto;
@@ -310,6 +452,15 @@ main { width: 100%; height: calc(100vh - 67px); display: flex; }
       <button id="viewTabProgress" class="main-tab-btn" onclick="showMainView('progress')">📅 Daily Progress</button>
       <a href="javascript:void(0)" onclick="openPasswordModal()" title="Add New Record">➕ Add Record</a>
       <a href="login.html" id="loginLink" title="Login Page">🔐 Login</a>
+      <div class="burger-menu" onclick="toggleMenu()">☰</div>
+
+<!-- Dropdown Menu -->
+<div id="dropdownMenu" class="dropdown-menu">
+    <a onclick="window.location.href='test.html'">📄 Imprest Covering letter</a>
+    <!-- Add more menu items here -->
+    <a href="settings.html">⚙ Settings</a>
+    <a href="#">📞 Contact</a>
+</div>
     </div>
   </header>
 
@@ -795,6 +946,12 @@ main { width: 100%; height: calc(100vh - 67px); display: flex; }
       toggleSidebar('mobileDailyFilterBtn','inlineLeftBar');
     });
 
+    // 🔥 Toggle Burger Dropdown
+window.toggleMenu = function () {
+    const menu = document.getElementById("dropdownMenu");
+    menu.style.display = (menu.style.display === "flex") ? "none" : "flex";
+};
+
     // Scroll to top behaviour
     const scrollTopBtn = document.getElementById('scrollTopBtn');
     const rightPanels = document.querySelectorAll('.right-panel');
@@ -806,17 +963,59 @@ main { width: 100%; height: calc(100vh - 67px); display: flex; }
       document.getElementById('inlineRightBar')?.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
+    function applyUserSettings() {
+const dark = localStorage.getItem("darkMode") === "true";
+
+    if (dark) {
+    document.body.classList.add("dark-mode");
+    document.querySelector("header").classList.add("dark-mode");
+    document.getElementById("dropdownMenu").classList.add("dark-mode");
+
+    document.querySelectorAll(".left-bar").forEach(el => el.classList.add("dark-mode"));
+    document.querySelectorAll(".product").forEach(el => el.classList.add("dark-mode"));
+    document.querySelectorAll(".product-info h3").forEach(el => el.style.color = "#fff");
+    document.querySelectorAll(".product-info p").forEach(el => el.style.color = "#ddd");
+}
+
+
+    // CARD SIZE
+    const size = localStorage.getItem("cardSize") || "normal";
+    let scale = 1;
+    if (size === "small") scale = 0.85;
+    if (size === "large") scale = 1.15;
+    document.documentElement.style.setProperty("--card-scale", scale);
+
+    document.querySelectorAll(".product").forEach(card => {
+        card.style.transform = `scale(${scale})`;
+    });
+
+    // GRID COLUMNS
+    const cols = localStorage.getItem("gridColumns") || "3";
+    const grid = document.querySelector(".product-grid");
+    if (grid) {
+        grid.style.gridTemplateColumns = `repeat(${cols}, minmax(240px, 1fr))`;
+    }
+
+    // ANIMATIONS
+    const anim = localStorage.getItem("enableAnim") === "true";
+    if (!anim) {
+        document.querySelectorAll("*").forEach(e => e.style.animation = "none");
+    }
+
     // global key: esc closes modal & sidebar
     window.addEventListener('keydown', (e)=>{
       if(e.key === 'Escape'){ closeModal(); document.querySelectorAll('.left-bar.active').forEach(el=>el.classList.remove('active')); }
     });
 
     // initialize
-    window.addEventListener('load', loadRecords);
+    window.addEventListener("load", () => {
+    applyUserSettings();
+    loadRecords();
 
   </script>
 </body>
 </html>
+
 
 
 
