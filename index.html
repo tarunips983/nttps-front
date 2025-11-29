@@ -850,6 +850,7 @@ if (listEnabled) {
     container.innerHTML = `
         <table style="
     width:100%;
+    border:1px solid #ccc;
     border-collapse:collapse;
     background:white;
     border-radius:10px;
@@ -879,7 +880,7 @@ if (listEnabled) {
                 <img src="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg"
                      style="height:40px;border-radius:4px;">
             </td>
-            <td style="padding:10px;border:1px solid #ddd;text-align:center;">${r.workName}</td>
+            <td style="padding:10px;border:1px solid #ddd;">${r.workName}</td>
             <td style="padding:10px;border:1px solid #ddd;text-align:center;">${r.prNo}</td>
             <td style="padding:10px;border:1px solid #ddd;text-align:center;">${r.subDivision}</td>
             <td style="padding:10px;border:1px solid #ddd;text-align:center;">${r.recordType}</td>
@@ -1384,6 +1385,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
