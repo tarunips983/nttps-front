@@ -1021,31 +1021,40 @@ async function renderCLBioData() {
       return;
     }
 
-    container.innerHTML = data
-      .map(c => {
-        const photo = c.photo_url 
-            ? c.photo_url 
-            : "https://icon-library.com/images/no-picture-available-icon/no-picture-available-icon-20.jpg";
+   container.innerHTML = data
+  .map(c => {
+    const photo = c.photo_url 
+      ? c.photo_url 
+      : "https://icon-library.com/images/no-picture-available-icon/no-picture-available-icon-20.jpg";
 
-        return `
-        <div class="cl-card">
-          <img src="${photo}" class="cl-photo">
+    return `
+      <div class="cl-card">
 
-          <div class="cl-info-box">
-            <h3>${c.name}</h3>
-            <p><b>Gender:</b> ${c.gender}</p>
-            <p><b>Aadhar:</b> ${c.aadhar}</p>
-            <p><b>Phone:</b> ${c.phone || "N/A"}</p>
-            <p><b>Station:</b> ${c.station}</p>
-            <p><b>Division:</b> ${c.division}</p>
-            <p><b>Date of Joining:</b> ${c.doj}</p>
-            <p><b>Date of Birth:</b> ${c.dob}</p>
-            <p><b>Wages:</b> ${c.wages}</p>
-            <p><b>Nominee:</b> ${c.nominee} (${c.relation})</p>
-          </div>
-        </div>`;
-      })
-      .join("");
+        <img src="${photo}" class="cl-photo">
+
+        <div class="cl-name">${c.name}</div>
+
+        <div class="cl-info-box">
+
+          <p><b>Gender:</b> ${c.gender}</p>
+          <p><b>Aadhar:</b> ${c.aadhar}</p>
+          <p><b>Phone:</b> ${c.phone || "N/A"}</p>
+
+          <p><b>Station:</b> ${c.station}</p>
+          <p><b>Division:</b> ${c.division}</p>
+
+          <p><b>Date of Joining:</b> ${c.doj}</p>
+          <p><b>Date of Birth:</b> ${c.dob}</p>
+
+          <p><b>Wages:</b> ${c.wages}</p>
+          <p><b>Nominee:</b> ${c.nominee} (${c.relation})</p>
+
+        </div>
+      </div>
+    `;
+  })
+  .join("");
+
   } catch (err) {
     console.error(err);
     container.innerHTML = "<p style='color:red'>Error fetching CL Bio Data.</p>";
@@ -1187,6 +1196,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
