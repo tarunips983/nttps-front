@@ -596,8 +596,8 @@ main {
   </header>
 
   <div id="subNavBar">
-  <button class="subnav-btn" onclick="showMainView('progress')">📅 Daily Progress</button>
   <button class="subnav-btn" onclick="showMainView('pdf')">📄 PDF's Records</button>
+  <button class="subnav-btn" onclick="showMainView('progress')">📅 Daily Progress</button>
   <button class="subnav-btn" onclick="showMainView('clbiodata')">👥 CL's Bio Data</button>
 </div>
 
@@ -838,16 +838,16 @@ main {
   
   if (viewName === "pdf") {
     pdfView.style.display = "flex";
-    document.querySelector("#subNavBar button:nth-child(2)").classList.add("active");
+    document.querySelector("#subNavBar button:nth-child(1)").classList.add("active");
   }
 
   if (viewName === "progress") {
     progressView.style.display = "flex";
-    document.querySelector("#subNavBar button:nth-child(3)").classList.add("active");
+    document.querySelector("#subNavBar button:nth-child(2)").classList.add("active");
   }
   if (viewName === "clbiodata") {
     clbiodata.style.display = "block";   // FIXED HERE
-    document.querySelector("#subNavBar button:nth-child(1)").classList.add("active");
+    document.querySelector("#subNavBar button:nth-child(3)").classList.add("active");
     renderCLBioData();
   }
 };
@@ -1235,6 +1235,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
