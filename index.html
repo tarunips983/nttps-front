@@ -53,6 +53,44 @@ header h1 { margin:0; font-size:22px; }
     grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); 
     gap:20px; 
 }
+/* ============================
+   CL BIO DATA CARD STYLES
+============================ */
+
+.cl-card {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+    display: flex;
+    gap: 15px;
+    transition: all .2s ease;
+}
+
+.cl-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+}
+
+.cl-photo {
+    width: 90px;
+    height: 90px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 1px solid #ccc;
+}
+
+.cl-info-box h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #232f3e;
+}
+
+.cl-info-box p {
+    margin: 3px 0;
+    font-size: 0.9rem;
+    color: #333;
+}
 
 /* Card Layout Fix */
 .product { 
@@ -743,7 +781,6 @@ main { width: 100%; height: calc(100vh - 67px); display: flex; }
   if(viewName === "clbiodata"){
       document.getElementById("clbiodata-container").style.display = "flex";
       document.querySelector("#subNavBar button:nth-child(1)").classList.add("active");
-      renderCLBioData();
   }
   if(viewName === "pdf"){
       pdfView.style.display = "flex";
@@ -945,6 +982,55 @@ main { width: 100%; height: calc(100vh - 67px); display: flex; }
       setTimeout(()=>{ w.print(); w.close(); },250);
     };
 
+// =========================================
+// REAL CL BIO DATA FETCH + CARD RENDER
+// =========================================
+
+async function renderCLBioData() {
+  const container = document.getElementById("clBioGrid");
+  container.innerHTML = "<p>Loading CL data...</p>";
+
+  try {
+    const res = await fetch(`${SERVER_URL}/cl`);
+    const data = await res.json();
+
+    if (!data.length) {
+      container.innerHTML = "<p>No CL Bio Data found.</p>";
+      return;
+    }
+
+    container.innerHTML = data
+      .map(c => {
+        const photo = c.photo_url 
+            ? c.photo_url 
+            : "https://icon-library.com/images/no-picture-available-icon/no-picture-available-icon-20.jpg";
+
+        return `
+        <div class="cl-card">
+          <img src="${photo}" class="cl-photo">
+
+          <div class="cl-info-box">
+            <h3>${c.name}</h3>
+            <p><b>Gender:</b> ${c.gender}</p>
+            <p><b>Aadhar:</b> ${c.aadhar}</p>
+            <p><b>Phone:</b> ${c.phone || "N/A"}</p>
+            <p><b>Station:</b> ${c.station}</p>
+            <p><b>Division:</b> ${c.division}</p>
+            <p><b>Date of Joining:</b> ${c.doj}</p>
+            <p><b>Date of Birth:</b> ${c.dob}</p>
+            <p><b>Wages:</b> ${c.wages}</p>
+            <p><b>Nominee:</b> ${c.nominee} (${c.relation})</p>
+          </div>
+        </div>`;
+      })
+      .join("");
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = "<p style='color:red'>Error fetching CL Bio Data.</p>";
+  }
+}
+
+    
     // password modal helpers
     window.openPasswordModal = function(){ document.getElementById('passwordModal').style.display='flex'; document.getElementById('usernameInput').focus(); }
     window.closePasswordModal = function(){ document.getElementById('passwordModal').style.display='none'; document.getElementById('usernameInput').value=''; document.getElementById('passwordInput').value=''; }
@@ -1017,59 +1103,7 @@ window.toggleMenu = function () {
       document.getElementById('inlineRightBar')?.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-   // ===========================
-// GLOBAL: CL BIO DATA RENDER
-// ===========================
-function renderCLBioData() {
-  const sampleCLdata = [
-    {
-      photo: "photos/samprasad.jpg",
-      name: "N. Sam Prasad",
-      gender: "Male",
-      aadhar: "815518888184",
-      phone: "6302469484",
-      station: "TM&CAM Stage-V",
-      division: "SD-I&II",
-      doj: "05.10.2007",
-      dob: "10.09.1975",
-      wages: "23,030.00",
-      nominee: "N. Sunitha",
-      relation: "Wife"
-    }
-  ];
 
-  const container = document.getElementById("clBioGrid");
-
-  container.innerHTML = sampleCLdata.map(c => `
-  <div style="
-    background:white;
-    padding:15px;
-    border-radius:12px;
-    box-shadow:0 3px 10px rgba(0,0,0,0.15);
-    line-height:1.6;
-    display:flex;
-    gap:15px;
-    align-items:flex-start;
-  ">
-    
-    <img src="${c.photo || 'default-user.png'}" 
-         style="width:90px;height:90px;border-radius:10px;object-fit:cover;border:1px solid #ccc;">
-    <div>
-      <h3 style="margin-top:0">${c.name}</h3>
-      <p><strong>Gender:</strong> ${c.gender}</p>
-      <p><strong>Aadhar:</strong> ${c.aadhar}</p>
-      <p><strong>Phone:</strong> ${c.phone}</p>
-      <p><strong>Station:</strong> ${c.station}</p>
-      <p><strong>Division:</strong> ${c.division}</p>
-      <p><strong>Date of Joining:</strong> ${c.doj}</p>
-      <p><strong>Date of Birth:</strong> ${c.dob}</p>
-      <p><strong>Wages:</strong> ${c.wages}</p>
-      <p><strong>Nominee:</strong> ${c.nominee} (${c.relation})</p>
-    </div>
-
-    </div>
-  `).join("");
-}
 
 function applyUserSettings() {
     const dark = localStorage.getItem("darkMode") === "true";
@@ -1131,6 +1165,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
