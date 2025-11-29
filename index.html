@@ -822,13 +822,13 @@ main {
   // hide all
   pdfView.style.display = "none";
   progressView.style.display = "none";
-  document.getElementById("clbiodata-container").style.display = "none";
+  clbiodata.style.display = "none";
 
   // remove active states
   document.querySelectorAll(".subnav-btn").forEach(btn => btn.classList.remove("active"));
 
   if (viewName === "clbiodata") {
-    document.getElementById("clbiodata-container").style.display = "block";
+    clbiodata.style.display = "flex";
     document.querySelector("#subNavBar button:nth-child(1)").classList.add("active");
     renderCLBioData();   // ← NOW CALLS THE REAL FUNCTION
   }
@@ -1224,6 +1224,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
