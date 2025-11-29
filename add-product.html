@@ -184,6 +184,109 @@
     margin-bottom: 15px; /* Space before table */
 }
 
+/* Modern CL Records Table */
+#clTableContainer {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0px 2px 10px rgba(0,0,0,0.08);
+    overflow-x: auto;
+}
+
+#clTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+#clTable thead tr {
+    background: #007bff;
+    color: white;
+    text-align: left;
+    font-weight: bold;
+}
+
+#clTable th, #clTable td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+#clTable tr:hover {
+    background: #f5f8ff;
+}
+
+/* Checkbox column */
+#clTable th:first-child, 
+#clTable td:first-child {
+    text-align: center;
+    width: 40px;
+}
+
+/* S.No column */
+#clTable td:nth-child(2) {
+    width: 50px;
+    font-weight: bold;
+}
+
+/* Buttons */
+.edit-btn, .delete-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #fff;
+    transition: 0.2s ease;
+}
+
+.edit-btn {
+    background: #28a745;
+}
+
+.edit-btn:hover {
+    background: #1e7e34;
+}
+
+.delete-btn {
+    background: #dc3545;
+}
+
+.delete-btn:hover {
+    background: #b52a36;
+}
+
+/* Top buttons */
+#clActions {
+    margin: 15px 0;
+}
+
+#clActions .top-btn {
+    padding: 7px 14px;
+    font-size: 14px;
+    background: #0056d2;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+#clActions .top-btn:hover {
+    background: #003e9c;
+}
+
+/* No photo image */
+.default-photo {
+    width: 45px;
+    height: 45px;
+    border-radius: 5px;
+    object-fit: cover;
+    border: 1px solid #ccc;
+}
+
+
+        
 /* Style for each group of buttons */
 .control-group {
     display: flex;
@@ -621,32 +724,34 @@
 
     <h3>All CL Records</h3>
 
-<div style="margin-bottom:10px;">
-    <button class="btn btn-primary" onclick="editSelected()">Edit</button>
-    <button class="btn btn-danger" onclick="deleteSelected()">Delete</button>
+<div id="clActions">
+    <button class="top-btn" onclick="editSelected()">Edit</button>
+    <button class="top-btn" onclick="deleteSelected()">Delete</button>
 </div>
 
-<table id="clTable" class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll()"></th>
-            <th>Sl.No</th>
-            <th>Name</th>
-            <th>Gender</th>
-            <th>Aadhar</th>
-            <th>Phone</th>
-            <th>Station</th>
-            <th>Division</th>
-            <th>Date of Joining</th>
-            <th>Date of Birth</th>
-            <th>Wages</th>
-            <th>Nominee</th>
-            <th>Relation</th>
-            <th>Photo</th>
-        </tr>
-    </thead>
-    <tbody id="clTableBody"></tbody>
-</table>
+<div id="clTableContainer">
+    <table id="clTable">
+        <thead>
+            <tr>
+                <th><input type="checkbox" onclick="toggleSelectAll(this)"></th>
+                <th>S.No</th>
+                <th>Name</th>
+                <th>Gender</th>
+                <th>Aadhar</th>
+                <th>Phone</th>
+                <th>Station</th>
+                <th>Division</th>
+                <th>Date of Joining</th>
+                <th>Date of Birth</th>
+                <th>Wages</th>
+                <th>Nominee</th>
+                <th>Relation</th>
+                <th>Photo</th>
+            </tr>
+        </thead>
+        <tbody id="clTableBody"></tbody>
+    </table>
+</div>
 
         <!-- ================= CONFIRM MODAL (REQUIRED) ================= -->
 <div id="confirmModal" class="modal-overlay">
@@ -781,6 +886,10 @@ async function loadCLData() {
     tbody.innerHTML = "";
 
     data.forEach((cl, index) => {
+        const photo = cl.photo_url
+            ? `<img src="${cl.photo_url}" class="default-photo">`
+            : `<img src="https://icon-library.com/images/no-picture-available-icon/no-picture-available-icon-20.jpg" class="default-photo">`;
+
         tbody.innerHTML += `
             <tr>
                 <td><input type="checkbox" class="clSelect" data-id="${cl.id}"></td>
@@ -796,12 +905,11 @@ async function loadCLData() {
                 <td>${cl.wages}</td>
                 <td>${cl.nominee}</td>
                 <td>${cl.relation}</td>
-                <td>${cl.photo_url ? `<img src="${cl.photo_url}" height="40">` : "No Photo"}</td>
+                <td>${photo}</td>
             </tr>
         `;
     });
 }
-
 
 function toggleSelectAll() {
     const checked = document.getElementById("selectAll").checked;
@@ -2125,6 +2233,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
