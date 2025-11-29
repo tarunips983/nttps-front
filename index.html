@@ -889,7 +889,8 @@ if (listEnabled) {
 
     const listBody = document.getElementById("listBody");
 
-    listBody.innerHTML = records.map(r => `
+    listBody.innerHTML = records
+    .map((r, i) => `
         <tr class="list-row" style="border-bottom:1px solid #eee; animation-delay: ${i * 0.05}s">
             <td style="padding:10px;border:1px solid #ddd;text-align:center;">
                 <img src="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg"
@@ -1400,6 +1401,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
