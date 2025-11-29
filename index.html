@@ -844,46 +844,65 @@ main {
     const listEnabled = localStorage.getItem("listView") === "true";
 
     // ========= 🟦 LIST VIEW MODE ========
-    if (listEnabled) {
-        container.style.display = "block";  // full width
-        container.innerHTML = `
-            <table style="width:100%;border-collapse:collapse;background:white;border-radius:10px;overflow:hidden;">
-                <thead>
-                    <tr style="background:#007bff;color:white;">
-                        <th style="padding:10px;">Logo</th>
-                        <th style="padding:10px;">Name</th>
-                        <th style="padding:10px;">PR No</th>
-                        <th style="padding:10px;">Sub Div</th>
-                        <th style="padding:10px;">Type</th>
-                        <th style="padding:10px;">Amount</th>
-                        <th style="padding:10px;">Send To</th>
-                    </tr>
-                </thead>
-                <tbody id="listBody"></tbody>
-            </table>
-        `;
+    // ========= 🟦 LIST VIEW MODE ========
+if (listEnabled) {
+    container.style.display = "block";
+    container.innerHTML = `
+        <table style="width:100%;border-collapse:collapse;background:white;border-radius:10px;overflow:hidden;">
+            <thead>
+                <tr style="background:#007bff;color:white;">
+                    <th style="padding:10px;">Logo</th>
+                    <th style="padding:10px;">Name</th>
+                    <th style="padding:10px;">PR No</th>
+                    <th style="padding:10px;">Sub Div</th>
+                    <th style="padding:10px;">Type</th>
+                    <th style="padding:10px;">Amount</th>
+                    <th style="padding:10px;">Send To</th>
+                    <th style="padding:10px;">Action</th>
+                </tr>
+            </thead>
+            <tbody id="listBody"></tbody>
+        </table>
+    `;
 
-        const listBody = document.getElementById("listBody");
+    const listBody = document.getElementById("listBody");
 
-        listBody.innerHTML = records.map(r => `
-            <tr style="border-bottom:1px solid #eee;">
-                <td style="padding:8px;text-align:center;">
-                    <img src="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg"
-                         style="height:40px;border-radius:4px;">
-                </td>
-                <td style="padding:10px;">${r.workName}</td>
-                <td style="padding:10px;">${r.prNo}</td>
-                <td style="padding:10px;">${r.subDivision}</td>
-                <td style="padding:10px;">${r.recordType}</td>
-                <td style="padding:10px;font-weight:bold;color:green;">
-                    ₹ ${(parseFloat(r.amount) || 0).toLocaleString('en-IN')}
-                </td>
-                <td style="padding:10px;">${r.sendTo}</td>
-            </tr>
-        `).join("");
+    listBody.innerHTML = records.map(r => `
+        <tr style="border-bottom:1px solid #eee;">
+            <td style="padding:8px;text-align:center;">
+                <img src="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg"
+                     style="height:40px;border-radius:4px;">
+            </td>
+            <td style="padding:10px;">${r.workName}</td>
+            <td style="padding:10px;">${r.prNo}</td>
+            <td style="padding:10px;">${r.subDivision}</td>
+            <td style="padding:10px;">${r.recordType}</td>
+            <td style="padding:10px;font-weight:bold;color:green;">
+                ₹ ${(parseFloat(r.amount) || 0).toLocaleString('en-IN')}
+            </td>
+            <td style="padding:10px;">${r.sendTo}</td>
 
-        return;
-    }
+            <!-- ⭐ VIEW PDF BUTTON ⭐ -->
+            <td style="padding:10px;text-align:center;">
+                <button 
+                    onclick='showPDF(${JSON.stringify(r).replace(/'/g,"&apos;")})'
+                    style="
+                        background:#007bff;
+                        color:white;
+                        border:none;
+                        padding:6px 12px;
+                        border-radius:6px;
+                        cursor:pointer;
+                        font-weight:bold;
+                    ">
+                    View PDF
+                </button>
+            </td>
+        </tr>
+    `).join("");
+
+    return;
+}
 
     // ========= 🟩 CARD VIEW MODE (default) =========
     container.style.display = "grid";
@@ -1359,6 +1378,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
