@@ -819,7 +819,7 @@ main {
 
     // Show main view
    window.showMainView = function(viewName){
-  
+
   // hide all
   pdfView.style.display = "none";
   progressView.style.display = "none";
@@ -829,19 +829,22 @@ main {
   document.querySelectorAll(".subnav-btn").forEach(btn => btn.classList.remove("active"));
 
   if (viewName === "clbiodata") {
-    clbiodata.style.display = "flex";
+    clbiodata.style.display = "block";   // FIXED HERE
     document.querySelector("#subNavBar button:nth-child(1)").classList.add("active");
-    renderCLBioData();   // ← NOW CALLS THE REAL FUNCTION
+    renderCLBioData();
   }
-  if(viewName === "pdf"){
-      pdfView.style.display = "flex";
-      document.querySelector("#subNavBar button:nth-child(2)").classList.add("active");
+
+  if (viewName === "pdf") {
+    pdfView.style.display = "flex";
+    document.querySelector("#subNavBar button:nth-child(2)").classList.add("active");
   }
-  if(viewName === "progress"){
-      progressView.style.display = "flex";
-      document.querySelector("#subNavBar button:nth-child(3)").classList.add("active");
+
+  if (viewName === "progress") {
+    progressView.style.display = "flex";
+    document.querySelector("#subNavBar button:nth-child(3)").classList.add("active");
   }
 };
+
 
     // filtering & accordion
     function clearPdfNavActive(){
@@ -1225,6 +1228,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
