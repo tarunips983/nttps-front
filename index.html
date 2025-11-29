@@ -495,6 +495,43 @@ main {
     #inlineSnapshotFrame { padding:10px; }
     table th, table td { font-size:0.75rem !important; padding:6px !important; }
 }
+    /* Left-bar smooth fade + slide-in animation */
+.left-bar {
+    animation: leftbarFade 0.35s ease;
+}
+
+@keyframes leftbarFade {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+/* Daily Progress date buttons restore animations */
+.date-list-item {
+    transition: all 0.25s ease-in-out;
+}
+
+.date-list-item:hover {
+    background: #0056b3;
+    transform: translateX(5px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+/* Print button style */
+.print-btn, #printBtn, button#print {
+    background: #007bff;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: 0.25s;
+}
+
+.print-btn:hover, #printBtn:hover, button#print:hover {
+    background: #0056b3;
+    transform: scale(1.05);
+}
+
 </style>
 
 </head>
@@ -1162,6 +1199,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
