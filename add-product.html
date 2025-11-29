@@ -620,37 +620,33 @@
     <hr>
 
     <h3>All CL Records</h3>
-    <table>
-        <thead>
+
+<div style="margin-bottom:10px;">
+    <button class="btn btn-primary" onclick="editSelected()">Edit</button>
+    <button class="btn btn-danger" onclick="deleteSelected()">Delete</button>
+</div>
+
+<table id="clTable" class="table table-bordered table-striped">
+    <thead>
         <tr>
-        <th>Name</th>
-        <th>Gender</th>
-        <th>Aadhar</th>
-        <th>Phone</th>
-        <th>Station</th>
-        <th>Division</th>
-        <th>Date of Joining</th>
-        <th>Date of Birth</th>
-        <th>Wages</th>
-        <th>Nominee</th>
-        <th>Relation</th>
-        <th>Photo</th>
-        <th>Actions</th>
+            <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll()"></th>
+            <th>Sl.No</th>
+            <th>Name</th>
+            <th>Gender</th>
+            <th>Aadhar</th>
+            <th>Phone</th>
+            <th>Station</th>
+            <th>Division</th>
+            <th>Date of Joining</th>
+            <th>Date of Birth</th</th>
+            <th>Wages</th>
+            <th>Nominee</th>
+            <th>Relation</th>
+            <th>Photo</th>
         </tr>
     </thead>
-        <tbody id="clTableBody"></tbody>
-    </table>
-</div>
-    <div id="confirmModal" class="modal-overlay">
-        <div id="confirmModalContent">
-            <h3 id="confirmTitle">Are you sure?</h3>
-            <p id="confirmMessage">This action cannot be undone.</p>
-            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
-                <button id="confirmBtnCancel" class="small btn-clear">Cancel</button>
-                <button id="confirmBtnOk" class="small delete-btn">Confirm</button>
-            </div>
-        </div>
-    </div>
+    <tbody id="clTableBody"></tbody>
+</table>
 
     <div id="toastContainer"></div>
 
@@ -715,7 +711,7 @@ async function authFetch(url, options = {}) {
     else if (name === 'cl') {
         document.getElementById('clPanel').classList.add('active');
         document.getElementById('tabCL').classList.add('active');
-        loadCLData();
+        ;
     }
 }
 
@@ -758,59 +754,85 @@ document.getElementById("clForm").addEventListener("submit", async function(e) {
     }
 });
         
-async function loadCLData() {
-    const res = await authFetch(`${API}/cl`);
-    const data = await res.json();
+function loadCLData() {
+    fetch(`${API}/cl`)
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.getElementById("clTableBody");
+            tbody.innerHTML = "";
 
-    const tbody = document.getElementById("clTableBody");
-    tbody.innerHTML = "";
+            data.forEach((cl, index) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><input type="checkbox" class="clSelect" data-id="${cl.id}"></td>
+                        <td>${index + 1}</td>
+                        <td>${cl.name}</td>
+                        <td>${cl.gender}</td>
+                        <td>${cl.aadhar}</td>
+                        <td>${cl.phone}</td>
+                        <td>${cl.station}</td>
+                        <td>${cl.division}</td>
+                        <td>${cl.doj}</td>
+                        <td>${cl.dob}</td>
+                        <td>${cl.wages}</td>
+                        <td>${cl.nominee}</td>
+                        <td>${cl.relation}</td>
+                        <td>${cl.photo_url ? `<img src="${cl.photo_url}" height="40">` : "No Photo"}</td>
+                    </tr>
+                `;
+            });
+        });
+}
 
-    data.forEach(cl => {
+function toggleSelectAll() {
+    const checked = document.getElementById("selectAll").checked;
+    document.querySelectorAll(".clSelect").forEach(ch => ch.checked = checked);
+}
 
-        tbody.innerHTML += `
-            <tr>
-                <td>${cl.name || ""}</td>
-                <td>${cl.gender || ""}</td>
-                <td>${cl.aadhar || ""}</td>
-                <td>${cl.phone || ""}</td>
-                <td>${cl.station || ""}</td>
-                <td>${cl.division || ""}</td>
-                <td>${cl.doj || ""}</td>
-                <td>${cl.dob || ""}</td>
-                <td>${cl.wages || ""}</td>
-                <td>${cl.nominee || ""}</td>
-                <td>${cl.relation || ""}</td>
-                <td>
-  ${cl.photo_url
-    ? `<img src="${cl.photo_url}" width="50" height="50" style="border-radius:6px; object-fit:cover;">`
-    : "No Photo"
-  }
-</td>
-                <td>
-                    <button class="edit-btn" onclick='editCL(${JSON.stringify(cl)})'>Edit</button>
-                    <button class="delete-btn" onclick='deleteCL(${cl.id})'>Delete</button>
-                </td>
-            </tr>
-        `;
+function getSelectedIds() {
+    const ids = [];
+    document.querySelectorAll(".clSelect:checked").forEach(ch => {
+        ids.push(ch.getAttribute("data-id"));
     });
+    return ids;
 }
-function editCL(cl) {
-    document.getElementById("clId").value = cl.id;
-    document.getElementById("clName").value = cl.name;
-    document.getElementById("clGender").value = cl.gender;
-    document.getElementById("clAadhar").value = cl.aadhar;
-    document.getElementById("clPhone").value = cl.phone;
-    document.getElementById("clStation").value = cl.station;
-    document.getElementById("clDivision").value = cl.division;
-    document.getElementById("clDoj").value = cl.doj;
-    document.getElementById("clDob").value = cl.dob;
-    document.getElementById("clWages").value = cl.wages;
-    document.getElementById("clNominee").value = cl.nominee;
-    document.getElementById("clRelation").value = cl.relation;
 
-    // Save old photo URL
-    document.getElementById("clPhoto").dataset.old = cl.photo || "";
+        
+        
+function editSelected() {
+    const ids = getSelectedIds();
+
+    if (ids.length !== 1) {
+        alert("Select exactly ONE record to edit.");
+        return;
+    }
+
+    const id = ids[0];
+
+    fetch(`${API}/cl`)
+        .then(res => res.json())
+        .then(data => {
+            const cl = data.find(x => x.id == id);
+
+            if (!cl) return alert("Record not found");
+
+            document.getElementById("clId").value = cl.id;
+            document.getElementById("name").value = cl.name;
+            document.getElementById("gender").value = cl.gender;
+            document.getElementById("aadhar").value = cl.aadhar;
+            document.getElementById("phone").value = cl.phone;
+            document.getElementById("station").value = cl.station;
+            document.getElementById("division").value = cl.division;
+            document.getElementById("doj").value = cl.doj;
+            document.getElementById("dob").value = cl.dob;
+            document.getElementById("wages").value = cl.wages;
+            document.getElementById("nominee").value = cl.nominee;
+            document.getElementById("relation").value = cl.relation;
+
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        });
 }
+
 
         
         /* ----------------- Toast Notifications ----------------- */
@@ -1989,27 +2011,22 @@ loadedSnapshotDate = null;
             }
         }
 
-async function deleteCL(id) {
-    showConfirm("Delete this CL record permanently?", async () => {
-        try {
-            const res = await authFetch(`${API}/cl/${id}`, {
-                method: "DELETE"
-            });
+function deleteSelected() {
+    const ids = getSelectedIds();
 
-            const data = await res.json();
+    if (ids.length === 0) {
+        alert("Select at least one record to delete.");
+        return;
+    }
 
-            if (data.success) {
-                showToast("CL record deleted");
-                loadCLData();
-            } else {
-                showToast("Delete failed", true);
-            }
-        } catch (err) {
-            console.error(err);
-            showToast("Server error", true);
-        }
+    if (!confirm("Delete selected CL records?")) return;
+
+    ids.forEach(id => {
+        authFetch(`${API}/cl/${id}`, { method: "DELETE" })
+            .then(() => loadCLData());
     });
 }
+
 
         
         /* --- Collapsible Form Logic --- */
@@ -2090,6 +2107,7 @@ async function deleteCL(id) {
     </script></body>
 
 </html>
+
 
 
 
