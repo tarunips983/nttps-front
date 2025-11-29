@@ -861,14 +861,46 @@ main {
         `;
       }).join("");
     }
+    
+//search function
+    document.getElementById("searchInput").addEventListener("input", (e) => {
+    const key = e.target.value.toLowerCase();
 
-    // search
-    document.getElementById("searchInput").addEventListener("input", e=>{
-      showMainView('pdf');
-      const key = e.target.value.toLowerCase();
-      const filtered = allRecords.filter(r => ((r.workName||'').toLowerCase().includes(key) || (r.prNo||'').toLowerCase().includes(key) || (r.sendTo||'').toLowerCase().includes(key)));
-      renderRecords(filtered);
-    });
+    /* ---------------------
+       1️⃣ PDF SEARCH
+    ----------------------*/
+    if (pdfView.style.display !== "none") {
+        const filtered = allRecords.filter(r =>
+            (r.workName || "").toLowerCase().includes(key) ||
+            (r.prNo || "").toLowerCase().includes(key) ||
+            (r.sendTo || "").toLowerCase().includes(key)
+        );
+        renderRecords(filtered);
+    }
+
+    /* ---------------------
+       2️⃣ DAILY PROGRESS SEARCH (DATES)
+    ----------------------*/
+    if (progressView.style.display !== "none") {
+        const allButtons = document.querySelectorAll(".date-list-item");
+        allButtons.forEach(btn => {
+            const txt = btn.textContent.toLowerCase();
+            btn.style.display = txt.includes(key) ? "block" : "none";
+        });
+    }
+
+    /* ---------------------
+       3️⃣ CL BIO SEARCH
+    ----------------------*/
+    if (clbiodata.style.display !== "none") {
+        const cards = document.querySelectorAll("#clBioGrid .cl-card");
+        cards.forEach(card => {
+            const text = card.textContent.toLowerCase();
+            card.style.display = text.includes(key) ? "block" : "none";
+        });
+    }
+});
+
 
     // Show main view
    window.showMainView = function(viewName){
@@ -1281,6 +1313,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
