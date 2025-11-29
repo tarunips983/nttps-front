@@ -122,6 +122,11 @@
         </select>
     </div>
 
+    <div class="setting-item">
+    <span>List View (instead of Cards)</span>
+    <input type="checkbox" id="listViewToggle">
+</div>
+
     <!-- GRID COLUMNS -->
     <div class="setting-item">
         <span>Grid Columns</span>
@@ -183,6 +188,9 @@ function applySavedSettings() {
     document.getElementById("cardSize").value =
         localStorage.getItem("cardSize") || "normal";
 
+    document.getElementById("listViewToggle").checked =
+    localStorage.getItem("listView") === "true";
+
     // PDF Grid Columns
     document.getElementById("gridCols").value =
         localStorage.getItem("gridColumns") || "3";
@@ -203,6 +211,9 @@ document.getElementById("darkModeToggle").onchange = (e) =>
 document.getElementById("cardSize").onchange = (e) =>
     saveSetting("cardSize", e.target.value);
 
+    document.getElementById("listViewToggle").onchange = (e) =>
+    saveSetting("listView", e.target.checked);
+
 document.getElementById("gridCols").onchange = (e) =>
     saveSetting("gridColumns", e.target.value);
 
@@ -222,3 +233,4 @@ function resetSettings() {
 
 </body>
 </html>
+
