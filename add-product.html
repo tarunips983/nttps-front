@@ -769,35 +769,39 @@ document.getElementById("clForm").addEventListener("submit", async function(e) {
     }
 });
         
-function loadCLData() {
-    fetch(`${API}/cl`)
-        .then(res => res.json())
-        .then(data => {
-            const tbody = document.getElementById("clTableBody");
-            tbody.innerHTML = "";
+async function loadCLData() {
+    const res = await authFetch(`${API}/cl`);
+    if (!res.ok) {
+        console.error("Failed loading CL data");
+        return;
+    }
 
-            data.forEach((cl, index) => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td><input type="checkbox" class="clSelect" data-id="${cl.id}"></td>
-                        <td>${index + 1}</td>
-                        <td>${cl.name}</td>
-                        <td>${cl.gender}</td>
-                        <td>${cl.aadhar}</td>
-                        <td>${cl.phone}</td>
-                        <td>${cl.station}</td>
-                        <td>${cl.division}</td>
-                        <td>${cl.doj}</td>
-                        <td>${cl.dob}</td>
-                        <td>${cl.wages}</td>
-                        <td>${cl.nominee}</td>
-                        <td>${cl.relation}</td>
-                        <td>${cl.photo_url ? `<img src="${cl.photo_url}" height="40">` : "No Photo"}</td>
-                    </tr>
-                `;
-            });
-        });
+    const data = await res.json();
+    const tbody = document.getElementById("clTableBody");
+    tbody.innerHTML = "";
+
+    data.forEach((cl, index) => {
+        tbody.innerHTML += `
+            <tr>
+                <td><input type="checkbox" class="clSelect" data-id="${cl.id}"></td>
+                <td>${index + 1}</td>
+                <td>${cl.name}</td>
+                <td>${cl.gender}</td>
+                <td>${cl.aadhar}</td>
+                <td>${cl.phone}</td>
+                <td>${cl.station}</td>
+                <td>${cl.division}</td>
+                <td>${cl.doj}</td>
+                <td>${cl.dob}</td>
+                <td>${cl.wages}</td>
+                <td>${cl.nominee}</td>
+                <td>${cl.relation}</td>
+                <td>${cl.photo_url ? `<img src="${cl.photo_url}" height="40">` : "No Photo"}</td>
+            </tr>
+        `;
+    });
 }
+
 
 function toggleSelectAll() {
     const checked = document.getElementById("selectAll").checked;
@@ -2122,6 +2126,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
