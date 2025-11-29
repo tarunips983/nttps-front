@@ -648,6 +648,21 @@
     <tbody id="clTableBody"></tbody>
 </table>
 
+        <!-- ================= CONFIRM MODAL (REQUIRED) ================= -->
+<div id="confirmModal" class="modal-overlay">
+    <div id="confirmModalContent">
+        <h3 id="confirmTitle">Confirm</h3>
+        <p id="confirmMessage"></p>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+            <button id="confirmBtnCancel" class="small btn-clear">Cancel</button>
+            <button id="confirmBtnOk" class="small delete-btn">OK</button>
+        </div>
+    </div>
+</div>
+<!-- ================= END CONFIRM MODAL ================= -->
+
+
     <div id="toastContainer"></div>
 
 
@@ -2107,6 +2122,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
