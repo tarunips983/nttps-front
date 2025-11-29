@@ -781,9 +781,11 @@ async function loadCLData() {
                 <td>${cl.nominee || ""}</td>
                 <td>${cl.relation || ""}</td>
                 <td>
-                    ${cl.photo ? `<img src="${cl.photo}" style="width:60px;height:60px;border-radius:8px;">`
-                               : "No Photo"}
-                </td>
+  ${cl.photo_url
+    ? `<img src="${cl.photo_url}" width="50" height="50" style="border-radius:6px; object-fit:cover;">`
+    : "No Photo"
+  }
+</td>
                 <td>
                     <button class="edit-btn" onclick='editCL(${JSON.stringify(cl)})'>Edit</button>
                     <button class="delete-btn" onclick='deleteCL(${cl.id})'>Delete</button>
@@ -2065,6 +2067,7 @@ loadedSnapshotDate = null;
     </script></body>
 
 </html>
+
 
 
 
