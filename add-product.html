@@ -1988,6 +1988,29 @@ loadedSnapshotDate = null;
                 };
             }
         }
+
+async function deleteCL(id) {
+    showConfirm("Delete this CL record permanently?", async () => {
+        try {
+            const res = await authFetch(`${API}/cl/${id}`, {
+                method: "DELETE"
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                showToast("CL record deleted");
+                loadCLData();
+            } else {
+                showToast("Delete failed", true);
+            }
+        } catch (err) {
+            console.error(err);
+            showToast("Server error", true);
+        }
+    });
+}
+
         
         /* --- Collapsible Form Logic --- */
         const formToggle = document.getElementById('formToggle');
@@ -2067,6 +2090,7 @@ loadedSnapshotDate = null;
     </script></body>
 
 </html>
+
 
 
 
