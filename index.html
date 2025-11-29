@@ -835,12 +835,7 @@ main {
   // remove active states
   document.querySelectorAll(".subnav-btn").forEach(btn => btn.classList.remove("active"));
 
-  if (viewName === "clbiodata") {
-    clbiodata.style.display = "block";   // FIXED HERE
-    document.querySelector("#subNavBar button:nth-child(1)").classList.add("active");
-    renderCLBioData();
-  }
-
+  
   if (viewName === "pdf") {
     pdfView.style.display = "flex";
     document.querySelector("#subNavBar button:nth-child(2)").classList.add("active");
@@ -849,6 +844,11 @@ main {
   if (viewName === "progress") {
     progressView.style.display = "flex";
     document.querySelector("#subNavBar button:nth-child(3)").classList.add("active");
+  }
+  if (viewName === "clbiodata") {
+    clbiodata.style.display = "block";   // FIXED HERE
+    document.querySelector("#subNavBar button:nth-child(1)").classList.add("active");
+    renderCLBioData();
   }
 };
 
@@ -1235,6 +1235,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
