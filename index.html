@@ -613,6 +613,22 @@ main {
 
 /* PDF sidebar open/close animation */
 
+/* Fade + Slide Up */
+@keyframes listFadeUp {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.list-row {
+    animation: listFadeUp 0.45s ease forwards;
+    opacity: 0;
+}
 
 </style>
 
@@ -874,7 +890,7 @@ if (listEnabled) {
     const listBody = document.getElementById("listBody");
 
     listBody.innerHTML = records.map(r => `
-        <tr style="border-bottom:1px solid #eee;">
+        <tr class="list-row" style="border-bottom:1px solid #eee; animation-delay: ${i * 0.05}s">
             <td style="padding:10px;border:1px solid #ddd;text-align:center;">
                 <img src="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg"
                      style="height:40px;border-radius:4px;">
@@ -1384,6 +1400,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
