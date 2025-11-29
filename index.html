@@ -254,7 +254,12 @@ header.dark-mode input::placeholder {
     transition: background 0.2s;
     display: none; /* Hidden on desktop (shows on small screens if you want) */
 }
+    
+footer {
+    margin-top: 40px !important;
+}
 
+    
 /* Show burger always */
 .burger-menu {
     display: block;
@@ -381,7 +386,12 @@ footer {
 @keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
 
 /* Main container & views */
-main { width: 100%; height: calc(100vh - 67px); display: flex; }
+main {
+    width: 100%;
+    min-height: calc(100vh - 67px);
+    display: block;   /* NOT flex */
+}
+
 .main-view { width: 100%; height: 100%; display: flex; flex-direction: row; background: white; display: none; }
 .main-view.active { display: flex; }
 
@@ -818,7 +828,7 @@ main { width: 100%; height: calc(100vh - 67px); display: flex; }
   document.querySelectorAll(".subnav-btn").forEach(btn => btn.classList.remove("active"));
 
   if (viewName === "clbiodata") {
-    document.getElementById("clbiodata-container").style.display = "flex";
+    document.getElementById("clbiodata-container").style.display = "block";
     document.querySelector("#subNavBar button:nth-child(1)").classList.add("active");
     renderCLBioData();   // ← NOW CALLS THE REAL FUNCTION
   }
@@ -1214,6 +1224,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
