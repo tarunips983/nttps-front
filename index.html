@@ -53,6 +53,29 @@ header h1 { margin:0; font-size:22px; }
     grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); 
     gap:20px; 
 }
+
+    /* CL Bio Data View Fix */
+.cl-view {
+    width: 100%;
+    padding: 20px;
+    display: block !important;   /* override flex */
+    background: #f4f4f4;
+}
+
+/* Ensure cards grid stays normal */
+#clBioGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+    width: 100%;
+}
+
+/* Prevent footer overlap */
+footer {
+    position: relative !important;
+    bottom: 0 !important;
+}
+
 /* ============================
    CL BIO DATA CARD STYLES
 ============================ */
@@ -642,7 +665,7 @@ main { width: 100%; height: calc(100vh - 67px); display: flex; }
       </section>
     </div>
     <!-- CL Bio Data View -->
-<div id="clbiodata-container" class="main-view">
+<div id="clbiodata-container" class="cl-view">
   <div style="padding:20px; width:100%;">
     <h2>👥 CL's Bio Data</h2>
 
@@ -1196,6 +1219,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
