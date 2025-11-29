@@ -253,6 +253,8 @@ header.dark-mode input::placeholder { color:#bbb !important; }
     z-index:900;
 }
 
+
+    
 .subnav-btn {
     background:#4a5c70;
     color:white;
@@ -456,21 +458,32 @@ main {
 
     .product img { height:140px !important; }
 
-    .left-bar {
-        position:fixed;
-        top:68px;
-        left:0;
-        transform:translateX(-110%);
-        width:82%;
-        max-width:320px;
-        height:calc(100vh - 68px);
-        background:#f0f4f8;
-        padding:12px;
-        transition:0.28s;
-        z-index:1500;
-        overflow-y:auto;
-    }
-    .left-bar.active { transform:translateX(0); }
+/* --- Smooth Slide + Fade for Sidebar --- */
+.left-bar {
+    position: fixed;
+    top: 68px;
+    left: 0;
+    width: 220px;
+    background: #f0f4f8;
+    height: calc(100vh - 68px);
+    padding: 12px;
+    transform: translateX(-120%);
+    
+    opacity: 0;
+    transition:
+        transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 0.35s ease-in-out;
+  
+    z-index: 1500;
+    overflow-y: auto;
+}
+
+/* Sidebar becomes visible */
+.left-bar.active {
+    transform: translateX(0);
+    opacity: 1;
+}
+
 
     #modalContent {
         width:100% !important;
@@ -1235,6 +1248,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
