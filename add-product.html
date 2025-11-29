@@ -391,6 +391,7 @@
         <div class="tabs">
             <button id="tabPdf" class="tab-btn active" onclick="showPanel('pdf')">PDF Database</button>
             <button id="tabDaily" class="tab-btn" onclick="showPanel('daily')">Daily Work Progress</button>
+            <button id="tabCL" class="tab-btn" onclick="showPanel('cl')">CL Bio Data</button>
         </div>
 
         <div id="pdfPanel" class="panel active">
@@ -568,6 +569,72 @@
         </div>
     </div>
 
+    <div id="clPanel" class="panel">
+    <h2>👷 CL Bio Data Management</h2>
+
+    <form id="clForm" enctype="multipart/form-data">
+        <input type="hidden" id="clId">
+
+        <label>Name</label>
+        <input type="text" id="clName" required>
+
+        <label>Gender</label>
+        <select id="clGender">
+            <option>Male</option>
+            <option>Female</option>
+        </select>
+
+        <label>Aadhar</label>
+        <input type="text" id="clAadhar">
+
+        <label>Phone</label>
+        <input type="text" id="clPhone">
+
+        <label>Station</label>
+        <input type="text" id="clStation">
+
+        <label>Division</label>
+        <input type="text" id="clDivision">
+
+        <label>Date of Joining</label>
+        <input type="text" id="clDoj">
+
+        <label>Date of Birth</label>
+        <input type="text" id="clDob">
+
+        <label>Wages</label>
+        <input type="text" id="clWages">
+
+        <label>Nominee</label>
+        <input type="text" id="clNominee">
+
+        <label>Relation</label>
+        <input type="text" id="clRelation">
+
+        <label>Photo</label>
+        <input type="file" id="clPhoto" accept="image/*">
+
+        <button type="submit" class="primary">Save CL Data</button>
+    </form>
+
+    <hr>
+
+    <h3>All CL Records</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Aadhar</th>
+                <th>Division</th>
+                <th>Photo</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="clTableBody"></tbody>
+    </table>
+</div>
+
+
     <div id="confirmModal" class="modal-overlay">
         <div id="confirmModalContent">
             <h3 id="confirmTitle">Are you sure?</h3>
@@ -619,21 +686,116 @@ async function authFetch(url, options = {}) {
 }
         /* ----------------- Tab switching ----------------- */
         function showPanel(name) {
-            document.getElementById('pdfPanel').classList.remove('active');
-            document.getElementById('dailyPanel').classList.remove('active');
-            document.getElementById('tabPdf').classList.remove('active');
-            document.getElementById('tabDaily').classList.remove('active');
+    // Hide all
+    document.getElementById('pdfPanel').classList.remove('active');
+    document.getElementById('dailyPanel').classList.remove('active');
+    document.getElementById('clPanel').classList.remove('active');
 
-            if (name === 'pdf') {
-                document.getElementById('pdfPanel').classList.add('active');
-                document.getElementById('tabPdf').classList.add('active');
-            } else {
-                document.getElementById('dailyPanel').classList.add('active');
-                document.getElementById('tabDaily').classList.add('active');
-                loadSavedProgress();
-            }
-        }
+    // Reset tab highlights
+    document.getElementById('tabPdf').classList.remove('active');
+    document.getElementById('tabDaily').classList.remove('active');
+    document.getElementById('tabCL').classList.remove('active');
 
+    // Activate correct panel
+    if (name === 'pdf') {
+        document.getElementById('pdfPanel').classList.add('active');
+        document.getElementById('tabPdf').classList.add('active');
+    }
+    else if (name === 'daily') {
+        document.getElementById('dailyPanel').classList.add('active');
+        document.getElementById('tabDaily').classList.add('active');
+        loadSavedProgress();
+    }
+    else if (name === 'cl') {
+        document.getElementById('clPanel').classList.add('active');
+        document.getElementById('tabCL').classList.add('active');
+        loadCLData();
+    }
+}
+
+
+document.getElementById("clForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const formData = new FormData();
+    formData.append("id", document.getElementById("clId").value);
+    formData.append("name", document.getElementById("clName").value);
+    formData.append("gender", document.getElementById("clGender").value);
+    formData.append("aadhar", document.getElementById("clAadhar").value);
+    formData.append("phone", document.getElementById("clPhone").value);
+    formData.append("station", document.getElementById("clStation").value);
+    formData.append("division", document.getElementById("clDivision").value);
+    formData.append("doj", document.getElementById("clDoj").value);
+    formData.append("dob", document.getElementById("clDob").value);
+    formData.append("wages", document.getElementById("clWages").value);
+    formData.append("nominee", document.getElementById("clNominee").value);
+    formData.append("relation", document.getElementById("clRelation").value);
+
+    // If editing → keep previous photo URL
+    const oldPhoto = document.getElementById("clPhoto").dataset.old;
+    if (oldPhoto) formData.append("photoUrl", oldPhoto);
+
+    const file = document.getElementById("clPhoto").files[0];
+    if (file) formData.append("photo", file);
+
+    const res = await authFetch(`${API}/cl`, {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await res.json();
+    if (data.success) {
+        showToast("CL record saved");
+        loadCLData();
+        document.getElementById("clForm").reset();
+        document.getElementById("clId").value = "";
+    }
+});
+        
+async function loadCLData() {
+    const res = await authFetch(`${API}/cl`);
+    const data = await res.json();
+
+    const tbody = document.getElementById("clTableBody");
+    tbody.innerHTML = "";
+
+    data.forEach(cl => {
+        tbody.innerHTML += `
+            <tr>
+                <td>${cl.name}</td>
+                <td>${cl.aadhar}</td>
+                <td>${cl.division}</td>
+                <td>
+                    ${cl.photo ? `<img src="${cl.photo}" style="width:60px;height:60px;border-radius:8px;">`
+                    : "No Photo"}
+                </td>
+                <td>
+                    <button class="edit-btn" onclick='editCL(${JSON.stringify(cl)})'>Edit</button>
+                    <button class="delete-btn" onclick='deleteCL(${cl.id})'>Delete</button>
+                </td>
+            </tr>
+        `;
+    });
+}
+function editCL(cl) {
+    document.getElementById("clId").value = cl.id;
+    document.getElementById("clName").value = cl.name;
+    document.getElementById("clGender").value = cl.gender;
+    document.getElementById("clAadhar").value = cl.aadhar;
+    document.getElementById("clPhone").value = cl.phone;
+    document.getElementById("clStation").value = cl.station;
+    document.getElementById("clDivision").value = cl.division;
+    document.getElementById("clDoj").value = cl.doj;
+    document.getElementById("clDob").value = cl.dob;
+    document.getElementById("clWages").value = cl.wages;
+    document.getElementById("clNominee").value = cl.nominee;
+    document.getElementById("clRelation").value = cl.relation;
+
+    // Save old photo URL
+    document.getElementById("clPhoto").dataset.old = cl.photo || "";
+}
+
+        
         /* ----------------- Toast Notifications ----------------- */
         function showToast(message, isError = false) {
             const container = document.getElementById('toastContainer');
@@ -1888,6 +2050,7 @@ loadedSnapshotDate = null;
     </script></body>
 
 </html>
+
 
 
 
