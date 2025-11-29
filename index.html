@@ -1023,6 +1023,7 @@ window.toggleMenu = function () {
 function renderCLBioData() {
   const sampleCLdata = [
     {
+      photo: "photos/samprasad.jpg"
       name: "N. Sam Prasad",
       gender: "Male",
       aadhar: "815518888184",
@@ -1040,13 +1041,20 @@ function renderCLBioData() {
   const container = document.getElementById("clBioGrid");
 
   container.innerHTML = sampleCLdata.map(c => `
-    <div style="
-      background:white;
-      padding:15px;
-      border-radius:12px;
-      box-shadow:0 3px 10px rgba(0,0,0,0.15);
-      line-height:1.6;
-    ">
+  <div style="
+    background:white;
+    padding:15px;
+    border-radius:12px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.15);
+    line-height:1.6;
+    display:flex;
+    gap:15px;
+    align-items:flex-start;
+  ">
+    
+    <img src="${c.photo || 'default-user.png'}" 
+         style="width:90px;height:90px;border-radius:10px;object-fit:cover;border:1px solid #ccc;">
+    <div>
       <h3 style="margin-top:0">${c.name}</h3>
       <p><strong>Gender:</strong> ${c.gender}</p>
       <p><strong>Aadhar:</strong> ${c.aadhar}</p>
@@ -1057,6 +1065,8 @@ function renderCLBioData() {
       <p><strong>Date of Birth:</strong> ${c.dob}</p>
       <p><strong>Wages:</strong> ${c.wages}</p>
       <p><strong>Nominee:</strong> ${c.nominee} (${c.relation})</p>
+    </div>
+
     </div>
   `).join("");
 }
@@ -1121,6 +1131,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
