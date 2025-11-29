@@ -818,7 +818,7 @@ function getSelectedIds() {
 
         
         
-function editSelected() {
+async function editSelected() {
     const ids = getSelectedIds();
 
     if (ids.length !== 1) {
@@ -828,28 +828,26 @@ function editSelected() {
 
     const id = ids[0];
 
-    fetch(`${API}/cl`)
-        .then(res => res.json())
-        .then(data => {
-            const cl = data.find(x => x.id == id);
+    const res = await authFetch(`${API}/cl`);
+    const data = await res.json();
 
-            if (!cl) return alert("Record not found");
+    const cl = data.find(x => x.id == id);
+    if (!cl) return alert("Record not found");
 
-            document.getElementById("clId").value = cl.id;
-            document.getElementById("name").value = cl.name;
-            document.getElementById("gender").value = cl.gender;
-            document.getElementById("aadhar").value = cl.aadhar;
-            document.getElementById("phone").value = cl.phone;
-            document.getElementById("station").value = cl.station;
-            document.getElementById("division").value = cl.division;
-            document.getElementById("doj").value = cl.doj;
-            document.getElementById("dob").value = cl.dob;
-            document.getElementById("wages").value = cl.wages;
-            document.getElementById("nominee").value = cl.nominee;
-            document.getElementById("relation").value = cl.relation;
+    document.getElementById("clId").value = cl.id;
+    document.getElementById("clName").value = cl.name;
+    document.getElementById("clGender").value = cl.gender;
+    document.getElementById("clAadhar").value = cl.aadhar;
+    document.getElementById("clPhone").value = cl.phone;
+    document.getElementById("clStation").value = cl.station;
+    document.getElementById("clDivision").value = cl.division;
+    document.getElementById("clDoj").value = cl.doj;
+    document.getElementById("clDob").value = cl.dob;
+    document.getElementById("clWages").value = cl.wages;
+    document.getElementById("clNominee").value = cl.nominee;
+    document.getElementById("clRelation").value = cl.relation;
 
-            window.scrollTo({ top: 0, behavior: "smooth" });
-        });
+    window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 
@@ -2122,10 +2120,12 @@ function deleteSelected() {
         setDefaultDate(); 
         loadSavedProgress();
         restoreDraft();
+        loadCLData();
         
     </script></body>
 
 </html>
+
 
 
 
