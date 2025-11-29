@@ -352,7 +352,7 @@ main {
 
 .main-view {
     width:100%;
-    height:100%;
+    height:100vh;
     display:none;
     flex-direction:row;
     background:white;
@@ -912,6 +912,25 @@ if (listEnabled) {
 
     const listBody = document.getElementById("listBody");
 
+// If NO records found → show message
+if (!records || records.length === 0) {
+    listBody.innerHTML = `
+        <tr>
+            <td colspan="8" 
+                style="
+                    padding: 25px;
+                    text-align: center;
+                    font-size: 18px;
+                    color: #888;
+                    font-weight: 500;
+                ">
+                ❌ No Records Found
+            </td>
+        </tr>
+    `;
+    return;
+}
+
     listBody.innerHTML = records
     .map((r, i) => `
         <tr class="list-row" style="border-bottom:1px solid #eee; animation-delay: ${i * 0.05}s">
@@ -950,25 +969,43 @@ if (listEnabled) {
     return;
 }
 
-    // ========= 🟩 CARD VIEW MODE (default) =========
-    container.style.display = "grid";
-    container.innerHTML = records.map(r => {
-        const recordData = JSON.stringify(r).replace(/'/g, "&apos;");
-        return `
-          <div class="product" role="article">
-            <img src="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg"
-                 alt="APGENCO logo" />
-            <div class="product-info">
-              <h3>${summarize(r.workName)}</h3>
-              <p><strong>PR No:</strong> ${r.prNo || 'N/A'}</p>
-              <p><strong>Sub Div:</strong> ${r.subDivision || 'N/A'}</p>
-              <p><strong>Type:</strong> ${r.recordType || 'N/A'}</p>
-            </div>
-            <button class="view-btn" onclick='showPDF(${recordData})'>View PDF</button>
-          </div>
-        `;
-    }).join("");
+   // ========= 🟩 CARD VIEW MODE (default) =========
+container.style.display = "grid";
+
+// If NO records → show message
+if (!records || records.length === 0) {
+    container.innerHTML = `
+        <div style="
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            font-size: 20px;
+            font-weight: 500;
+            color: #777;
+        ">
+            ❌ No Records Found
+        </div>
+    `;
+    return;
 }
+
+container.innerHTML = records.map((r, i) => {
+    const recordData = JSON.stringify(r).replace(/'/g, "&apos;");
+    return `
+      <div class="product" role="article" style="animation-delay:${i * 0.05}s">
+        <img src="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg"
+             alt="APGENCO logo" />
+        <div class="product-info">
+          <h3>${summarize(r.workName)}</h3>
+          <p><strong>PR No:</strong> ${r.prNo || 'N/A'}</p>
+          <p><strong>Sub Div:</strong> ${r.subDivision || 'N/A'}</p>
+          <p><strong>Type:</strong> ${r.recordType || 'N/A'}</p>
+        </div>
+        <button class="view-btn" onclick='showPDF(${recordData})'>View PDF</button>
+      </div>
+    `;
+}).join("");
+
 
     
 //search function
@@ -1432,6 +1469,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
