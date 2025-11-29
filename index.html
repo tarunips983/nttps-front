@@ -839,17 +839,60 @@ main {
     }
 
     // render records
-    function renderRecords(records){
-      const container = document.getElementById("product-list");
-      if(!records || !records.length){
-        container.innerHTML = "<h3 style='text-align:center;color:gray;margin-top:40px;'>No records found.</h3>";
+    function renderRecords(records) {
+    const container = document.getElementById("product-list");
+    const listEnabled = localStorage.getItem("listView") === "true";
+
+    // ========= 🟦 LIST VIEW MODE ========
+    if (listEnabled) {
+        container.style.display = "block";  // full width
+        container.innerHTML = `
+            <table style="width:100%;border-collapse:collapse;background:white;border-radius:10px;overflow:hidden;">
+                <thead>
+                    <tr style="background:#007bff;color:white;">
+                        <th style="padding:10px;">Logo</th>
+                        <th style="padding:10px;">Name</th>
+                        <th style="padding:10px;">PR No</th>
+                        <th style="padding:10px;">Sub Div</th>
+                        <th style="padding:10px;">Type</th>
+                        <th style="padding:10px;">Amount</th>
+                        <th style="padding:10px;">Send To</th>
+                    </tr>
+                </thead>
+                <tbody id="listBody"></tbody>
+            </table>
+        `;
+
+        const listBody = document.getElementById("listBody");
+
+        listBody.innerHTML = records.map(r => `
+            <tr style="border-bottom:1px solid #eee;">
+                <td style="padding:8px;text-align:center;">
+                    <img src="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg"
+                         style="height:40px;border-radius:4px;">
+                </td>
+                <td style="padding:10px;">${r.workName}</td>
+                <td style="padding:10px;">${r.prNo}</td>
+                <td style="padding:10px;">${r.subDivision}</td>
+                <td style="padding:10px;">${r.recordType}</td>
+                <td style="padding:10px;font-weight:bold;color:green;">
+                    ₹ ${(parseFloat(r.amount) || 0).toLocaleString('en-IN')}
+                </td>
+                <td style="padding:10px;">${r.sendTo}</td>
+            </tr>
+        `).join("");
+
         return;
-      }
-      container.innerHTML = records.map(r => {
+    }
+
+    // ========= 🟩 CARD VIEW MODE (default) =========
+    container.style.display = "grid";
+    container.innerHTML = records.map(r => {
         const recordData = JSON.stringify(r).replace(/'/g, "&apos;");
         return `
           <div class="product" role="article">
-            <img src="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg" alt="APGENCO logo" />
+            <img src="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg"
+                 alt="APGENCO logo" />
             <div class="product-info">
               <h3>${summarize(r.workName)}</h3>
               <p><strong>PR No:</strong> ${r.prNo || 'N/A'}</p>
@@ -859,8 +902,9 @@ main {
             <button class="view-btn" onclick='showPDF(${recordData})'>View PDF</button>
           </div>
         `;
-      }).join("");
-    }
+    }).join("");
+}
+
     
 //search function
     document.getElementById("searchInput").addEventListener("input", (e) => {
@@ -1313,6 +1357,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
