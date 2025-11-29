@@ -918,47 +918,6 @@ main { width: 100%; height: calc(100vh - 67px); display: flex; }
           td.removeAttribute('contenteditable');
           td.style.background = 'none';
         });
-
-// Dummy Data Example — you will later connect the real backend
-const sampleCLdata = [
-  {
-    name: "N. Sam Prasad",
-    gender: "Male",
-    aadhar: "815518888184",
-    station: "TM&CAM Stage-V",
-    division: "SD-I&II",
-    doj: "05.10.2007",
-    dob: "10.09.1975",
-    wages: "23,030.00",
-    nominee: "N. Sunitha",
-    relation: "Wife"
-  }
-];
-
-// Render CL Cards
-function renderCLBioData() {
-  const container = document.getElementById("clBioGrid");
-  container.innerHTML = sampleCLdata.map(c => `
-    <div style="
-      background:white;
-      padding:15px;
-      border-radius:12px;
-      box-shadow:0 3px 10px rgba(0,0,0,0.15);
-      line-height:1.6;
-    ">
-      <h3 style="margin-top:0">${c.name}</h3>
-      <p><strong>Gender:</strong> ${c.gender}</p>
-      <p><strong>Aadhar:</strong> ${c.aadhar}</p>
-      <p><strong>Station:</strong> ${c.station}</p>
-      <p><strong>Division:</strong> ${c.division}</p>
-      <p><strong>Date of Joining:</strong> ${c.doj}</p>
-      <p><strong>Date of Birth:</strong> ${c.dob}</p>
-      <p><strong>Wages:</strong> ${c.wages}</p>
-      <p><strong>Nominee:</strong> ${c.nominee} (${c.relation})</p>
-    </div>
-  `).join("");
-}
-
         
         // close the left pane on mobile so user sees the table
         if(window.innerWidth <= 768){
@@ -1058,6 +1017,48 @@ window.toggleMenu = function () {
       document.getElementById('inlineRightBar')?.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
+   // ===========================
+// GLOBAL: CL BIO DATA RENDER
+// ===========================
+function renderCLBioData() {
+  const sampleCLdata = [
+    {
+      name: "N. Sam Prasad",
+      gender: "Male",
+      aadhar: "815518888184",
+      station: "TM&CAM Stage-V",
+      division: "SD-I&II",
+      doj: "05.10.2007",
+      dob: "10.09.1975",
+      wages: "23,030.00",
+      nominee: "N. Sunitha",
+      relation: "Wife"
+    }
+  ];
+
+  const container = document.getElementById("clBioGrid");
+
+  container.innerHTML = sampleCLdata.map(c => `
+    <div style="
+      background:white;
+      padding:15px;
+      border-radius:12px;
+      box-shadow:0 3px 10px rgba(0,0,0,0.15);
+      line-height:1.6;
+    ">
+      <h3 style="margin-top:0">${c.name}</h3>
+      <p><strong>Gender:</strong> ${c.gender}</p>
+      <p><strong>Aadhar:</strong> ${c.aadhar}</p>
+      <p><strong>Station:</strong> ${c.station}</p>
+      <p><strong>Division:</strong> ${c.division}</p>
+      <p><strong>Date of Joining:</strong> ${c.doj}</p>
+      <p><strong>Date of Birth:</strong> ${c.dob}</p>
+      <p><strong>Wages:</strong> ${c.wages}</p>
+      <p><strong>Nominee:</strong> ${c.nominee} (${c.relation})</p>
+    </div>
+  `).join("");
+}
+
 function applyUserSettings() {
     const dark = localStorage.getItem("darkMode") === "true";
 
@@ -1117,6 +1118,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
