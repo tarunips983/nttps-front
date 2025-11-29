@@ -238,6 +238,44 @@ header.dark-mode input::placeholder {
     font-weight:bold; 
     transition: all 0.2s;
 }
+
+/* ===== Sub Navigation Bar (NEW) ===== */
+#subNavBar {
+    width: 100%;
+    background: #ffffff;
+    padding: 12px 0;
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    border-bottom: 1px solid #ddd;
+    position: sticky;
+    top: 67px;   /* just below main header */
+    z-index: 900;
+}
+
+.subnav-btn {
+    background: #4a5c70;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 25px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.subnav-btn:hover {
+    background: #007bff;
+    transform: scale(1.08);
+}
+
+.subnav-btn.active {
+    background: #007bff;
+    color: #fff;
+    box-shadow: inset 0px 2px 6px rgba(0,0,0,0.2);
+}
+
 .product .view-btn:hover { transform: scale(1.05); }
 .view-btn { background:#007bff; color:white; }
 
@@ -464,6 +502,12 @@ main { width: 100%; height: calc(100vh - 67px); display: flex; }
     </div>
   </header>
 
+  <div id="subNavBar">
+  <button class="subnav-btn" onclick="showMainView('clbiodata')">👥 CL's Bio Data</button>
+  <button class="subnav-btn" onclick="showMainView('pdf')">📄 PDF's Records</button>
+  <button class="subnav-btn" onclick="showMainView('progress')">📅 Daily Progress</button>
+</div>
+
   <!-- Mobile toggles (visible on mobile only by CSS) -->
   <button id="mobileFilterBtn" style="display:none;">📂 Filters</button>
   <button id="mobileDailyFilterBtn" style="display:none;">📂 Daily Filters</button>
@@ -539,6 +583,16 @@ main { width: 100%; height: calc(100vh - 67px); display: flex; }
         </div>
       </section>
     </div>
+    <!-- CL Bio Data View -->
+<div id="clbiodata-container" class="main-view">
+  <div style="padding:20px; width:100%;">
+    <h2>CL's Bio Data</h2>
+    <p>Data loading...</p>
+
+    <div id="clBioGrid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:20px; margin-top:20px;"></div>
+  </div>
+</div>
+
   </main>
 
   <!-- PDF Modal -->
@@ -678,32 +732,30 @@ main { width: 100%; height: calc(100vh - 67px); display: flex; }
     });
 
     // Show main view
-    window.showMainView = function(viewName){
-  if(viewName === 'progress'){
-      pdfView.classList.remove('active');
-      progressView.classList.add('active');
-      viewTabPdf.classList.remove('active');
-      viewTabProgress.classList.add('active');
+   window.showMainView = function(viewName){
+  
+  // hide all
+  pdfView.style.display = "none";
+  progressView.style.display = "none";
+  document.getElementById("clbiodata-container").style.display = "none";
 
-      if(window.innerWidth <= 768){
-        mobileFilterBtn.style.display = 'none';
-        mobileDailyFilterBtn.style.display = 'block';
-      }
+  // remove active states
+  document.querySelectorAll(".subnav-btn").forEach(btn => btn.classList.remove("active"));
 
-      loadDailyProgressDates();
-  } 
-  else {   // PDF view
-      pdfView.classList.add('active');
-      progressView.classList.remove('active');
-      viewTabPdf.classList.add('active');
-      viewTabProgress.classList.remove('active');
-
-      if(window.innerWidth <= 768){
-        mobileFilterBtn.style.display = 'block';
-        mobileDailyFilterBtn.style.display = 'none';   // ← THIS HIDES DAILY FILTER BUTTON
-      }
+  if(viewName === "clbiodata"){
+      document.getElementById("clbiodata-container").style.display = "flex";
+      document.querySelector("#subNavBar button:nth-child(1)").classList.add("active");
+      renderCLBioData();
   }
-}
+  if(viewName === "pdf"){
+      pdfView.style.display = "flex";
+      document.querySelector("#subNavBar button:nth-child(2)").classList.add("active");
+  }
+  if(viewName === "progress"){
+      progressView.style.display = "flex";
+      document.querySelector("#subNavBar button:nth-child(3)").classList.add("active");
+  }
+};
 
     // filtering & accordion
     function clearPdfNavActive(){
@@ -869,6 +921,47 @@ main { width: 100%; height: calc(100vh - 67px); display: flex; }
           td.style.background = 'none';
         });
 
+// Dummy Data Example — you will later connect the real backend
+const sampleCLdata = [
+  {
+    name: "N. Sam Prasad",
+    gender: "Male",
+    aadhar: "815518888184",
+    station: "TM&CAM Stage-V",
+    division: "SD-I&II",
+    doj: "05.10.2007",
+    dob: "10.09.1975",
+    wages: "23,030.00",
+    nominee: "N. Sunitha",
+    relation: "Wife"
+  }
+];
+
+// Render CL Cards
+function renderCLBioData() {
+  const container = document.getElementById("clBioGrid");
+  container.innerHTML = sampleCLdata.map(c => `
+    <div style="
+      background:white;
+      padding:15px;
+      border-radius:12px;
+      box-shadow:0 3px 10px rgba(0,0,0,0.15);
+      line-height:1.6;
+    ">
+      <h3 style="margin-top:0">${c.name}</h3>
+      <p><strong>Gender:</strong> ${c.gender}</p>
+      <p><strong>Aadhar:</strong> ${c.aadhar}</p>
+      <p><strong>Station:</strong> ${c.station}</p>
+      <p><strong>Division:</strong> ${c.division}</p>
+      <p><strong>Date of Joining:</strong> ${c.doj}</p>
+      <p><strong>Date of Birth:</strong> ${c.dob}</p>
+      <p><strong>Wages:</strong> ${c.wages}</p>
+      <p><strong>Nominee:</strong> ${c.nominee} (${c.relation})</p>
+    </div>
+  `).join("");
+}
+
+        
         // close the left pane on mobile so user sees the table
         if(window.innerWidth <= 768){
           document.getElementById('inlineLeftBar')?.classList?.remove('active');
@@ -1026,6 +1119,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
