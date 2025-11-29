@@ -778,9 +778,10 @@ main { width: 100%; height: calc(100vh - 67px); display: flex; }
   // remove active states
   document.querySelectorAll(".subnav-btn").forEach(btn => btn.classList.remove("active"));
 
-  if(viewName === "clbiodata"){
-      document.getElementById("clbiodata-container").style.display = "flex";
-      document.querySelector("#subNavBar button:nth-child(1)").classList.add("active");
+  if (viewName === "clbiodata") {
+    document.getElementById("clbiodata-container").style.display = "flex";
+    document.querySelector("#subNavBar button:nth-child(1)").classList.add("active");
+    renderCLBioData();   // ← NOW CALLS THE REAL FUNCTION
   }
   if(viewName === "pdf"){
       pdfView.style.display = "flex";
@@ -1165,6 +1166,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
