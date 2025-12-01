@@ -429,6 +429,29 @@ main {
     position: relative;
     z-index: 1;
 }
+
+    /* Desktop restore */
+@media (min-width: 769px) {
+    .left-bar {
+        position: sticky !important;
+        transform: none !important;
+        opacity: 1 !important;
+        z-index: 1 !important;
+    }
+
+    #mobileFilterBtn,
+    #mobileDailyFilterBtn {
+        display: none !important;
+    }
+}
+#menuOverlay {
+    z-index: 4000 !important;
+}
+
+.dropdown-menu {
+    z-index: 5000 !important;
+}
+
 .dropdown-menu {
     position: absolute;
     z-index: 5000 !important;
@@ -1604,6 +1627,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
