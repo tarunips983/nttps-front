@@ -101,6 +101,14 @@ header h1 { margin: 0; font-size: 22px; }
     gap: 20px;
     width: 100%;
 }
+@media (max-width: 768px) {
+    .nav-right {
+        justify-content: flex-end;
+    }
+    .search-wrapper {
+        flex-grow: 1;
+    }
+}
 
 /* CL Cards */
 .cl-card {
@@ -1105,18 +1113,7 @@ container.innerHTML = records.map((r, i) => {
         );
         renderRecords(filtered);
     }
-
-function toggleSearchBar() {
-    const input = document.getElementById("searchInput");
-    input.classList.toggle("active");
-
-    if (input.classList.contains("active")) {
-        input.focus();
-    }
-}
-
-      
-    /* ---------------------
+------------------
        2️⃣ DAILY PROGRESS SEARCH (DATES)
     ----------------------*/
     if (progressView.style.display !== "none") {
@@ -1140,6 +1137,17 @@ function toggleSearchBar() {
 });
 
 
+function toggleSearchBar() {
+    const input = document.getElementById("searchInput");
+    input.classList.toggle("active");
+
+    if (input.classList.contains("active")) {
+        input.focus();
+    }
+}
+
+      
+    /* ---
     // Show main view
    window.showMainView = function(viewName){
 
@@ -1590,6 +1598,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
