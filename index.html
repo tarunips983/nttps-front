@@ -1113,7 +1113,7 @@ container.innerHTML = records.map((r, i) => {
         );
         renderRecords(filtered);
     }
-------------------
+/* ---------------------
        2️⃣ DAILY PROGRESS SEARCH (DATES)
     ----------------------*/
     if (progressView.style.display !== "none") {
@@ -1136,7 +1136,6 @@ container.innerHTML = records.map((r, i) => {
     }
 });
 
-
 function toggleSearchBar() {
     const input = document.getElementById("searchInput");
     input.classList.toggle("active");
@@ -1145,9 +1144,6 @@ function toggleSearchBar() {
         input.focus();
     }
 }
-
-      
-    /* ---
     // Show main view
    window.showMainView = function(viewName){
 
@@ -1598,6 +1594,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
