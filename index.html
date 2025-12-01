@@ -420,11 +420,21 @@ main {
 
 /* Right panel */
 .right-panel {
-    flex:1;
-    overflow: visible;   /* was auto */
+    flex: 1;
+    overflow-y: auto;     /* allows scrolling */
+    overflow-x: hidden;   /* prevents blocking dropdown */
     height: auto;
-    display:flex;
-    flex-direction:column;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+}
+.dropdown-menu {
+    position: absolute;
+    z-index: 5000 !important;
+}
+.menu-overlay.active {
+    z-index: 4000 !important;
 }
 
 /* PDF NAV BUTTONS */
@@ -1594,6 +1604,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
