@@ -352,7 +352,7 @@ main {
 
 .main-view {
     width:100%;
-    height:100vh;
+    min-height: calc(100vh - 70px);
     display:none;
     flex-direction:row;
     background:white;
@@ -367,6 +367,9 @@ main {
     overflow-y:auto;
     padding:15px;
     box-sizing:border-box;
+    position: sticky;
+    top: 110px;
+    height: auto;
 }
 .left-bar h3 {
     margin:0 0 15px 0;
@@ -379,8 +382,8 @@ main {
 /* Right panel */
 .right-panel {
     flex:1;
-    overflow:auto;
-    height:100%;
+    overflow: visible;   /* was auto */
+    height: auto;
     display:flex;
     flex-direction:column;
 }
@@ -1468,6 +1471,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
