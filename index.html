@@ -246,13 +246,17 @@ header.dark-mode input::placeholder { color:#bbb !important; }
     transition:0.2s;
 }
 
-@media (max-width:768px) {
+/* MOBILE BURGER MENU */
+@media (max-width: 768px) {
     .dropdown-menu {
+        position: fixed !important;
         right: 0 !important;
-        width: 70% !important;
         top: 60px !important;
-        transform: translateX(120%);
-        transition: transform 0.35s ease-out;
+        width: 70% !important;
+        transform: translateX(100%);
+        transition: transform 0.35s ease-in-out;
+        display: flex !important;
+        flex-direction: column;
     }
 
     .dropdown-menu.active {
@@ -749,6 +753,33 @@ main {
     width: 360px;
     transition: 0.3s;
 }
+@media (max-width: 768px) {
+    .nav-right a[onclick="openPasswordModal()"] {
+        display: none !important;
+    }
+}
+@media (max-width: 768px) {
+    .nav-right {
+        gap: 6px !important;
+        width: 100%;
+    }
+    .search-wrapper {
+        flex-grow: 1;
+    }
+}
+@media (min-width: 769px) {
+    .left-bar {
+        position: sticky !important;
+        transform: none !important;
+        opacity: 1 !important;
+        z-index: 2 !important;
+    }
+
+    #mobileFilterBtn,
+    #mobileDailyFilterBtn {
+        display: none !important;
+    }
+}
 
 /* Mobile: hide search bar by default */
 @media (max-width: 768px) {
@@ -794,6 +825,7 @@ main {
 
 <!-- Dropdown Menu -->
 <div id="dropdownMenu" class="dropdown-menu">
+  <a onclick="openPasswordModal()">➕ Add Record</a>
     <a onclick="window.location.href='test.html'">📄 Imprest Covering letter</a>
     <!-- Add more menu items here -->
     <a href="settings.html">⚙ Settings</a>
@@ -1529,19 +1561,18 @@ async function renderCLBioData() {
     });
     
 //dropdown
-    window.toggleMenu = function() {
+window.toggleMenu = function () {
     const menu = document.getElementById("dropdownMenu");
-    const overlay = document.getElementById("menuOverlay");
 
-    const open = menu.style.display === "flex";
-    menu.style.display = open ? "none" : "flex";
-    overlay.classList.toggle("active", !open);
+    if (window.innerWidth <= 768) {
+        // MOBILE → slide menu
+        menu.classList.toggle("active");
+    } else {
+        // DESKTOP → simple show/hide
+        menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+    }
 };
 
-window.closeMenu = function() {
-    document.getElementById("dropdownMenu").style.display = "none";
-    document.getElementById("menuOverlay").classList.remove("active");
-};
 
 
     // Scroll to top behaviour
@@ -1627,6 +1658,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
