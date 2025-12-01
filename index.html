@@ -237,6 +237,21 @@ header.dark-mode input::placeholder { color:#bbb !important; }
     font-weight:bold;
     transition:0.2s;
 }
+
+@media (max-width:768px) {
+    .dropdown-menu {
+        right: 0 !important;
+        width: 70% !important;
+        top: 60px !important;
+        transform: translateX(120%);
+        transition: transform 0.35s ease-out;
+    }
+
+    .dropdown-menu.active {
+        transform: translateX(0%);
+    }
+}
+    
 .view-btn { background:#007bff; color:white; }
 
 /* Sub Nav Bar */
@@ -271,6 +286,22 @@ header.dark-mode input::placeholder { color:#bbb !important; }
     background:#007bff;
     color:#fff;
     box-shadow:inset 0px 2px 6px rgba(0,0,0,0.2);
+}
+.menu-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: none;
+    z-index: 1500;
+}
+
+.menu-overlay.active {
+    display: block;
+}
+
+.dropdown-menu {
+    z-index: 1600;
+    margin-top: 10px;
 }
 
 /* Modal */
@@ -655,6 +686,50 @@ main {
     0% { background: #cfe8ff; }
     100% { background: transparent; }
 }
+/* Search button (mobile) */
+.search-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.search-btn {
+    background: #007bff;
+    border: none;
+    padding: 8px 10px;
+    border-radius: 6px;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    display: none; /* hidden on desktop */
+}
+
+.search-field {
+    width: 360px;
+    transition: 0.3s;
+}
+
+/* Mobile: hide search bar by default */
+@media (max-width: 768px) {
+    .search-field {
+        width: 0;
+        opacity: 0;
+        padding: 0;
+        border: none;
+    }
+
+    .search-field.active {
+        width: 100%;
+        opacity: 1;
+        padding: 7px 10px;
+        border-radius: 6px;
+        border: 1px solid #999;
+    }
+
+    .search-btn {
+        display: block;
+    }
+}
 
 </style>
 
@@ -668,7 +743,10 @@ main {
     </div>
 
     <div class="nav-right">
-      <input id="searchInput" placeholder="Search by Work, PR No, or Send To..." />
+      <div class="search-wrapper">
+    <button id="searchIconBtn" onclick="toggleSearchBar()" class="search-btn">🔍</button>
+    <input id="searchInput" class="search-field" placeholder="Search by Work, PR No, or Send To..." />
+</div>
       <a href="javascript:void(0)" onclick="openPasswordModal()" title="Add New Record">➕ Add Record</a>
       <a href="login.html" id="loginLink" title="Login Page">🔐 Login</a>
       <div class="burger-menu" onclick="toggleMenu()">☰</div>
@@ -820,7 +898,9 @@ main {
     <p>© 2025 MyWeb. Built by Tarun</p>
   </footer>
 
+
   <button id="scrollTopBtn" title="Scroll to Top" style="position:fixed;right:18px;bottom:18px;display:none;background:var(--dark);color:#fff;border-radius:50%;border:0;padding:10px;z-index:2000">⬆️</button>
+<div id="menuOverlay" class="menu-overlay" onclick="closeMenu()"></div>
 
   <script>
     // Server URL unchanged
@@ -1026,6 +1106,16 @@ container.innerHTML = records.map((r, i) => {
         renderRecords(filtered);
     }
 
+function toggleSearchBar() {
+    const input = document.getElementById("searchInput");
+    input.classList.toggle("active");
+
+    if (input.classList.contains("active")) {
+        input.focus();
+    }
+}
+
+      
     /* ---------------------
        2️⃣ DAILY PROGRESS SEARCH (DATES)
     ----------------------*/
@@ -1061,18 +1151,37 @@ container.innerHTML = records.map((r, i) => {
   // remove active states
   document.querySelectorAll(".subnav-btn").forEach(btn => btn.classList.remove("active"));
 
-  
+  // ⭐ MOBILE FILTER BUTTON LOGIC ⭐
+  if (viewName === "pdf") {
+      mobileFilterBtn.style.display = "block";
+      mobileDailyFilterBtn.style.display = "none";
+  }
+
+  if (viewName === "progress") {
+      mobileFilterBtn.style.display = "none";
+      mobileDailyFilterBtn.style.display = "block";
+  }
+
+  if (viewName === "clbiodata") {
+      mobileFilterBtn.style.display = "none";
+      mobileDailyFilterBtn.style.display = "none";
+  }
+
+  // show PDF
   if (viewName === "pdf") {
     pdfView.style.display = "flex";
     document.querySelector("#subNavBar button:nth-child(1)").classList.add("active");
   }
 
+  // show progress
   if (viewName === "progress") {
     progressView.style.display = "flex";
     document.querySelector("#subNavBar button:nth-child(2)").classList.add("active");
   }
+
+  // show cl biodata
   if (viewName === "clbiodata") {
-    clbiodata.style.display = "block";   // FIXED HERE
+    clbiodata.style.display = "block";
     document.querySelector("#subNavBar button:nth-child(3)").classList.add("active");
     renderCLBioData();
   }
@@ -1381,12 +1490,22 @@ async function renderCLBioData() {
       toggleSidebar('mobileFilterBtn','pdf-nav-bar');
       toggleSidebar('mobileDailyFilterBtn','inlineLeftBar');
     });
-
-    // 🔥 Toggle Burger Dropdown
-window.toggleMenu = function () {
+    
+//dropdown
+    window.toggleMenu = function() {
     const menu = document.getElementById("dropdownMenu");
-    menu.style.display = (menu.style.display === "flex") ? "none" : "flex";
+    const overlay = document.getElementById("menuOverlay");
+
+    const open = menu.style.display === "flex";
+    menu.style.display = open ? "none" : "flex";
+    overlay.classList.toggle("active", !open);
 };
+
+window.closeMenu = function() {
+    document.getElementById("dropdownMenu").style.display = "none";
+    document.getElementById("menuOverlay").classList.remove("active");
+};
+
 
     // Scroll to top behaviour
     const scrollTopBtn = document.getElementById('scrollTopBtn');
@@ -1471,6 +1590,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
