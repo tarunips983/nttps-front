@@ -508,37 +508,30 @@
             <div>
                 <h2 id="formToggle">Add / Edit Record ➕</h2>
                 <div id="formWrapper" style="display: none; overflow: hidden; animation: fadeIn 0.3s ease-out;">
-                    <form id="recordForm">
-                        <input type="hidden" id="editId">
-                        <input type="hidden" id="currentPdf">
-                        <label>Name of the Work</label>
-                        <input type="text" id="workName" required>
-                        <label>PR No.</label>
-                        <input type="text" id="prNo" required>
-                        <label>Sub Division</label>
-                        <select id="subDivision" required>
-                            <option value="">Select Sub Division</option>
-                            <option value="Sub Div-I">Sub Div-I</option>
-                            <option value="Sub Div-II">Sub Div-II</option>
-                            <option value="Sub Div-III">Sub Div-III</option>
-                            <option value="Sub Div-IV">Sub Div-IV</option>
-                        </select>
-                        <label>Record Type</label>
-                        <select id="recordType" required>
-                            <option value="">Select Type</option>
-                            <option value="PR">PR</option>
-                            <option value="Estimate">Estimate</option>
-                            <option value="Drawing">Drawing</option>
-                            <option value="Other">Other Record</option>
-                        </select>
-                        <label>PDF File</label>
-                        <input type="file" id="pdfFile" accept="application/pdf" onchange="autoExtractPDF()">
-                        <label>Amount</label>
-                        <input type="number" id="amount" required>
-                        <label>Send To</label>
-                        <input type="text" id="sendTo" required>
-                        <button type="submit" class="primary">Add / Update Record</button>
-                    </form>
+                    <h3>📄 PDF Database Editor</h3>
+
+<div style="padding:10px 0;">
+    <button id="addRowBtn" class="btn btn-success">➕ Add Row</button>
+    <button id="savePDFBtn" class="btn btn-primary">💾 Save All</button>
+</div>
+
+<table id="pdfTable" class="table table-bordered" style="width:100%; background:white;">
+    <thead>
+        <tr>
+            <th>Name of Work</th>
+            <th>PR No</th>
+            <th>Sub Division</th>
+            <th>Record Type</th>
+            <th>PDF File</th>
+            <th>Amount</th>
+            <th>Send To</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="pdfTableBody">
+    </tbody>
+</table>
+
                 </div>
             </div>
             
@@ -1420,6 +1413,90 @@ function previewPDF(path) {
                 showToast(err.message, true);
             }
         }
+function addPDFRow(data = {}) {
+    const table = document.getElementById("pdfTableBody");
+
+    const row = document.createElement("tr");
+
+    row.innerHTML = `
+        <td><input class="form-control" value="${data.workName || ''}" /></td>
+        <td><input class="form-control" value="${data.prNo || ''}" /></td>
+
+        <td>
+            <select class="form-control">
+                <option>Sub Div-I</option>
+                <option>Sub Div-II</option>
+                <option>Sub Div-III</option>
+                <option>Sub Div-IV</option>
+            </select>
+        </td>
+
+        <td>
+            <select class="form-control">
+                <option>PR</option>
+                <option>Estimate</option>
+                <option>Drawing</option>
+                <option>Other Record</option>
+            </select>
+        </td>
+
+        <td><input type="file" class="form-control" accept="application/pdf" /></td>
+
+        <td><input class="form-control" value="${data.amount || ''}" /></td>
+
+        <td><input class="form-control" value="${data.sendTo || ''}" /></td>
+
+        <td>
+            <button class="btn btn-danger" onclick="this.closest('tr').remove()">❌</button>
+        </td>
+    `;
+
+    table.appendChild(row);
+}
+
+
+// ADD NEW EMPTY ROW
+document.getElementById("addRowBtn").addEventListener("click", () => {
+    addPDFRow();
+});
+
+
+// SAVE ALL PDF RECORDS
+document.getElementById("savePDFBtn").addEventListener("click", async () => {
+    const rows = document.querySelectorAll("#pdfTableBody tr");
+    const records = [];
+
+    for (let r of rows) {
+        const inputs = r.querySelectorAll("input, select");
+        const pdfFile = inputs[4].files[0];
+
+        const formData = new FormData();
+        formData.append("workName", inputs[0].value);
+        formData.append("prNo", inputs[1].value);
+        formData.append("subDivision", inputs[2].value);
+        formData.append("recordType", inputs[3].value);
+        formData.append("amount", inputs[5].value);
+        formData.append("sendTo", inputs[6].value);
+
+        if (pdfFile) formData.append("pdfFile", pdfFile);
+
+        // PUSH TO SERVER
+        await fetch(`${SERVER_URL}/records`, {
+            method: "POST",
+            body: formData
+        });
+    }
+
+    alert("✅ All Records Saved!");
+});
+async function loadExistingPDFRecords() {
+    const res = await fetch(`${SERVER_URL}/records`);
+    const data = await res.json();
+
+    data.forEach(r => addPDFRow(r));
+}
+
+window.onload = loadExistingPDFRecords;
 
 
         /* =================================================================== */
@@ -2233,6 +2310,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
