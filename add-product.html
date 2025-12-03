@@ -1665,6 +1665,27 @@
       el('confirmBtnCancel').onclick = () => { if (isFn(origCancel)) origCancel(); localStorage.removeItem('dailyProgressDraft'); showToast('Draft discarded.'); };
     }
   }
+function showPanel(tab) {
+    document.getElementById("pdfPanel").classList.remove("active");
+    document.getElementById("dailyPanel").classList.remove("active");
+    document.getElementById("clPanel").classList.remove("active");
+
+    document.getElementById("tabPdf").classList.remove("active");
+    document.getElementById("tabDaily").classList.remove("active");
+    document.getElementById("tabCL").classList.remove("active");
+
+    if (tab === "pdf") {
+        document.getElementById("pdfPanel").classList.add("active");
+        document.getElementById("tabPdf").classList.add("active");
+    } else if (tab === "daily") {
+        document.getElementById("dailyPanel").classList.add("active");
+        document.getElementById("tabDaily").classList.add("active");
+    } else if (tab === "cl") {
+        document.getElementById("clPanel").classList.add("active");
+        document.getElementById("tabCL").classList.add("active");
+    }
+}
+window.showPanel = showPanel;
 
   /* -------------------- Startup -------------------- */
   (function start() {
@@ -1710,6 +1731,7 @@
 </script>
 </body>
 </html>
+
 
 
 
