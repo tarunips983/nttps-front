@@ -583,13 +583,20 @@
             </div>
         
             <div class="control-group">
-                <button class="small btn-save" onclick="saveProgress()">💾 Save Progress</button>
-                <button class="small btn-save" style="background-color: #ff9900;" onclick="saveDraft()">📝 Save Draft</button>
-                <button class="small btn-clear" onclick="clearSheet()">🧹 Clear Sheet</button>
+               <button id="dpSaveBtn" class="small btn-save">💾 Save Progress</button>
+
+<button id="dpDraftBtn" class="small btn-save" style="background-color: #ff9900;">
+    📝 Save Draft
+</button>
+
+<button id="dpClearBtn" class="small btn-clear">🧹 Clear Sheet</button>
+
+
+
             </div>
             
             <div class="control-group">
-                <button class="small btn-export" onclick="exportToExcel()">📤 Export to Excel</button>
+                <button id="dpExportBtn" class="small btn-export">📤 Export to Excel</button>
                 <label for="importFile" class="btn-import-label">📥 Import from Excel</label>
                 <input type="file" id="importFile" onchange="importFromExcel(event)" accept=".xlsx, .xls" style="display: none;">
             </div>
@@ -1590,8 +1597,14 @@
 
     // CL form
     if (el('clForm')) el('clForm').addEventListener('submit', submitCLForm);
-    safeAddEvent(el('clActions') && el('clActions').querySelector('.top-btn:nth-child(1)'), 'click', editSelectedCL);
-    safeAddEvent(el('clActions') && el('clActions').querySelector('.top-btn:nth-child(2)'), 'click', deleteSelectedCL);
+    if (el('clActions')) {
+    const clEditBtn = el('clActions').querySelector('.top-btn:nth-child(1)');
+    const clDeleteBtn = el('clActions').querySelector('.top-btn:nth-child(2)');
+
+    safeAddEvent(clEditBtn, 'click', editSelectedCL);
+    safeAddEvent(clDeleteBtn, 'click', deleteSelectedCL);
+}
+
 
     // saved progress paging controls
     safeAddEvent(document.querySelector('#savedBody ~ div .small:first-child'), 'click', ()=> { if (savedPage>1) { savedPage--; renderSaved(); } }); // optional
@@ -1731,6 +1744,7 @@ window.showPanel = showPanel;
 </script>
 </body>
 </html>
+
 
 
 
