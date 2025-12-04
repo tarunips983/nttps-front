@@ -583,20 +583,13 @@
             </div>
         
             <div class="control-group">
-               <button id="dpSaveBtn" class="small btn-save">💾 Save Progress</button>
-
-<button id="dpDraftBtn" class="small btn-save" style="background-color: #ff9900;">
-    📝 Save Draft
-</button>
-
-<button id="dpClearBtn" class="small btn-clear">🧹 Clear Sheet</button>
-
-
-
+                <button class="small btn-save" onclick="saveProgress()">💾 Save Progress</button>
+                <button class="small btn-save" style="background-color: #ff9900;" onclick="saveDraft()">📝 Save Draft</button>
+                <button class="small btn-clear" onclick="clearSheet()">🧹 Clear Sheet</button>
             </div>
             
             <div class="control-group">
-                <button id="dpExportBtn" class="small btn-export">📤 Export to Excel</button>
+                <button class="small btn-export" onclick="exportToExcel()">📤 Export to Excel</button>
                 <label for="importFile" class="btn-import-label">📥 Import from Excel</label>
                 <input type="file" id="importFile" onchange="importFromExcel(event)" accept=".xlsx, .xls" style="display: none;">
             </div>
@@ -772,983 +765,1551 @@
 
 
     <script>
-/*
-  Clean, modular replacement script for add-product.html
-  - Auth-safe fetch wrapper
-  - PDF Database (list, filters, paging, trash/restore, preview, download)
-  - PDF row editor (bulk rows in the "pdfTable" area)
-  - Daily Progress editor (add/insert/delete/drag, save/load/export/import/preview)
-  - CL Bio Data CRUD (upload via FormData)
-  Defensive: checks for missing DOM elements before wiring listeners.
-*/
+        
+const API = "https://nttps-backend.onrender.com";
 
-(() => {
-  const API = "https://nttps-backend.onrender.com"; // backend base
-  const RECORDS_PER_PAGE = 10;
-  const SAVED_PER_PAGE = 8;
+// Safe auth wrapper for all API calls
+async function authFetch(url, options = {}) {
+  // Always read the latest token from localStorage
+  const token = localStorage.getItem("adminToken");
+  const headers = new Headers(options.headers || {});
 
-  /* -------------------- Utilities -------------------- */
-  function el(id) { return document.getElementById(id); }
-  function qs(sel, root = document) { return root.querySelector(sel); }
-  function qsa(sel, root = document) { return Array.from(root.querySelectorAll(sel)); }
-  function isFn(fn){ return typeof fn === 'function'; }
-
-  // Toast
-  function showToast(msg, isError = false) {
-    const container = el('toastContainer') || (() => {
-      const c = document.createElement('div'); c.id = 'toastContainer'; document.body.appendChild(c); return c;
-    })();
-    const d = document.createElement('div');
-    d.className = 'toast ' + (isError ? 'error' : 'success');
-    d.textContent = msg;
-    container.appendChild(d);
-    setTimeout(()=> d.remove(), 4000);
+  // Attach token if present
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
   }
 
-  // Confirm modal wrapper (re-usable)
-  let confirmCallback = null;
-  function showConfirm(message, onConfirm, okClass='delete-btn') {
-    const modal = el('confirmModal');
-    if (!modal) { if (onConfirm) onConfirm(); return; }
-    el('confirmMessage').textContent = message;
-    confirmCallback = onConfirm;
-    const okBtn = el('confirmBtnOk');
-    okBtn.className = 'small ' + okClass;
-    modal.style.display = 'flex';
+  // Only set JSON header when not sending FormData
+  const isFormData = options.body instanceof FormData;
+  if (!isFormData && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
   }
-  function hideConfirm() { const m = el('confirmModal'); if(m) m.style.display='none'; confirmCallback = null; }
-  if (el('confirmBtnOk')) el('confirmBtnOk').onclick = () => { if (confirmCallback) confirmCallback(); hideConfirm(); };
-  if (el('confirmBtnCancel')) el('confirmBtnCancel').onclick = () => { hideConfirm(); };
 
-  // Auth-aware fetch
-  async function authFetch(url, opts = {}) {
-    const token = localStorage.getItem('adminToken');
-    const headers = new Headers(opts.headers || {});
-    if (token) headers.set('Authorization', `Bearer ${token}`);
-    // If not FormData and no Content-Type set, set JSON
-    const isForm = opts.body instanceof FormData;
-    if (!isForm && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
-    const res = await fetch(url, {...opts, headers});
-    if (res.status === 401) {
-      showToast('Session expired. Redirecting to login...', true);
-      setTimeout(()=> { localStorage.removeItem('adminToken'); localStorage.removeItem('isAdmin'); window.location.href='login.html'; }, 1200);
-    } else if (res.status === 403) {
-      showToast('Forbidden (403) - check permissions', true);
+  const res = await fetch(url, { ...options, headers });
+
+  // 401 → real session expired → logout
+  if (res.status === 401) {
+    showToast("Session expired. Please log in again.", true);
+    setTimeout(logout, 1500);
+  }
+  // 403 → forbidden, but DON'T auto logout (just show message)
+  else if (res.status === 403) {
+    showToast("Forbidden (403): check that you are logged in and token is valid.", true);
+  }
+
+  return res;
+}
+        /* ----------------- Tab switching ----------------- */
+        function showPanel(name) {
+    // Hide all
+    document.getElementById('pdfPanel').classList.remove('active');
+    document.getElementById('dailyPanel').classList.remove('active');
+    document.getElementById('clPanel').classList.remove('active');
+
+    // Reset tab highlights
+    document.getElementById('tabPdf').classList.remove('active');
+    document.getElementById('tabDaily').classList.remove('active');
+    document.getElementById('tabCL').classList.remove('active');
+
+    // Activate correct panel
+    if (name === 'pdf') {
+        document.getElementById('pdfPanel').classList.add('active');
+        document.getElementById('tabPdf').classList.add('active');
     }
-    return res;
-  }
-
-  /* -------------------- Generic safety guards -------------------- */
-  function safeAddEvent(elm, ev, fn) { if(!elm) return; elm.addEventListener(ev, fn); }
-
-  /* -------------------- PDF DATABASE: state & DOM -------------------- */
-  let allRecords = [];
-  let filteredRecords = [];
-  let currentPage = 1;
-  let viewingTrash = false;
-  const pdfDashboardEl = el('pdfDashboard');
-  const recordTableBody = el('recordTable');
-  const pageInfoEl = el('pageInfo');
-  const searchEl = el('searchInput');
-  const filterSubEl = el('filterSubDivision');
-  const filterTypeEl = el('filterRecordType');
-  const pdfTableHead = el('pdfTableHead');
-
-  async function loadRecords() {
-    try {
-      const res = await authFetch(`${API}/records`);
-      if (!res.ok) throw new Error('Failed to load records');
-      allRecords = await res.json();
-      populateFilters();
-      applyFilters();
-    } catch (err) {
-      console.error(err);
-      if (recordTableBody) recordTableBody.innerHTML = `<tr><td colspan="8">⚠️ Failed to load records</td></tr>`;
-      showToast('Failed to load records', true);
+    else if (name === 'daily') {
+        document.getElementById('dailyPanel').classList.add('active');
+        document.getElementById('tabDaily').classList.add('active');
+        loadSavedProgress();
     }
-  }
-
-  function populateFilters() {
-    if (!filterSubEl || !filterTypeEl) return;
-    const subs = [...new Set(allRecords.map(x=>x.subDivision).filter(Boolean))].sort();
-    const types = [...new Set(allRecords.map(x=>x.recordType).filter(Boolean))].sort();
-    filterSubEl.innerHTML = '<option value="">All Sub Divisions</option>' + subs.map(s => `<option value="${s}">${s}</option>`).join('');
-    filterTypeEl.innerHTML = '<option value="">All Record Types</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
-  }
-
-  function applyFilters() {
-    const q = (searchEl && searchEl.value || '').toLowerCase();
-    const sub = (filterSubEl && filterSubEl.value) || '';
-    const type = (filterTypeEl && filterTypeEl.value) || '';
-    filteredRecords = allRecords.filter(r => {
-      const matchQ = !q || ['workName','prNo','subDivision','recordType'].some(k => (r[k] || '').toString().toLowerCase().includes(q));
-      const matchSub = !sub || r.subDivision === sub;
-      const matchType = !type || r.recordType === type;
-      return matchQ && matchSub && matchType;
-    });
-    currentPage = 1;
-    renderRecords();
-    updateDashboard();
-  }
-
-  function updateDashboard() {
-    if (!pdfDashboardEl) return;
-    const data = filteredRecords || allRecords;
-    const totalAmount = data.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
-    const prCount = data.filter(r => (r.recordType||'').toLowerCase()==='pr').length;
-    const estCount = data.filter(r => (r.recordType||'').toLowerCase()==='estimate').length;
-    pdfDashboardEl.innerHTML = `
-      <div class="dash-box"><h4>Total Records</h4><p>${data.length}</p></div>
-      <div class="dash-box"><h4>Total Amount</h4><p>₹${totalAmount.toLocaleString('en-IN')}</p></div>
-      <div class="dash-box"><h4>PRs</h4><p>${prCount}</p></div>
-      <div class="dash-box"><h4>Estimates</h4><p>${estCount}</p></div>
-    `;
-  }
-
-  function renderRecords() {
-    if (!recordTableBody) return;
-    const isTrash = viewingTrash;
-    // header
-    if (pdfTableHead) {
-      if (isTrash) {
-        pdfTableHead.innerHTML = `<th class="wrap">Name</th><th class="wrap">PR No</th><th class="wrap">Sub Div</th><th class="wrap">Deleted On</th><th class="wrap">Actions</th>`;
-      } else {
-        pdfTableHead.innerHTML = `
-          <th class="wrap" onclick="void(0)">ID</th>
-          <th class="wrap">Name</th>
-          <th class="wrap">PR No</th>
-          <th class="wrap">Sub Div</th>
-          <th class="wrap">Type</th>
-          <th class="wrap">Amount</th>
-          <th class="wrap">Send To</th>
-          <th class="wrap">Actions</th>`;
-      }
+    else if (name === 'cl') {
+        document.getElementById('clPanel').classList.add('active');
+        document.getElementById('tabCL').classList.add('active');
+        ;
     }
+}
 
-    const start = (currentPage - 1) * RECORDS_PER_PAGE;
-    const pageItems = (filteredRecords || []).slice(start, start + RECORDS_PER_PAGE);
-    recordTableBody.innerHTML = '';
-    if (!pageItems.length) {
-      const cols = isTrash ? 5 : 8;
-      recordTableBody.innerHTML = `<tr><td colspan="${cols}">No records found</td></tr>`;
-      if (pageInfoEl) pageInfoEl.textContent = `Page 1 of 1`;
-      return;
-    }
 
-    pageItems.forEach(r => {
-      const tr = document.createElement('tr');
-      if (isTrash) {
-        tr.innerHTML = `
-          <td class="wrap">${r.workName||''}</td>
-          <td class="wrap">${r.prNo||''}</td>
-          <td class="wrap">${r.subDivision||''}</td>
-          <td class="wrap">${r.deletedOn ? new Date(r.deletedOn).toLocaleString() : ''}</td>
-          <td class="wrap">
-            <div class="actions">
-              <button class="small-btn restore-btn">Restore</button>
-              <button class="small-btn delete-btn">Delete Perm.</button>
-            </div>
-          </td>`;
-        tr.querySelector('.restore-btn').addEventListener('click', ()=> restoreRecord(r.id));
-        tr.querySelector('.delete-btn').addEventListener('click', ()=> deleteRecordPermanently(r.id));
-      } else {
-        tr.innerHTML = `
-          <td class="wrap">${r.id || ''}</td>
-          <td class="wrap">${r.workName || ''}</td>
-          <td class="wrap">${r.prNo || ''}</td>
-          <td class="wrap">${r.subDivision || ''}</td>
-          <td class="wrap">${r.recordType || ''}</td>
-          <td class="wrap">₹${r.amount ? parseFloat(r.amount).toLocaleString('en-IN') : '0'}</td>
-          <td class="wrap">${r.sendTo || ''}</td>
-          <td class="wrap">
-            <div class="actions">
-              ${r.pdfPath ? `<button class="small-btn preview-btn">Preview</button>` : ''}
-              <button class="small-btn edit-btn">Edit</button>
-              <button class="small-btn delete-btn">Trash</button>
-              ${r.pdfPath ? `<button class="small-btn download-btn">Download</button>` : ''}
-            </div>
-          </td>`;
-        if (r.pdfPath) tr.querySelector('.preview-btn').addEventListener('click', ()=> previewPDF(r.pdfPath));
-        tr.querySelector('.edit-btn').addEventListener('click', ()=> openEditRecord(r));
-        tr.querySelector('.delete-btn').addEventListener('click', ()=> deleteRecord(r.id));
-        if (r.pdfPath) tr.querySelector('.download-btn').addEventListener('click', ()=> downloadPDF(r.pdfPath));
-      }
-      recordTableBody.appendChild(tr);
+document.getElementById("clForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const formData = new FormData();
+    formData.append("id", document.getElementById("clId").value);
+    formData.append("name", document.getElementById("clName").value);
+    formData.append("gender", document.getElementById("clGender").value);
+    formData.append("aadhar", document.getElementById("clAadhar").value);
+    formData.append("phone", document.getElementById("clPhone").value);
+    formData.append("station", document.getElementById("clStation").value);
+    formData.append("division", document.getElementById("clDivision").value);
+    formData.append("doj", document.getElementById("clDoj").value);
+    formData.append("dob", document.getElementById("clDob").value);
+    formData.append("wages", document.getElementById("clWages").value);
+    formData.append("nominee", document.getElementById("clNominee").value);
+    formData.append("relation", document.getElementById("clRelation").value);
+
+    // If editing → keep previous photo URL
+    const oldPhoto = document.getElementById("clPhoto").dataset.old;
+    if (oldPhoto) formData.append("photoUrl", oldPhoto);
+
+    const file = document.getElementById("clPhoto").files[0];
+    if (file) formData.append("photo", file);
+
+    const res = await authFetch(`${API}/cl`, {
+        method: "POST",
+        body: formData
     });
 
-    if (pageInfoEl) pageInfoEl.textContent = `Page ${currentPage} of ${Math.max(1, Math.ceil(filteredRecords.length / RECORDS_PER_PAGE))}`;
-  }
-
-  function nextPage() { if (currentPage < Math.ceil(filteredRecords.length / RECORDS_PER_PAGE)) { currentPage++; renderRecords(); } }
-  function prevPage() { if (currentPage > 1) { currentPage--; renderRecords(); } }
-
-  // Trash / restore / delete
-  async function deleteRecord(id) {
-    showConfirm('Move this record to trash?', async () => {
-      try {
-        const res = await authFetch(`${API}/records/${id}`, { method: 'DELETE' });
-        const data = await res.json().catch(()=>({success:false}));
-        if (data.success) { showToast('Moved to trash'); await loadRecords(); }
-        else showToast('Delete failed', true);
-      } catch (err) { console.error(err); showToast('Server error', true); }
-    }, 'delete-btn');
-  }
-  async function loadTrash() {
-    try {
-      const res = await authFetch(`${API}/records/trash`);
-      if (!res.ok) throw new Error('Failed to load trash');
-      const trash = await res.json();
-      allRecords = trash; filteredRecords = trash; currentPage = 1; viewingTrash = true;
-      renderRecords();
-      updateDashboard();
-    } catch (err) { console.error(err); showToast('Failed to load trash', true); }
-  }
-  async function restoreRecord(id) {
-    showConfirm('Restore record?', async () => {
-      try {
-        const res = await authFetch(`${API}/records/${id}/restore`, { method: 'POST' });
-        const data = await res.json().catch(()=>({success:false}));
-        if (data.success) { showToast('Restored'); await loadRecords(); } else showToast('Restore failed', true);
-      } catch (err) { console.error(err); showToast('Server error', true); }
-    }, 'restore-btn');
-  }
-  async function deleteRecordPermanently(id) {
-    showConfirm('Permanently delete? This cannot be undone.', async () => {
-      try {
-        const res = await authFetch(`${API}/records/trash/${id}`, { method: 'DELETE' });
-        const data = await res.json().catch(()=>({success:false}));
-        if (data.success) { showToast('Deleted permanently'); await loadTrash(); } else showToast('Delete failed', true);
-      } catch (err) { console.error(err); showToast('Server error', true); }
-    }, 'delete-btn');
-  }
-
-  // Preview & download
-  function previewPDF(path) {
-    const iframe = el('pdfFrame');
-    if (!iframe) { window.open(path, '_blank'); return; }
-    iframe.src = path;
-    const modal = el('previewModal'); if(modal) modal.style.display = 'flex';
-  }
-  function closePreview() { const m = el('previewModal'); if(m) { m.style.display='none'; const iframe = el('pdfFrame'); if(iframe) iframe.src=''; } }
-  function downloadPDF(path) {
-    const a = document.createElement('a');
-    a.href = path.startsWith('http') ? path : API + path;
-    a.download = path.split('/').pop();
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  }
-
-  // Edit record (if inline form exists, populate it; otherwise open drawer)
-  function openEditRecord(record) {
-    // Try to populate inputs if present
-    const getOrNull = id => el(id) || null;
-    const workName = getOrNull('workName');
-    if (workName) {
-      workName.value = record.workName || '';
-      if (el('prNo')) el('prNo').value = record.prNo || '';
-      if (el('subDivision')) el('subDivision').value = record.subDivision || '';
-      if (el('recordType')) el('recordType').value = record.recordType || '';
-      if (el('amount')) el('amount').value = record.amount || '';
-      if (el('sendTo')) el('sendTo').value = record.sendTo || '';
-      if (el('currentPdf')) el('currentPdf').value = record.pdfPath || '';
-      if (el('editId')) el('editId').value = record.id || '';
-      const wrapper = el('formWrapper'); if (wrapper) { wrapper.style.display='block'; el('formToggle').textContent='Add / Edit Record ➖'; }
-      window.scrollTo({ top:0, behavior:'smooth' });
-      return;
-    }
-    // fallback: open preview URL
-    if (record.pdfPath) window.open(record.pdfPath, '_blank');
-  }
-
-  /* -------------------- PDF Table Bulk Rows (the Add Row -> Save All area) -------------------- */
-  const pdfTableBody = el('pdfTableBody');
-  function addPDFRow(data = {}) {
-    if (!pdfTableBody) return;
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><input class="form-control" name="workName" value="${escapeHtml(data.workName||'')}" /></td>
-      <td><input class="form-control" name="prNo" value="${escapeHtml(data.prNo||'')}" /></td>
-      <td>
-        <select class="form-control" name="subDivision">
-          <option>Sub Div-I</option><option>Sub Div-II</option><option>Sub Div-III</option><option>Sub Div-IV</option>
-        </select>
-      </td>
-      <td>
-        <select class="form-control" name="recordType">
-          <option>PR</option><option>Estimate</option><option>Drawing</option><option>Other Record</option>
-        </select>
-      </td>
-      <td><input type="file" class="form-control" name="pdfFile" accept="application/pdf"/></td>
-      <td><input class="form-control" name="amount" value="${escapeHtml(data.amount||'')}" /></td>
-      <td><input class="form-control" name="sendTo" value="${escapeHtml(data.sendTo||'')}" /></td>
-      <td><button class="btn btn-danger">❌</button></td>
-    `;
-    tr.querySelector('button').addEventListener('click', ()=> tr.remove());
-    pdfTableBody.appendChild(tr);
-  }
-
-  function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-  async function saveAllPDFRows() {
-    if (!pdfTableBody) return;
-    const rows = qsa('tr', pdfTableBody);
-    if (!rows.length) return showToast('No rows to save', true);
-    showConfirm(`Save ${rows.length} record(s) to server?`, async () => {
-      try {
-        for (const r of rows) {
-          const inputs = qsa('input, select', r);
-          const form = new FormData();
-          // inputs order: workName, prNo, subDivision(select), recordType(select), pdfFile, amount, sendTo
-          const workName = inputs[0] && inputs[0].value || '';
-          const prNo = inputs[1] && inputs[1].value || '';
-          const subDiv = inputs[2] && inputs[2].value || '';
-          const type = inputs[3] && inputs[3].value || '';
-          const fileInput = r.querySelector('input[type="file"]');
-          const amount = inputs[5] && inputs[5].value || '';
-          const sendTo = inputs[6] && inputs[6].value || '';
-          form.append('workName', workName);
-          form.append('prNo', prNo);
-          form.append('subDivision', subDiv);
-          form.append('recordType', type);
-          form.append('amount', amount);
-          form.append('sendTo', sendTo);
-          if (fileInput && fileInput.files[0]) form.append('pdfFile', fileInput.files[0]);
-          // POST each row
-          await authFetch(`${API}/records`, { method: 'POST', body: form });
-        }
-        showToast('All records saved');
-        // Clear the added rows area
-        pdfTableBody.innerHTML = '';
-        await loadRecords();
-      } catch (err) {
-        console.error(err); showToast('Save failed', true);
-      }
-    }, 'btn-export');
-  }
-
-  /* -------------------- CL BIO DATA -------------------- */
-  async function submitCLForm(e) {
-    if (e && e.preventDefault) e.preventDefault();
-    try {
-      const form = el('clForm');
-      if (!form) return;
-      const fd = new FormData();
-      ['clId','clName','clGender','clAadhar','clPhone','clStation','clDivision','clDoj','clDob','clWages','clNominee','clRelation']
-        .forEach(id => { const elmt = el(id); if (elmt) fd.append(id.replace('cl','').toLowerCase(), elmt.value || ''); });
-
-      // photo
-      const photoEl = el('clPhoto');
-      if (photoEl && photoEl.files && photoEl.files[0]) fd.append('photo', photoEl.files[0]);
-      // If editing keep existing id
-      if (el('clId') && el('clId').value) fd.append('id', el('clId').value);
-
-      const res = await authFetch(`${API}/cl`, { method: 'POST', body: fd });
-      const data = await res.json();
-      if (data && data.success) {
-        showToast('CL record saved');
-        form.reset();
+    const data = await res.json();
+    if (data.success) {
+        showToast("CL record saved");
         loadCLData();
-      } else {
-        showToast(data && data.error ? data.error : 'Save failed', true);
-      }
-    } catch (err) { console.error(err); showToast('Server error', true); }
-  }
+        document.getElementById("clForm").reset();
+        document.getElementById("clId").value = "";
+    }
+});
+        
+async function loadCLData() {
+    const res = await authFetch(`${API}/cl`);
+    if (!res.ok) {
+        console.error("Failed loading CL data");
+        return;
+    }
 
-  async function loadCLData() {
-    try {
-      const res = await authFetch(`${API}/cl`);
-      if (!res.ok) throw new Error('Failed to load CL data');
-      const data = await res.json();
-      const tbody = el('clTableBody');
-      if (!tbody) return;
-      tbody.innerHTML = '';
-      data.forEach((cl, idx) => {
-        const photo = cl.photo_url ? `<img src="${cl.photo_url}" class="default-photo">` : `<img src="https://icon-library.com/images/no-picture-available-icon/no-picture-available-icon-20.jpg" class="default-photo">`;
-        tbody.insertAdjacentHTML('beforeend', `
-          <tr>
-            <td><input class="clSelect" type="checkbox" data-id="${cl.id}"></td>
-            <td>${idx+1}</td>
-            <td>${escapeHtml(cl.name||'')}</td>
-            <td>${escapeHtml(cl.gender||'')}</td>
-            <td>${escapeHtml(cl.aadhar||'')}</td>
-            <td>${escapeHtml(cl.phone||'')}</td>
-            <td>${escapeHtml(cl.station||'')}</td>
-            <td>${escapeHtml(cl.division||'')}</td>
-            <td>${escapeHtml(cl.doj||'')}</td>
-            <td>${escapeHtml(cl.dob||'')}</td>
-            <td>${escapeHtml(cl.wages||'')}</td>
-            <td>${escapeHtml(cl.nominee||'')}</td>
-            <td>${escapeHtml(cl.relation||'')}</td>
-            <td>${photo}</td>
-          </tr>
-        `);
-      });
-    } catch (err) { console.error(err); showToast('Failed to load CL data', true); }
-  }
+    const data = await res.json();
+    const tbody = document.getElementById("clTableBody");
+    tbody.innerHTML = "";
 
-  function getSelectedCLIds() {
-    return qsa('.clSelect:checked').map(ch => ch.dataset.id);
-  }
+    data.forEach((cl, index) => {
+        const photo = cl.photo_url
+            ? `<img src="${cl.photo_url}" class="default-photo">`
+            : `<img src="https://icon-library.com/images/no-picture-available-icon/no-picture-available-icon-20.jpg" class="default-photo">`;
 
-  async function deleteSelectedCL() {
-    const ids = getSelectedCLIds();
-    if (!ids.length) return alert('Select at least one record');
-    if (!confirm('Delete selected CL records?')) return;
-    try {
-      for (const id of ids) await authFetch(`${API}/cl/${id}`, { method: 'DELETE' });
-      showToast('Deleted selected records');
-      loadCLData();
-    } catch (err) { console.error(err); showToast('Delete failed', true); }
-  }
-
-  async function editSelectedCL() {
-    const ids = getSelectedCLIds();
-    if (ids.length !== 1) return alert('Select exactly ONE record to edit.');
-    try {
-      const res = await authFetch(`${API}/cl`);
-      const list = await res.json();
-      const cl = list.find(x => x.id == ids[0]);
-      if (!cl) return alert('Record not found');
-      // populate form
-      ['Name','Gender','Aadhar','Phone','Station','Division','Doj','Dob','Wages','Nominee','Relation'].forEach(k => {
-        const id = 'cl' + k.toLowerCase();
-        if (el(id)) el(id).value = cl[k.toLowerCase()] || cl[k] || '';
-      });
-      if (el('clId')) el('clId').value = cl.id;
-      window.scrollTo({ top:0, behavior:'smooth' });
-    } catch (err) { console.error(err); showToast('Failed to load record', true); }
-  }
-
-  /* -------------------- Daily Progress sheet features -------------------- */
-  const sheetTbody = el('progressTableBody');
-  const snapshotDateEl = el('snapshotDate');
-  const snapshotIdEl = el('snapshotId');
-  const autoSaveMsgEl = el('autoSaveMsg');
-  let lastSelectedRow = null;
-  let loadedSnapshotDate = null;
-
-  function initSheet(defaultRows = 20) {
-    if (!sheetTbody) return;
-    sheetTbody.innerHTML = '';
-    for (let i=0;i<defaultRows;i++) addProgressRow();
-    updateRowNumbers();
-  }
-
-  function addProgressRow(prefill = {}) {
-    if (!sheetTbody) return;
-    const tr = document.createElement('tr'); tr.draggable = true;
-    const makeCell = (txt='') => { const td = document.createElement('td'); td.contentEditable = true; td.setAttribute('role','gridcell'); td.textContent = txt; return td; };
-    tr.appendChild(makeCell(prefill.date||''));
-    tr.appendChild(makeCell(prefill.division||''));
-    tr.appendChild(makeCell(prefill.subDivision||''));
-    tr.appendChild(makeCell(prefill.activity||''));
-    tr.appendChild(makeCell(prefill.manpower||''));
-    tr.appendChild(makeCell(prefill.status||''));
-    tr.appendChild(makeCell(prefill.remarks||''));
-    const last = document.createElement('td'); last.innerHTML = `<button class="small small-btn delete-btn" style="padding:4px 8px">X</button> 0`;
-    last.querySelector('button').addEventListener('click', (e)=> { const tr = e.target.closest('tr'); if (tr) tr.remove(); updateRowNumbers(); });
-    tr.appendChild(last);
-    sheetTbody.appendChild(tr);
-    styleRow(tr);
-  }
-
-  function updateRowNumbers() {
-    if (!sheetTbody) return;
-    Array.from(sheetTbody.children).forEach((tr, idx) => {
-      const last = tr.querySelector('td:last-child');
-      if (last) last.innerHTML = `<button class="small small-btn delete-btn" style="padding:4px 8px" onclick="this.closest('tr').remove();undefined">${idx+1}</button> ${idx+1}`;
+        tbody.innerHTML += `
+            <tr>
+                <td><input type="checkbox" class="clSelect" data-id="${cl.id}"></td>
+                <td>${index + 1}</td>
+                <td>${cl.name}</td>
+                <td>${cl.gender}</td>
+                <td>${cl.aadhar}</td>
+                <td>${cl.phone}</td>
+                <td>${cl.station}</td>
+                <td>${cl.division}</td>
+                <td>${cl.doj}</td>
+                <td>${cl.dob}</td>
+                <td>${cl.wages}</td>
+                <td>${cl.nominee}</td>
+                <td>${cl.relation}</td>
+                <td>${photo}</td>
+            </tr>
+        `;
     });
-  }
+}
 
-  function styleRow(tr) {
-    if (!tr) return;
-    const statusCell = tr.children[5];
-    if (!statusCell) return;
-    const status = (statusCell.textContent||'').toLowerCase();
-    tr.classList.remove('status-done','status-progress','status-pending','selected-row');
-    if (status.includes('done') || status.includes('completed')) tr.classList.add('status-done');
-    else if (status.includes('progress') || status.includes('wip')) tr.classList.add('status-progress');
-    else if (status.includes('pending') || status.includes('issue')) tr.classList.add('status-pending');
-  }
+function toggleSelectAll() {
+    const checked = document.getElementById("selectAll").checked;
+    document.querySelectorAll(".clSelect").forEach(ch => ch.checked = checked);
+}
 
-  function styleProgressRows(){ if(!sheetTbody) return; qsa('tr', sheetTbody).forEach(styleRow); }
-
-  // click selection & multi-cell selection
-  if (sheetTbody) {
-    sheetTbody.addEventListener('click', (e) => {
-      const td = e.target.closest('td');
-      if (!td) return;
-      const tr = td.parentElement;
-      if (lastSelectedRow) lastSelectedRow.classList.remove('selected-row');
-      tr.classList.add('selected-row');
-      lastSelectedRow = tr;
-      updateRowNumbers();
+function getSelectedIds() {
+    const ids = [];
+    document.querySelectorAll(".clSelect:checked").forEach(ch => {
+        ids.push(ch.getAttribute("data-id"));
     });
-    sheetTbody.addEventListener('input', (e) => {
-      const tr = e.target.closest('tr'); styleRow(tr);
-    });
-  }
+    return ids;
+}
 
-  // Drag & drop rows
-  let dragged = null;
-  if (sheetTbody) {
-    sheetTbody.addEventListener('dragstart', (e) => {
-      const tr = e.target.closest('tr'); if (!tr) return;
-      dragged = tr; setTimeout(()=> tr.classList.add('dragging'), 0);
-    });
-    sheetTbody.addEventListener('dragend', (e) => { if (dragged) dragged.classList.remove('dragging'); dragged = null; });
-    sheetTbody.addEventListener('dragover', (e)=> e.preventDefault());
-    sheetTbody.addEventListener('drop', (e) => {
-      e.preventDefault();
-      if (!dragged) return;
-      const target = e.target.closest('tr');
-      if (target && target !== dragged) {
-        const rect = target.getBoundingClientRect(), midY = rect.top + rect.height/2;
-        if (e.clientY < midY) target.before(dragged); else target.after(dragged);
-      } else if (!target) sheetTbody.appendChild(dragged);
-      updateRowNumbers();
-      dragged = null;
-    });
-  }
+        
+        
+async function editSelected() {
+    const ids = getSelectedIds();
 
-  // Save progress snapshot
-  async function saveProgress() {
-    if (!sheetTbody) return;
-    const rows = qsa('tr', sheetTbody);
-    if (!rows.length) return showToast('No rows to save', true);
-    const dateVal = snapshotDateEl && snapshotDateEl.value;
-    if (!dateVal) return showToast('Select a date', true);
-    // format to DD/MM/YYYY for server (your server expects that)
-    const parts = dateVal.split('-'); const formatted = `${parts[2]}/${parts[1]}/${parts[0]}`;
-    // If loaded snapshot had a different date we must clear id to 'save as new'
-    let idToSend = snapshotIdEl && snapshotIdEl.value || null;
-    if (loadedSnapshotDate && loadedSnapshotDate !== formatted) idToSend = null;
+    if (ids.length !== 1) {
+        alert("Select exactly ONE record to edit.");
+        return;
+    }
 
-    // gather table HTML (do not include the last 'Row' buttons column when saving preview)
-    const tableClone = sheetTbody.cloneNode(true);
-    // remove the last column content (buttons) in each row
-    qsa('tr', tableClone).forEach(tr => { if (tr.lastElementChild) tr.removeChild(tr.lastElementChild); });
-    const tableHTML = tableClone.innerHTML;
+    const id = ids[0];
 
-    try {
-      const res = await authFetch(`${API}/daily-progress`, {
-        method: 'POST',
-        body: JSON.stringify({ id: idToSend || null, date: formatted, tableHTML, rowCount: rows.length })
-      });
-      const data = await res.json().catch(()=>({success:false}));
-      if (data.success) {
-        showToast(data.message || 'Snapshot saved');
-        if (snapshotIdEl) snapshotIdEl.value = '';
-        loadedSnapshotDate = null;
-        localStorage.removeItem('dailyProgressDraft');
-        if (autoSaveMsgEl) autoSaveMsgEl.textContent = 'Snapshot saved!';
-        await loadSavedProgress();
-      } else showToast(data.error || 'Save failed', true);
-    } catch (err) { console.error(err); showToast('Server error', true); }
-  }
+    const res = await authFetch(`${API}/cl`);
+    const data = await res.json();
 
-  // Load saved progress list
-  let savedEntries = [], savedFiltered = [], savedPage = 1;
-  async function loadSavedProgress() {
-    try {
-      const res = await authFetch(`${API}/daily-progress`);
-      if (!res.ok) throw new Error('Failed to load saved snapshots');
-      savedEntries = await res.json();
-      // sort by DD/MM/YYYY -> newest first
-      savedEntries.sort((a,b) => {
-        const parseDate = d => { if(!d) return 0; const p = d.split(/[./-]/); return new Date(p[2], p[1]-1, p[0]).getTime(); };
-        return parseDate(b.date) - parseDate(a.date);
-      });
-      savedFiltered = savedEntries.slice();
-      savedPage = 1;
-      renderSaved();
-    } catch (err) { console.error(err); if (el('savedBody')) el('savedBody').innerHTML = '<tr><td colspan="3">Failed to load saved progress</td></tr>'; }
-  }
+    const cl = data.find(x => x.id == id);
+    if (!cl) return alert("Record not found");
 
-  function renderSaved() {
-    const tbody = el('savedBody'); if (!tbody) return;
-    const start = (savedPage-1) * SAVED_PER_PAGE; const end = start + SAVED_PER_PAGE;
-    const pageItems = savedFiltered.slice(start, end);
-    tbody.innerHTML = '';
-    if (!pageItems.length) { tbody.innerHTML = '<tr><td colspan="3">No saved snapshots</td></tr>'; if (el('savedPageInfo')) el('savedPageInfo').textContent = `Page 1 of 1`; return; }
-    pageItems.forEach(item => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td class="wrap"><strong>${item.date||''}</strong></td>
-        <td class="wrap">${item.rowCount||0} rows</td>
-        <td class="wrap">
-          <div class="actions">
-            <button class="small-btn preview-btn">Preview</button>
-            <button class="small-btn edit-btn">Load / Edit</button>
-            <button class="small-btn delete-btn">Delete</button>
-          </div>
-        </td>`;
-      tr.querySelector('.preview-btn').addEventListener('click', ()=> previewSnapshot(item.id));
-      tr.querySelector('.edit-btn').addEventListener('click', ()=> loadSnapshot(item.id));
-      tr.querySelector('.delete-btn').addEventListener('click', ()=> deleteSaved(item.id));
-      tbody.appendChild(tr);
-    });
-    const totalPages = Math.max(1, Math.ceil(savedFiltered.length / SAVED_PER_PAGE));
-    if (el('savedPageInfo')) el('savedPageInfo').textContent = `Page ${savedPage} of ${totalPages}`;
-  }
+    document.getElementById("clId").value = cl.id;
+    document.getElementById("clName").value = cl.name;
+    document.getElementById("clGender").value = cl.gender;
+    document.getElementById("clAadhar").value = cl.aadhar;
+    document.getElementById("clPhone").value = cl.phone;
+    document.getElementById("clStation").value = cl.station;
+    document.getElementById("clDivision").value = cl.division;
+    document.getElementById("clDoj").value = cl.doj;
+    document.getElementById("clDob").value = cl.dob;
+    document.getElementById("clWages").value = cl.wages;
+    document.getElementById("clNominee").value = cl.nominee;
+    document.getElementById("clRelation").value = cl.relation;
 
-  async function loadSnapshot(id) {
-    showConfirm('This will replace the current sheet. Continue?', async () => {
-      try {
-        const res = await authFetch(`${API}/daily-progress/${id}`);
-        if (!res.ok) throw new Error('Snapshot not found');
-        const snapshot = await res.json();
-        // snapshot.date = DD/MM/YYYY or similar; convert to YYYY-MM-DD for input
-        const parts = snapshot.date.split(/[./-]/);
-        const inputDate = `${parts[2]}-${parts[1]}-${parts[0]}`; if (snapshotDateEl) snapshotDateEl.value = inputDate;
-        if (sheetTbody) sheetTbody.innerHTML = snapshot.tableHTML;
-        if (snapshotIdEl) snapshotIdEl.value = snapshot.id;
-        loadedSnapshotDate = snapshot.date;
-        updateRowNumbers(); styleProgressRows();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } catch (err) { console.error(err); showToast(`Error loading snapshot: ${err.message}`, true); }
-    }, 'edit-btn');
-  }
-
-  async function previewSnapshot(id) {
-    const modal = el('snapshotPreviewModal'), frame = el('snapshotFrame');
-    if (!frame) return;
-    frame.innerHTML = '<h4>Loading snapshot...</h4>'; if (modal) modal.style.display = 'flex';
-    try {
-      const res = await authFetch(`${API}/daily-progress/${id}`);
-      if (!res.ok) throw new Error('Snapshot not found');
-      const snapshot = await res.json();
-      const theadHTML = el('progressTable') ? el('progressTable').querySelector('thead').innerHTML : '';
-      frame.innerHTML = `<h3>Daily progress on: ${snapshot.date}</h3><table id="previewTable"><thead>${theadHTML}</thead><tbody>${snapshot.tableHTML}</tbody></table>`;
-      // Remove last column in preview
-      const previewTR = frame.querySelector('#previewTable thead tr');
-      if (previewTR && previewTR.lastElementChild) previewTR.removeChild(previewTR.lastElementChild);
-      qsa('#previewTable tbody tr', frame).forEach(tr => { if (tr.lastElementChild) tr.removeChild(tr.lastElementChild); });
-      // remove contenteditable on preview
-      qsa('#previewTable td[contenteditable="true"]', frame).forEach(td => { td.removeAttribute('contenteditable'); td.style.background='none'; });
-    } catch (err) { console.error(err); frame.innerHTML = `<h4>Error loading snapshot: ${err.message}</h4>`; }
-  }
-  function closeSnapshotPreview(){ const m = el('snapshotPreviewModal'); if (m) { m.style.display='none'; el('snapshotFrame').innerHTML=''; } }
-
-  async function deleteSaved(id) {
-    showConfirm('Delete this saved snapshot? This cannot be undone.', async () => {
-      try {
-        const res = await authFetch(`${API}/daily-progress/${id}`, { method: 'DELETE' });
-        const data = await res.json().catch(()=>({success:false}));
-        if (data.success) { showToast('Snapshot deleted'); await loadSavedProgress(); } else showToast('Delete failed', true);
-      } catch (err) { console.error(err); showToast('Server error', true); }
-    });
-  }
-
-  // export to XLSX using SheetJS (already included in page)
-  function exportToExcel() {
-    showConfirm("Export current sheet to Excel?", () => {
-      try {
-        const table = el('progressTable').cloneNode(true);
-        // remove last header cell (Row)
-        const theadTR = table.querySelector('thead tr'); if (theadTR && theadTR.lastElementChild) theadTR.removeChild(theadTR.lastElementChild);
-        // remove last column in all tbody rows
-        qsa('tbody tr', table).forEach(tr => { if (tr.lastElementChild) tr.removeChild(tr.lastElementChild); });
-        const wb = XLSX.utils.table_to_book(table, {sheet: "Daily Progress"});
-        const date = snapshotDateEl && snapshotDateEl.value || new Date().toISOString().substr(0,10);
-        XLSX.writeFile(wb, `DailyProgress_${date}.xlsx`);
-      } catch (err) { console.error(err); showToast('Export failed', true); }
-    }, 'btn-export');
-  }
-
-  // Import from Excel (reads first sheet, groups by date)
-  async function importFromExcel(evt) {
-    const file = evt.target.files[0]; if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const data = e.target.result;
-        const wb = XLSX.read(data, {type: 'array'});
-        const ws = wb.Sheets[wb.SheetNames[0]];
-        const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, blankrows: false });
-        if (aoa.length < 2) return showToast('Import failed: empty sheet', true);
-        // build date groups
-        const dateGroups = {}; let currentDate = null;
-        for (let i=1;i<aoa.length;i++){
-          const row = aoa[i];
-          let dateVal = row[0];
-          if (dateVal) {
-            if (typeof dateVal === 'number') {
-              const excelDate = new Date((dateVal - (25567 + 2)) * 86400 * 1000);
-              dateVal = excelDate.toISOString().substr(0,10);
-            } else dateVal = String(dateVal).trim();
-            currentDate = dateVal;
-          }
-          if (!currentDate) continue;
-          if (!dateGroups[currentDate]) dateGroups[currentDate]=[];
-          dateGroups[currentDate].push({
-            Date: currentDate,
-            Division: row[1]||'',
-            SubDivision: row[2]||'',
-            Activity: row[3]||'',
-            Manpower: row[4]||'',
-            Status: row[5]||'',
-            Remarks: row[6]||''
-          });
-        }
-        const snapshots = [];
-        for (const d in dateGroups) {
-          const rows = dateGroups[d];
-          let tableHTML = '';
-          rows.forEach(r => {
-            tableHTML += `<tr>
-              <td contenteditable="true">${r.Date}</td>
-              <td contenteditable="true">${r.Division}</td>
-              <td contenteditable="true">${r.SubDivision}</td>
-              <td contenteditable="true">${r.Activity}</td>
-              <td contenteditable="true">${r.Manpower}</td>
-              <td contenteditable="true">${r.Status}</td>
-              <td contenteditable="true">${r.Remarks}</td>
-              <td></td>
-            </tr>`;
-          });
-          snapshots.push({ date: d, tableHTML, rowCount: rows.length });
-        }
-        if (!snapshots.length) return showToast("No valid dates found", true);
-        showConfirm(`Found ${snapshots.length} date(s). Import to server?`, async () => {
-          try {
-            const res = await authFetch(`${API}/daily-progress/batch-import`, { method: 'POST', body: JSON.stringify(snapshots) });
-            const data = await res.json().catch(()=>({success:false}));
-            if (res.ok) { showToast(data.message || 'Import complete'); loadSavedProgress(); } else { showToast(data.error || 'Import failed', true); }
-          } catch (err) { console.error(err); showToast('Import failed', true); }
-        }, 'btn-import-label');
-      } catch (err) { console.error(err); showToast('Import error', true); }
-    };
-    reader.onerror = ()=> showToast('File read error', true);
-    reader.readAsArrayBuffer(file);
-    evt.target.value = null;
-  }
-
-  // Merge / unmerge simple implementation
-  let selectedCells = [];
-  function mergeCells() {
-    if (selectedCells.length < 2) return showToast('Select 2+ cells (Shift+Click) to merge', true);
-    const rows = selectedCells.map(c => Array.from(sheetTbody.rows).indexOf(c.parentElement));
-    const cols = selectedCells.map(c => Array.from(c.parentElement.children).indexOf(c));
-    const minR = Math.min(...rows), maxR = Math.max(...rows);
-    const minC = Math.min(...cols), maxC = Math.max(...cols);
-    const topLeft = sheetTbody.rows[minR].children[minC];
-    topLeft.setAttribute('rowspan', maxR - minR + 1);
-    topLeft.setAttribute('colspan', maxC - minC + 1);
-    selectedCells.forEach(c => { if (c !== topLeft) c.remove(); });
-    selectedCells = [];
-    updateRowNumbers();
-  }
-  function unmergeCells() {
-    qsa('td[rowspan], td[colspan]', sheetTbody).forEach(td => {
-      const tr = td.parentElement;
-      const rowIndex = Array.from(sheetTbody.rows).indexOf(tr);
-      const colIndex = Array.from(tr.children).indexOf(td);
-      const rowspan = parseInt(td.getAttribute('rowspan')||1);
-      const colspan = parseInt(td.getAttribute('colspan')||1);
-      td.removeAttribute('rowspan'); td.removeAttribute('colspan');
-      for (let r = rowIndex; r < rowIndex + rowspan; r++) {
-        const targetRow = sheetTbody.rows[r];
-        for (let c = colIndex; c < colIndex + colspan; c++) {
-          if (r===rowIndex && c===colIndex) continue;
-          const newTd = document.createElement('td'); newTd.contentEditable = true; newTd.setAttribute('role','gridcell');
-          if (c >= targetRow.children.length) targetRow.appendChild(newTd); else targetRow.insertBefore(newTd, targetRow.children[c]);
-        }
-      }
-    });
-    updateRowNumbers();
-  }
-
-  /* -------------------- Initial wiring -------------------- */
-  function wireUI() {
-    // Tabs handled by existing showPanel function in markup; ensure daily panel loads snapshots when activated.
-    safeAddEvent(el('trashToggleBtn'), 'click', async () => {
-      viewingTrash = !viewingTrash;
-      if (viewingTrash) { await loadTrash(); el('trashToggleBtn').textContent='View Active Records'; el('trashToggleBtn').style.backgroundColor='#1D6F42'; el('pdfListTitle').textContent='Trash Bin'; }
-      else { await loadRecords(); el('trashToggleBtn').textContent='♻️ View Trash'; el('trashToggleBtn').style.backgroundColor='#dc3545'; el('pdfListTitle').textContent='All Records'; }
-      if (searchEl) searchEl.disabled = viewingTrash;
-      if (filterSubEl) filterSubEl.disabled = viewingTrash;
-      if (filterTypeEl) filterTypeEl.disabled = viewingTrash;
-    });
-
-    safeAddEvent(el('searchInput'), 'input', applyFilters);
-    safeAddEvent(el('filterSubDivision'), 'change', applyFilters);
-    safeAddEvent(el('filterRecordType'), 'change', applyFilters);
-    safeAddEvent(el('pageInfo'), 'click', ()=>{}); // noop keep existing UI stable
-    safeAddEvent(el('pdfTableBody') , 'click', (e)=> {
-      // make file-row delete button work (delegation)
-      const btn = e.target.closest('button');
-      if (!btn) return;
-      if (btn.textContent.trim() === '❌') btn.closest('tr').remove();
-    });
-    safeAddEvent(el('addRowBtn'), 'click', ()=> addPDFRow());
-    safeAddEvent(el('savePDFBtn'), 'click', saveAllPDFRows);
-    safeAddEvent(el('prevPage'), 'click', prevPage);
-    safeAddEvent(el('nextPage'), 'click', nextPage);
-
-    // simple prev/next in top controls
-    safeAddEvent(document.querySelector('.pagination-btn:nth-of-type(1)'), 'click', prevPage);
-    safeAddEvent(document.querySelector('.pagination-btn:nth-of-type(2)'), 'click', nextPage);
-
-    // preview modal close
-    safeAddEvent(el('previewModal'), 'click', (e) => { if (e.target === el('previewModal') || e.target.classList.contains('closeBtn')) closePreview(); });
-    safeAddEvent(el('snapshotPreviewModal'), 'click', (e) => { if (e.target === el('snapshotPreviewModal') || e.target.classList.contains('closeBtn')) closeSnapshotPreview(); });
-
-    // CL form
-    if (el('clForm')) el('clForm').addEventListener('submit', submitCLForm);
-    if (el('clActions')) {
-    const clEditBtn = el('clActions').querySelector('.top-btn:nth-child(1)');
-    const clDeleteBtn = el('clActions').querySelector('.top-btn:nth-child(2)');
-
-    safeAddEvent(clEditBtn, 'click', editSelectedCL);
-    safeAddEvent(clDeleteBtn, 'click', deleteSelectedCL);
+    window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 
-    // saved progress paging controls
-    safeAddEvent(document.querySelector('#savedBody ~ div .small:first-child'), 'click', ()=> { if (savedPage>1) { savedPage--; renderSaved(); } }); // optional
-    // but more reliable: bind the small buttons by ids if present
-    if (el('savedPageInfo')) {
-      // prev/next are above saved table — find them by the .small buttons around savedSearch
-      const smallBtns = document.querySelectorAll('#savedSearch ~ div .small');
-      if (smallBtns && smallBtns.length >= 2) {
-        smallBtns[0].addEventListener('click', ()=> { if (savedPage>1) { savedPage--; renderSaved(); }});
-        smallBtns[1].addEventListener('click', ()=> { if (savedPage < Math.ceil(savedFiltered.length/SAVED_PER_PAGE)) { savedPage++; renderSaved(); }});
-      }
+        
+        /* ----------------- Toast Notifications ----------------- */
+        function showToast(message, isError = false) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            toast.classList.add(isError ? 'error' : 'success');
+            container.appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 4000);
+        }
+
+        /* --- Custom Confirm Modal Logic --- */
+        let onConfirmCallback = null;
+        const confirmModal = document.getElementById('confirmModal');
+        const confirmMsgEl = document.getElementById('confirmMessage');
+        const confirmOkBtn = document.getElementById('confirmBtnOk');
+        const confirmCancelBtn = document.getElementById('confirmBtnCancel'); // --- NEW ---
+
+        function showConfirm(message, onConfirm, buttonClass = 'delete-btn') {
+            confirmMsgEl.textContent = message;
+            onConfirmCallback = onConfirm;
+            
+            confirmOkBtn.className = `small ${buttonClass}`;
+
+            confirmModal.style.display = 'flex';
+        }
+
+        confirmOkBtn.onclick = () => {
+            if (onConfirmCallback) {
+                onConfirmCallback();
+            }
+            onConfirmCallback = null;
+            confirmModal.style.display = 'none';
+        };
+
+        confirmCancelBtn.onclick = () => {
+            onConfirmCallback = null;
+            confirmModal.style.display = 'none';
+        };
+
+
+        /* =================================================================== */
+        /* ===================== PDF DATABASE PANEL CODE ===================== */
+        /* =================================================================== */
+        const recordForm = document.getElementById('recordForm');
+        const recordTable = document.getElementById('recordTable');
+        const editId = document.getElementById('editId');
+        let allRecords = [];
+        let currentPage = 1;
+        const recordsPerPage = 10;
+        let filteredRecords = []; 
+        let sortAsc = true;
+        
+        const filterSubDivisionEl = document.getElementById('filterSubDivision');
+        const filterRecordTypeEl = document.getElementById('filterRecordType');
+        const searchInputEl = document.getElementById('searchInput');
+
+        let viewingTrash = false;
+
+        async function loadRecords() {
+            try {
+                const res = await authFetch(`${API}/records`);
+                if (!res.ok) throw new Error('Failed to load');
+                
+                allRecords = await res.json();
+                
+                populateFilterDropdowns(allRecords);
+                applyAllFilters();
+                
+            } catch (err) {
+                console.error(err);
+                recordTable.innerHTML = "<tr><td colspan='8'>⚠️ Failed to load records</td></tr>";
+            }
+        }
+        
+        function populateFilterDropdowns(data) {
+            const subDivisions = [...new Set(data.map(r => r.subDivision).filter(Boolean))];
+            const recordTypes = [...new Set(data.map(r => r.recordType).filter(Boolean))];
+            
+            filterSubDivisionEl.innerHTML = '<option value="">All Sub Divisions</option>';
+            subDivisions.sort().forEach(val => {
+                filterSubDivisionEl.innerHTML += `<option value="${val}">${val}</option>`;
+            });
+            
+            filterRecordTypeEl.innerHTML = '<option value="">All Record Types</option>';
+            recordTypes.sort().forEach(val => {
+                filterRecordTypeEl.innerHTML += `<option value="${val}">${val}</option>`;
+            });
+        }
+
+        function updateDashboard(data = []) {
+            const totalAmount = data.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+            const prCount = data.filter(r => (r.recordType || '').toLowerCase() === 'pr').length;
+            const estimateCount = data.filter(r => (r.recordType || '').toLowerCase() === 'estimate').length;
+
+            document.getElementById('pdfDashboard').innerHTML = `
+                <div class="dash-box">
+                    <h4>Total Records</h4>
+                    <p id="statTotalRecords">${data.length}</p>
+                </div>
+                <div class="dash-box">
+                    <h4>Total Amount</h4>
+                    <p id="statTotalAmount">₹${totalAmount.toLocaleString('en-IN')}</p>
+                </div>
+                <div class="dash-box">
+                    <h4>PRs</h4>
+                    <p id="statPrCount">${prCount}</p>
+                </div>
+                <div class="dash-box">
+                    <h4>Estimates</h4>
+                    <p id="statEstimateCount">${estimateCount}</p>
+                </div>
+            `;
+        }
+
+        function applyAllFilters() {
+            const searchTerm = searchInputEl.value.toLowerCase();
+            const subDiv = filterSubDivisionEl.value;
+            const recType = filterRecordTypeEl.value;
+
+            filteredRecords = allRecords.filter(r => {
+                const matchesSearch = (
+                    (r.workName || '').toLowerCase().includes(searchTerm) ||
+                    (r.prNo || '').toLowerCase().includes(searchTerm) ||
+                    (r.subDivision || '').toLowerCase().includes(searchTerm) ||
+                    (r.recordType || '').toLowerCase().includes(searchTerm)
+                );
+                const matchesSubDiv = !subDiv || r.subDivision === subDiv;
+                const matchesRecType = !recType || r.recordType === recType;
+                
+                return matchesSearch && matchesSubDiv && matchesRecType;
+            });
+            
+            currentPage = 1;
+            renderRecords(filteredRecords, viewingTrash);
+            updateDashboard(filteredRecords);
+        }
+
+        function resetAllFilters() {
+            searchInputEl.value = '';
+            filterSubDivisionEl.value = '';
+            filterRecordTypeEl.value = '';
+            applyAllFilters();
+        }
+        
+        searchInputEl.addEventListener('input', applyAllFilters);
+        filterSubDivisionEl.addEventListener('change', applyAllFilters);
+        filterRecordTypeEl.addEventListener('change', applyAllFilters);
+
+        function renderRecords(data, isTrash = false) {
+            const tableHead = document.getElementById('pdfTableHead');
+            if (isTrash) {
+                tableHead.innerHTML = `
+                    <th class="wrap">Name</th>
+                    <th class="wrap">PR No</th>
+                    <th class="wrap">Sub Div</th>
+                    <th class="wrap">Deleted On</th>
+                    <th class="wrap">Actions</th>
+                `;
+            } else {
+                tableHead.innerHTML = `
+                    <th class="wrap" onclick="sortRecords('id')">ID ↕️</th>
+                    <th class="wrap" onclick="sortRecords('workName')">Name ↕️</th>
+                    <th class="wrap" onclick="sortRecords('prNo')">PR No ↕️</th>
+                    <th class="wrap" onclick="sortRecords('subDivision')">Sub Div ↕️</th>
+                    <th class="wrap" onclick="sortRecords('recordType')">Type ↕️</th>
+                    <th class="wrap" onclick="sortRecords('amount')">Amount ↕️</th>
+                    <th class="wrap" onclick="sortRecords('sendTo')">Send To ↕️</th>
+                    <th class="wrap">Actions</th>
+                `;
+            }
+
+            const start = (currentPage - 1) * recordsPerPage;
+            const end = start + recordsPerPage;
+            const paginated = data.slice(start, end);
+
+            recordTable.innerHTML = '';
+            if (!paginated.length) {
+                const cols = isTrash ? 5 : 8;
+                recordTable.innerHTML = `<tr><td colspan="${cols}">No records found</td></tr>`;
+                document.getElementById('pageInfo').textContent = `Page 1 of 1`;
+                return;
+            }
+
+            paginated.forEach(r => {
+                const tr = document.createElement('tr');
+                if (isTrash) {
+                    tr.innerHTML = `
+                        <td class="wrap">${r.workName || ''}</td>
+                        <td class="wrap">${r.prNo || ''}</td>
+                        <td class="wrap">${r.subDivision || ''}</td>
+                        <td class="wrap">${new Date(r.deletedOn).toLocaleString()}</td>
+                        <td class="wrap">
+                            <div class="actions">
+                                <button class="small-btn restore-btn" onclick="restoreRecord(${r.id})">Restore</button>
+                                <button class="small-btn delete-btn" onclick="deleteRecordPermanently(${r.id})">Delete Perm.</button>
+                            </div>
+                        </td>
+                    `;
+                } else {
+                    tr.innerHTML = `
+                        <td class="wrap">${r.id || ''}</td>
+                        <td class="wrap">${r.workName || ''}</td>
+                        <td class="wrap">${r.prNo || ''}</td>
+                        <td class="wrap">${r.subDivision || ''}</td>
+                        <td class="wrap">${r.recordType || ''}</td>
+                        <td class="wrap">₹${r.amount ? parseFloat(r.amount).toLocaleString('en-IN') : '0'}</td>
+                        <td class="wrap">${r.sendTo || ''}</td>
+                        <td class="wrap">
+                            <div class="actions">
+                                ${r.pdfPath ? `<button class="small-btn preview-btn" onclick="previewPDF('${r.pdfPath}')">Preview</button>` : ''}
+                                <button class="small-btn edit-btn" onclick="editRecord(${r.id})">Edit</button>
+                                <button class="small-btn delete-btn" onclick="deleteRecord(${r.id})">Trash</button>
+                                ${r.pdfPath ? `<button class="small-btn download-btn" onclick="downloadPDF('${r.pdfPath}')">Download</button>` : ''}
+                            </div>
+                        </td>
+                    `;
+                }
+                recordTable.appendChild(tr);
+            });
+            document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${Math.max(1, Math.ceil(data.length / recordsPerPage))}`;
+        }
+
+        function nextPage() {
+            if (currentPage < Math.ceil(filteredRecords.length / recordsPerPage)) {
+                currentPage++;
+                renderRecords(filteredRecords, viewingTrash);
+            }
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderRecords(filteredRecords, viewingTrash);
+            }
+        }
+        
+        function sortRecords(field) {
+            if (viewingTrash) return;
+            const sorter = (a, b) => {
+                let valA = a[field];
+                let valB = b[field];
+                if (field === 'amount' || field === 'id') {
+                    valA = parseFloat(valA) || 0;
+                    valB = parseFloat(valB) || 0;
+                }
+                if (valA < valB) return sortAsc ? -1 : 1;
+                if (valA > valB) return sortAsc ? 1 : -1;
+                return 0;
+            };
+            allRecords.sort(sorter);
+            filteredRecords.sort(sorter);
+            sortAsc = !sortAsc;
+            currentPage = 1;
+            renderRecords(filteredRecords, viewingTrash);
+        }
+       const BACKEND = "https://nttps-backend.onrender.com";
+
+function previewPDF(path) {
+    const iframe = document.getElementById("pdfFrame");
+    iframe.src = path;
+    document.getElementById("previewModal").style.display = "flex";
+}
+
+        function closePreview() {
+            document.getElementById('previewModal').style.display = 'none';
+            document.getElementById('pdfFrame').src = '';
+        }
+
+        function editRecord(id) {
+            const r = allRecords.find(r => r.id === id);
+            if (!r) return;
+            document.getElementById('workName').value = r.workName;
+            document.getElementById('prNo').value = r.prNo;
+            document.getElementById('subDivision').value = r.subDivision;
+            document.getElementById('recordType').value = r.recordType;
+            document.getElementById('amount').value = r.amount;
+            document.getElementById('sendTo').value = r.sendTo;
+            editId.value = r.id;
+            document.getElementById('currentPdf').value = r.pdfPath || '';
+            
+            document.getElementById('formWrapper').style.display = 'block';
+            document.getElementById('formToggle').textContent = 'Add / Edit Record ➖';
+            
+            window.scrollTo(0, 0); 
+        }
+
+        async function deleteRecord(id) {
+            showConfirm('Move this record to the trash bin?', async () => {
+                try {
+                    const res = await authFetch(`${API}/records/${id}`, { method: 'DELETE' }); 
+                    const data = await res.json();
+                    if (data.success) {
+                        showToast('Record moved to trash');
+                        loadRecords();
+                    } else showToast('Delete failed', true);
+                } catch (err) {
+                    console.error(err);
+                    showToast('Server error', true);
+                }
+            });
+        }
+        
+        async function toggleTrashView() {
+            viewingTrash = !viewingTrash;
+            const btn = document.getElementById('trashToggleBtn');
+            const title = document.getElementById('pdfListTitle');
+            
+            if (viewingTrash) {
+                btn.textContent = 'View Active Records';
+                btn.style.backgroundColor = '#1D6F42';
+                title.textContent = 'Trash Bin';
+                await loadTrash();
+            } else {
+                btn.textContent = '♻️ View Trash';
+                btn.style.backgroundColor = '#dc3545';
+                title.textContent = 'All Records';
+                await loadRecords();
+            }
+            searchInputEl.disabled = viewingTrash;
+            filterSubDivisionEl.disabled = viewingTrash;
+            filterRecordTypeEl.disabled = viewingTrash;
+        }
+
+        async function loadTrash() {
+            try {
+                const res = await authFetch('${API}/records/trash');
+                if (!res.ok) throw new Error('Failed to load trash');
+                
+                const trashRecords = await res.json();
+                trashRecords.sort((a,b) => (b.deletedOn || '').localeCompare(a.deletedOn));
+                
+                allRecords = trashRecords;
+                filteredRecords = trashRecords;
+                currentPage = 1;
+                
+                renderRecords(filteredRecords, true);
+                updateDashboard(filteredRecords);
+                
+            } catch (err) {
+                showToast(err.message, true);
+                recordTable.innerHTML = "<tr><td colspan='5'>⚠️ Failed to load trash</td></tr>";
+            }
+        }
+        
+        async function restoreRecord(id) {
+            showConfirm('Restore this record to the main list?', async () => {
+                try {
+                    const res = await authFetch(`${API}/records/${id}/restore`, { method: 'POST' }); 
+                    const data = await res.json();
+                    if (data.success) {
+                        showToast('Record restored');
+                        loadTrash();
+                    } else showToast('Restore failed', true);
+                } catch (err) {
+                    console.error(err);
+                    showToast('Server error', true);
+                }
+            }, 'restore-btn');
+        }
+
+        async function deleteRecordPermanently(id) {
+            showConfirm('PERMANENTLY DELETE this record? This cannot be undone.', async () => {
+                try {
+                    const res = await authFetch(`${API}/records/trash/${id}`, { method: 'DELETE' }); 
+                    const data = await res.json();
+                    if (data.success) {
+                        showToast('Record permanently deleted');
+                        loadTrash();
+                    } else showToast('Delete failed', true);
+                } catch (err) {
+                    console.error(err);
+                    showToast('Server error', true);
+                }
+            });
+        }
+
+        recordForm.addEventListener('submit', async e => {
+            e.preventDefault();
+            const formData = new FormData();
+            const pdfFile = document.getElementById('pdfFile').files[0];
+            if (pdfFile) formData.append('pdfs', pdfFile);
+            else if (editId.value) formData.append('pdfPath', document.getElementById('currentPdf').value);
+            formData.append('workName', document.getElementById('workName').value);
+            formData.append('prNo', document.getElementById('prNo').value);
+            formData.append('subDivision', document.getElementById('subDivision').value);
+            formData.append('recordType', document.getElementById('recordType').value);
+            formData.append('amount', document.getElementById('amount').value);
+            formData.append('sendTo', document.getElementById('sendTo').value);
+            if (editId.value) formData.append('id', editId.value);
+
+            try {
+                const res = await authFetch(`${API}/upload`, { 
+                    method: 'POST', 
+                    body: formData 
+                });
+                
+                const data = await res.json();
+                if (data.success || data.records) {
+                    showToast(editId.value ? 'Record updated' : 'Record added');
+                    recordForm.reset();
+                    editId.value = '';
+                    document.getElementById('currentPdf').value = '';
+                    loadRecords();
+                    
+                    document.getElementById('formWrapper').style.display = 'none';
+                    document.getElementById('formToggle').textContent = 'Add / Edit Record ➕';
+
+                } else showToast('Operation failed', true);
+            } catch (err) {
+                console.error(err);
+                showToast('Server error', true);
+            }
+        });
+
+        function downloadPDF(path) {
+            const a = document.createElement('a');
+            a.href = path.startsWith("http") ? path : BACKEND + path;
+            a.download = path.split('/').pop();
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function goHome() { window.location.href = 'index.html'; }
+        
+        function logout() {
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("isAdmin");
+    window.location.href = "login.html";
+}
+
+        async function autoExtractPDF() {
+            const fileInput = document.getElementById("pdfFile");
+            const file = fileInput.files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append("pdfFile", file);
+            try {
+                const res = await authFetch(`${API}/extract-pdf`, { 
+                    method: "POST", 
+                    body: formData 
+                });
+
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.error || "Failed to extract PDF content");
+                }
+
+                const data = await res.json();
+                if (data.workName) document.getElementById("workName").value = data.workName;
+                if (data.prNo) document.getElementById("prNo").value = data.prNo;
+                if (data.recordType) document.getElementById("recordType").value = data.recordType;
+                if (data.amount) document.getElementById("amount").value = data.amount;
+
+            } catch (err) {
+                console.error(err);
+                showToast(err.message, true);
+            }
+        }
+function addPDFRow(data = {}) {
+    const table = document.getElementById("pdfTableBody");
+
+    const row = document.createElement("tr");
+
+    row.innerHTML = `
+        <td><input class="form-control" value="${data.workName || ''}" /></td>
+        <td><input class="form-control" value="${data.prNo || ''}" /></td>
+
+        <td>
+            <select class="form-control">
+                <option>Sub Div-I</option>
+                <option>Sub Div-II</option>
+                <option>Sub Div-III</option>
+                <option>Sub Div-IV</option>
+            </select>
+        </td>
+
+        <td>
+            <select class="form-control">
+                <option>PR</option>
+                <option>Estimate</option>
+                <option>Drawing</option>
+                <option>Other Record</option>
+            </select>
+        </td>
+
+        <td><input type="file" class="form-control" accept="application/pdf" /></td>
+
+        <td><input class="form-control" value="${data.amount || ''}" /></td>
+
+        <td><input class="form-control" value="${data.sendTo || ''}" /></td>
+
+        <td>
+            <button class="btn btn-danger" onclick="this.closest('tr').remove()">❌</button>
+        </td>
+    `;
+
+    table.appendChild(row);
+}
+
+
+// ADD NEW EMPTY ROW
+document.getElementById("addRowBtn").addEventListener("click", () => {
+    addPDFRow();
+});
+
+
+// SAVE ALL PDF RECORDS
+document.getElementById("savePDFBtn").addEventListener("click", async () => {
+    const rows = document.querySelectorAll("#pdfTableBody tr");
+    const records = [];
+
+    for (let r of rows) {
+        const inputs = r.querySelectorAll("input, select");
+        const pdfFile = inputs[4].files[0];
+
+        const formData = new FormData();
+        formData.append("workName", inputs[0].value);
+        formData.append("prNo", inputs[1].value);
+        formData.append("subDivision", inputs[2].value);
+        formData.append("recordType", inputs[3].value);
+        formData.append("amount", inputs[5].value);
+        formData.append("sendTo", inputs[6].value);
+
+        if (pdfFile) formData.append("pdfFile", pdfFile);
+
+        // PUSH TO SERVER
+        await fetch(`${SERVER_URL}/records`, {
+            method: "POST",
+            body: formData
+        });
     }
 
-    // daily controls
-    safeAddEvent(el('addRowBtn'), 'click', ()=> addProgressRow());
-    safeAddEvent(el('addRowBtn'), 'click', ()=> addProgressRow()); // keep original Add
-    safeAddEvent(el('importFile'), 'change', importFromExcel);
-    safeAddEvent(el('autoSaveMsg'), 'click', ()=> {});
-    safeAddEvent(el('snapshotDate'), 'change', ()=> { /* nothing special */ });
-    // export/merge/unmerge/save/draft buttons
-    const btnExport = document.querySelector('.btn-export'); if (btnExport) btnExport.addEventListener('click', exportToExcel);
-    const btnMerge = document.querySelector('.btn-merge'); if (btnMerge) btnMerge.addEventListener('click', mergeCells);
-    const btnUnmerge = document.querySelector('.btn-unmerge'); if (btnUnmerge) btnUnmerge.addEventListener('click', unmergeCells);
-    const btnSaveProgress = document.querySelector('.btn-save'); if (btnSaveProgress) btnSaveProgress.addEventListener('click', saveProgress);
-    const btnSaveDraft = document.querySelector('.small[onclick*="saveDraft"]'); if (btnSaveDraft) btnSaveDraft.addEventListener('click', saveDraft);
+    alert("✅ All Records Saved!");
+});
+async function loadExistingPDFRecords() {
+    const res = await fetch(`${SERVER_URL}/records`);
+    const data = await res.json();
 
-    // snapshot preview print
-    safeAddEvent(el('snapshotPreviewContent') && el('snapshotPreviewContent').querySelector('.print-btn'), 'click', () => {
-      const content = el('snapshotFrame') ? el('snapshotFrame').innerHTML : '';
-      const w = window.open('', '', 'height=800,width=1000');
-      w.document.write('<html><head><title>Print Snapshot</title><style>body{font-family:Arial}table{width:100%;border-collapse:collapse}th,td{border:1px solid #000;padding:8px}</style></head><body>');
-      w.document.write(content); w.document.write('</body></html>');
-      w.document.close(); w.focus(); setTimeout(()=> { w.print(); w.close(); }, 200);
-    });
+    data.forEach(r => addPDFRow(r));
+}
 
-    // savedSearch input
-    if (el('savedSearch')) el('savedSearch').addEventListener('input', (e) => {
-      const term = e.target.value.trim().toLowerCase();
-      savedPage = 1;
-      if (!term) savedFiltered = savedEntries.slice();
-      else savedFiltered = savedEntries.filter(item => (item.date||'').toLowerCase().includes(term));
-      renderSaved();
-    });
+window.onload = loadExistingPDFRecords;
 
-    // Collapsible form toggle
-    const formToggle = el('formToggle'), formWrapper = el('formWrapper');
-    if (formToggle && formWrapper) formToggle.addEventListener('click', () => {
-      if (formWrapper.style.display === 'none' || formWrapper.style.display === '') { formWrapper.style.display='block'; formToggle.textContent='Add / Edit Record ➖'; }
-      else { formWrapper.style.display='none'; formToggle.textContent='Add / Edit Record ➕'; }
-    });
 
-    // logout/home buttons already wired inline in HTML
-  }
+        /* =================================================================== */
+        /* =================== DAILY WORK PROGRESS PANEL CODE ================ */
+        /* =================================================================== */
+        const sheetTbody = document.getElementById('progressTableBody');
+        const snapshotDateEl = document.getElementById('snapshotDate');
+        const snapshotIdEl = document.getElementById('snapshotId');
+        let loadedSnapshotDate = null; // <-- ADD THIS LINE
+        
+        let savedEntries = [];
+        let savedFiltered = [];
+        let savedPage = 1;
+        const savedPerPage = 8;
+        
+        function styleRow(tr) {
+            if (!tr) return;
+            const statusCell = tr.children[5];
+            if (!statusCell) return;
+            const status = statusCell.textContent.toLowerCase().trim();
+            tr.classList.remove('status-done', 'status-progress', 'status-pending');
+            if (status.includes('done') || status.includes('completed')) {
+                tr.classList.add('status-done');
+            } else if (status.includes('progress') || status.includes('wip')) {
+                tr.classList.add('status-progress');
+            } else if (status.includes('pending') || status.includes('issue')) {
+                tr.classList.add('status-pending');
+            }
+        }
+        function styleProgressRows() {
+            sheetTbody.querySelectorAll('tr').forEach(styleRow);
+        }
+        sheetTbody.addEventListener('input', (e) => {
+            const tr = e.target.closest('tr');
+            styleRow(tr);
+        });
 
-  // manual draft save/restore
-  function saveDraft() {
-    if (!sheetTbody) return;
-    localStorage.setItem('dailyProgressDraft', sheetTbody.innerHTML);
-    if (autoSaveMsgEl) autoSaveMsgEl.textContent = `Draft saved at ${new Date().toLocaleTimeString()}`;
-    showToast('Draft saved locally.');
-  }
-  function restoreDraft() {
-    const draft = localStorage.getItem('dailyProgressDraft');
-    if (!draft) return;
-    showConfirm('An unsaved draft found. Restore?', () => {
-      if (sheetTbody) { sheetTbody.innerHTML = draft; updateRowNumbers(); styleProgressRows(); showToast('Draft restored.'); }
-    }, 'restore-btn');
-    // If user cancels, remove draft
-    const origCancel = el('confirmBtnCancel') && el('confirmBtnCancel').onclick;
-    if (el('confirmBtnCancel')) {
-      el('confirmBtnCancel').onclick = () => { if (isFn(origCancel)) origCancel(); localStorage.removeItem('dailyProgressDraft'); showToast('Draft discarded.'); };
-    }
-  }
-function showPanel(tab) {
-    document.getElementById("pdfPanel").classList.remove("active");
-    document.getElementById("dailyPanel").classList.remove("active");
-    document.getElementById("clPanel").classList.remove("active");
+        function addProgressRow(prefill={}) {
+            const tr = document.createElement('tr');
+            tr.draggable = true;
+            
+            const makeCell = (value='') => {
+                const td = document.createElement('td');
+                td.contentEditable = true;
+                td.setAttribute('role','gridcell');
+                td.textContent = value;
+                return td;
+            };
+            tr.appendChild(makeCell(prefill.date || ''));
+            tr.appendChild(makeCell(prefill.division || ''));
+            tr.appendChild(makeCell(prefill.subDivision || ''));
+            tr.appendChild(makeCell(prefill.activity || ''));
+            tr.appendChild(makeCell(prefill.manpower || ''));
+            tr.appendChild(makeCell(prefill.status || ''));
+            tr.appendChild(makeCell(prefill.remarks || ''));
+            const rowCell = document.createElement('td');
+            tr.appendChild(rowCell);
+            sheetTbody.appendChild(tr);
+            styleRow(tr);
+        }
+        function insertRowBefore() {
+            // 1. Create a new blank row (logic from addProgressRow)
+            const tr = document.createElement('tr');
+            tr.draggable = true; // Make it draggable
 
-    document.getElementById("tabPdf").classList.remove("active");
-    document.getElementById("tabDaily").classList.remove("active");
-    document.getElementById("tabCL").classList.remove("active");
+            const makeCell = (value='') => {
+                const td = document.createElement('td');
+                td.contentEditable = true;
+                td.setAttribute('role','gridcell');
+                td.textContent = value;
+                return td;
+            };
+            
+            tr.appendChild(makeCell(''));
+            tr.appendChild(makeCell(''));
+            tr.appendChild(makeCell(''));
+            tr.appendChild(makeCell(''));
+            tr.appendChild(makeCell(''));
+            tr.appendChild(makeCell(''));
+            tr.appendChild(makeCell(''));
+            
+            const rowCell = document.createElement('td');
+            tr.appendChild(rowCell);
 
-    if (tab === "pdf") {
-        document.getElementById("pdfPanel").classList.add("active");
-        document.getElementById("tabPdf").classList.add("active");
-    } else if (tab === "daily") {
-        document.getElementById("dailyPanel").classList.add("active");
-        document.getElementById("tabDaily").classList.add("active");
-    } else if (tab === "cl") {
-        document.getElementById("clPanel").classList.add("active");
-        document.getElementById("tabCL").classList.add("active");
+            // 2. Check if a row is selected
+            if (!lastSelectedRow) {
+                // If no row is selected, just add to the top
+                sheetTbody.prepend(tr);
+            } else {
+                // If a row is selected, insert the new row *before* it
+                lastSelectedRow.before(tr);
+            }
+
+            // 3. Update row numbers and style
+            styleRow(tr);
+            updateRowNumbers();
+        }
+        function insertRowAfter() {
+            const tr = document.createElement('tr');
+            tr.draggable = true;
+            
+            const makeCell = (value='') => {
+                const td = document.createElement('td');
+                td.contentEditable = true;
+                td.setAttribute('role','gridcell');
+                td.textContent = value;
+                return td;
+            };
+            tr.appendChild(makeCell(''));
+            tr.appendChild(makeCell(''));
+            tr.appendChild(makeCell(''));
+            tr.appendChild(makeCell(''));
+            tr.appendChild(makeCell(''));
+            tr.appendChild(makeCell(''));
+            tr.appendChild(makeCell(''));
+            const rowCell = document.createElement('td');
+            tr.appendChild(rowCell);
+            if (!lastSelectedRow) {
+                sheetTbody.appendChild(tr);
+            } else {
+                lastSelectedRow.after(tr);
+            }
+            styleRow(tr);
+            updateRowNumbers();
+        }
+
+        function removeRow(btn){
+            const tr = btn.closest('tr');
+            if(tr) tr.remove();
+            updateRowNumbers();
+        }
+
+        function clearSheet(){
+            showConfirm('Clear all rows from the sheet?', () => {
+                sheetTbody.innerHTML='';
+                snapshotIdEl.value = '';
+                loadedSnapshotDate = null;
+                setDefaultDate();
+                localStorage.removeItem('dailyProgressDraft');
+                autoSaveMsgEl.textContent = '';
+            });
+        }
+
+        function initSheet() {
+            sheetTbody.innerHTML = '';
+            for (let i = 0; i < 20; i++) {
+                addProgressRow();
+            }
+            updateRowNumbers(); 
+            styleProgressRows();
+        }
+        
+        function setDefaultDate() {
+             if (!snapshotDateEl.value) {
+                 snapshotDateEl.value = new Date().toISOString().substr(0, 10);
+             }
+         }
+
+        function updateRowNumbers(){
+            sheetTbody.querySelectorAll('tr').forEach((tr, idx)=>{
+                const cell = tr.querySelector('td:last-child');
+                if(cell) cell.innerHTML=`<button class="small small-btn delete-btn" style="padding: 4px 8px;" onclick="removeRow(this)">X</button> ${idx+1}`;
+            });
+        }
+        
+        async function saveProgress(){
+            // --- FIX: Exclude selected row highlight from saved snapshot ---
+let lastSelectedRowIndex = -1;
+if (lastSelectedRow) {
+    // Remember index and remove highlight temporarily
+    lastSelectedRowIndex = Array.from(sheetTbody.children).indexOf(lastSelectedRow);
+    lastSelectedRow.classList.remove('selected-row');
+}
+
+// Take clean HTML without highlight
+const snapshotHTML = sheetTbody.innerHTML;
+
+// Restore highlight back for user view
+if (lastSelectedRowIndex > -1 && sheetTbody.children[lastSelectedRowIndex]) {
+    sheetTbody.children[lastSelectedRowIndex].classList.add('selected-row');
+}
+// --- END FIX ---
+
+unmergeCells();
+
+            const rowCount = sheetTbody.querySelectorAll('tr').length;
+            sheetTbody.innerHTML = snapshotHTML;
+            updateRowNumbers(); 
+            styleProgressRows();
+
+            const dateValue = snapshotDateEl.value; // This is 'YYYY-MM-DD'
+            let snapshotId = snapshotIdEl.value; // <-- Use 'let' instead of 'const'
+
+            if (!dateValue) {
+                return showToast('Please select a date for this snapshot.', true);
+            }
+
+            // --- NEW FORMATTING LOGIC ---
+            const parts = dateValue.split('-'); // [YYYY, MM, DD]
+            const formattedDate = `${parts[2]}/${parts[1]}/${parts[0]}`; // DD/MM/YYYY
+
+            // --- THIS IS THE FIX ---
+            // If we had a date loaded AND the new date is different,
+            // we must clear the ID to force a "Save As New".
+            if (loadedSnapshotDate && loadedSnapshotDate !== formattedDate) {
+                snapshotId = null;
+            }
+            // --- END OF FIX ---
+
+            if (!rowCount) return showToast('No rows to save.', true);
+            
+            try{
+ const res = await authFetch(`${API}/daily-progress`, {
+    method: 'POST',
+    body: JSON.stringify({
+        id: snapshotId || null,
+        date: formattedDate,
+        tableHTML: snapshotHTML,
+        rowCount: rowCount
+    })
+});
+                const data = await res.json();
+                if(data.success){
+                    showToast(data.message);
+                    snapshotIdEl.value = '';
+loadedSnapshotDate = null;
+                    localStorage.removeItem('dailyProgressDraft');
+                    document.getElementById('autoSaveMsg').textContent = 'Snapshot saved!';
+                    loadSavedProgress();
+                } else {
+                    showToast(`Save failed: ${data.error}`, true);
+                }
+            } catch(err){
+                console.error(err);
+                showToast('Server error', true);
+            }
+        }
+
+        async function loadSavedProgress(){
+    try {
+        const res = await authFetch(`${API}/daily-progress`);
+        savedEntries = await res.json();
+
+        // ✅ Sort from newest → oldest properly (handles DD/MM/YYYY format)
+        savedEntries.sort((a, b) => {
+            const parseDate = d => {
+                if (!d) return 0;
+                const parts = d.split(/[./-]/);
+                return new Date(parts[2], parts[1] - 1, parts[0]).getTime();
+            };
+            return parseDate(b.date) - parseDate(a.date);
+        });
+
+        savedFiltered = savedEntries.slice();
+        savedPage = 1;
+        renderSaved();
+    } catch (err) {
+        console.error(err);
+        document.getElementById('savedBody').innerHTML = '<tr><td colspan="3">Failed to load saved progress</td></tr>';
     }
 }
-window.showPanel = showPanel;
 
-  /* -------------------- Startup -------------------- */
-  (function start() {
-    // wire UI
-    wireUI();
-    // initial loads (guard the DOM presence)
-    loadRecords().catch(()=>{});
-    initSheet();
-    // set default date
-    if (snapshotDateEl && !snapshotDateEl.value) snapshotDateEl.value = new Date().toISOString().slice(0,10);
-    loadSavedProgress().catch(()=>{});
-    restoreDraft();
-    loadCLData().catch(()=>{});
-  })();
 
-  // Expose some functions globally for inline onclicks in the markup (if any)
-  window.nextPage = nextPage;
-  window.prevPage = prevPage;
-  window.showConfirm = showConfirm;
-  window.previewPDF = previewPDF;
-  window.closePreview = closePreview;
-  window.openEditRecord = openEditRecord;
-  window.downloadPDF = downloadPDF;
-  window.addProgressRow = addProgressRow;
-  window.insertRowBefore = function(){ if (!lastSelectedRow) sheetTbody.prepend(document.createElement('tr')); else lastSelectedRow.before(document.createElement('tr')); updateRowNumbers(); };
-  window.insertRowAfter = function(){ if (!lastSelectedRow) sheetTbody.appendChild(document.createElement('tr')); else lastSelectedRow.after(document.createElement('tr')); updateRowNumbers(); };
-  window.saveProgress = saveProgress;
-  window.exportToExcel = exportToExcel;
-  window.importFromExcel = importFromExcel;
-  window.mergeCells = mergeCells;
-  window.unmergeCells = unmergeCells;
-  window.previewSnapshot = previewSnapshot;
-  window.loadSnapshot = loadSnapshot;
-  window.deleteSaved = deleteSaved;
-  window.closeSnapshotPreview = closeSnapshotPreview;
-  window.printSnapshot = () => { const btn = document.querySelector('#snapshotPreviewContent .print-btn'); if (btn) btn.click(); };
+        function renderSaved(data=savedFiltered){
+            const start=(savedPage-1)*savedPerPage;
+            const end=start+savedPerPage;
+            const pageItems=data.slice(start,end);
+            const tbody=document.getElementById('savedBody');
+            tbody.innerHTML='';
 
-  // Keep old simple functions for markup compatibility
-  window.goHome = () => window.location.href = 'index.html';
-  window.logout = () => { localStorage.removeItem('adminToken'); localStorage.removeItem('isAdmin'); window.location.href = 'login.html'; };
+            if(!pageItems.length){
+                tbody.innerHTML='<tr><td colspan="3">No saved snapshots</td></tr>';
+                document.getElementById('savedPageInfo').textContent = `Page 1 of 1`;
+                return;
+            }
 
-})();
-</script>
-</body>
+            pageItems.forEach(item=>{
+                const tr=document.createElement('tr');
+                tr.innerHTML= `
+                    <td class="wrap"><strong>${item.date||''}</strong></td>
+                    <td class="wrap">${item.rowCount||'0'} rows</td>
+                    <td class="wrap">
+                        <div class="actions">
+                            <button class="small-btn preview-btn" onclick="previewSnapshot(${item.id})">Preview</button>
+                            <button class="small-btn edit-btn" onclick="loadSnapshot(${item.id})">Load / Edit</button>
+                            <button class="small-btn delete-btn" onclick="deleteSaved(${item.id})">Delete</button>
+                        </div>
+                    </td>`;
+                tbody.appendChild(tr);
+            });
+            const totalPages=Math.max(1,Math.ceil(data.length/savedPerPage));
+            document.getElementById('savedPageInfo').textContent=`Page ${savedPage} of ${totalPages}`;
+        }
+        
+        async function loadSnapshot(id) {
+            showConfirm('This will replace the current sheet. Are you sure?', async () => {
+                try {
+      const res = await authFetch(`${API}/daily-progress/${id}`);
+
+                    if (!res.ok) throw new Error('Snapshot not found');
+                    
+                    const snapshot = await res.json();
+                    
+                    sheetTbody.innerHTML = snapshot.tableHTML;
+
+                    // --- THIS IS THE FIX ---
+                    // snapshot.date is "DD.MM.YYYY" or "DD/MM/YYYY"
+                    const parts = snapshot.date.split(/[./-]/); // Split by dot, slash, or dash
+                    const inputDate = `${parts[2]}-${parts[1]}-${parts[0]}`; // YYYY-MM-DD
+ snapshotDateEl.value = inputDate; // <-- Set the YYYY-MM-DD value
+                    // --- END OF FIX ---
+
+            snapshotIdEl.value = snapshot.id;
+                    loadedSnapshotDate = snapshot.date; // <-- ADD THIS LINE
+
+ updateRowNumbers();
+ styleProgressRows();
+
+ window.scrollTo(0, 0);
+ } catch (err) {
+ showToast(`Error loading snapshot: ${err.message}`, true);
+ }
+ }, 'edit-btn');
+ }
+        function nextSavedPage(){ if(savedPage<Math.ceil(savedFiltered.length/savedPerPage)){savedPage++; renderSaved();}}
+        function prevSavedPage(){ if(savedPage>1){savedPage--; renderSaved();}}
+        document.getElementById('savedSearch').addEventListener('input', e=>{
+            const term=e.target.value.trim().toLowerCase();
+            savedPage=1;
+            if(!term){
+                savedFiltered=savedEntries.slice();
+                renderSaved();
+                return;
+            }
+            savedFiltered=savedEntries.filter(item =>
+                (item.date||'').toLowerCase().includes(term)
+            );
+            renderSaved();
+        });
+
+        function deleteSaved(id){
+            showConfirm('Delete this saved snapshot? This cannot be undone.', () => {
+                authFetch(`${API}/daily-progress
+/${id}`, {method:'DELETE'})
+                    .then(r=>r.json())
+                    .then(data=>{
+                        if(data.success) {
+                            loadSavedProgress(); 
+                            showToast('Snapshot deleted.');
+                        }
+                        else showToast('Delete failed', true);
+                    })
+                    .catch(err=>{console.error(err); showToast('Server error', true); });
+            });
+        }
+        
+        function handleSheetPaste(e) {
+            const td = e.target.closest('td[contenteditable="true"]');
+            if (!td) return;
+            e.preventDefault();
+            const text = e.clipboardData.getData('text/plain');
+            const lines = text.split(/\r?\n/).filter(line => line.length > 0);
+            if (lines.length <= 1) {
+                td.textContent = text;
+                return;
+            }
+            const cellIndex = td.cellIndex;
+            const tr = td.parentElement;
+            const rowIndex = Array.from(sheetTbody.children).indexOf(tr);
+            const allRows = sheetTbody.querySelectorAll('tr');
+            lines.forEach((line, i) => {
+                const targetRowIndex = rowIndex + i;
+                let targetRow = allRows[targetRowIndex];
+                if (!targetRow) {
+                    addProgressRow(); 
+                    targetRow = sheetTbody.lastElementChild;
+                }
+                const targetCell = targetRow.children[cellIndex];
+                if (targetCell) {
+                    targetCell.textContent = line.trim();
+                }
+            });
+            updateRowNumbers();
+            styleProgressRows();
+        }
+        sheetTbody.addEventListener('paste', handleSheetPaste);
+
+        function exportToExcel() {
+            showConfirm("Export the current 'Daily Work Progress' table to an Excel file?", () => {
+                const tableClone = document.getElementById('progressTable').cloneNode(true);
+                tableClone.querySelector('thead tr').removeChild(tableClone.querySelector('thead tr').lastElementChild);
+                tableClone.querySelectorAll('tbody tr').forEach(tr => {
+                    if (tr.lastElementChild) {
+                        tr.removeChild(tr.lastElementChild);
+                    }
+                });
+                const wb = XLSX.utils.table_to_book(tableClone, { sheet: "Daily Progress" });
+                let date = document.getElementById('snapshotDate').value || new Date().toISOString().substr(0, 10);
+                const fileName = `DailyProgress_${date}.xlsx`;
+                XLSX.writeFile(wb, fileName);
+            }, 'btn-export');
+        }
+        
+        async function importFromExcel(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // 1. Read the file
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const data = e.target.result;
+                const wb = XLSX.read(data, { type: 'buffer' });
+                const ws = wb.Sheets[wb.SheetNames[0]];
+                
+                // 2. Convert to Array of Arrays to capture empty cells
+                const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, blankrows: false });
+
+                if (aoa.length < 2) { // 1 row for header, 1 for data
+                    showToast("Import failed: The sheet is empty.", true);
+                    return;
+                }
+
+                // 3. Group all rows by their "Date" value
+                const dateGroups = {};
+                let currentDate = null; // This will "remember" the last date seen
+
+                // Loop from row 1 (skipping the header row 0)
+                for (let i = 1; i < aoa.length; i++) {
+                    const row = aoa[i];
+                    
+                    let dateValue = row[0]; // Get the value from the 'Date' column (index 0)
+
+                    // Check if this row has a new date
+                    if (dateValue) {
+                        let dateStr;
+                        if (typeof dateValue === 'number') {
+                            // It's an Excel serial date, convert it
+                            const excelDate = new Date((dateValue - (25567 + 2)) * 86400 * 1000); // UTC
+                            dateStr = excelDate.toISOString().substr(0, 10);
+                        } else {
+                            // It's a string, just trim it
+                            dateStr = String(dateValue).trim();
+                        }
+                        currentDate = dateStr; // Set the new "current date"
+                    }
+
+                    if (!currentDate) {
+                        continue; 
+                    }
+
+                    if (!dateGroups[currentDate]) {
+                        dateGroups[currentDate] = [];
+                    }
+
+                    const rowObj = {
+                        Date: currentDate,
+                        Division: row[1] || '',
+                        'Sub-Division/Location': row[2] || '',
+                        'Maintenance Activity Description': row[3] || '',
+                        'Man Power Engaged': row[4] || '',
+                        Status: row[5] || '',
+                        'Remarks/Issues': row[6] || ''
+                    };
+                    dateGroups[currentDate].push(rowObj);
+                }
+
+                // 4. Build the snapshot objects for the server
+                const snapshotsToSave = [];
+                for (const date in dateGroups) {
+                    const rows = dateGroups[date];
+                    let tableHTML = "";
+
+                    for (const row of rows) {
+                        tableHTML += `<tr>
+                            <td contenteditable="true">${row.Date || ''}</td>
+                            <td contenteditable="true">${row.Division || ''}</td>
+                            <td contenteditable="true">${row['Sub-Division/Location'] || ''}</td>
+                            <td contenteditable="true">${row['Maintenance Activity Description'] || ''}</td>
+                            <td contenteditable="true">${row['Man Power Engaged'] || ''}</td>
+                            <td contenteditable="true">${row.Status || ''}</td>
+                            <td contenteditable="true">${row['Remarks/Issues'] || ''}</td>
+                            <td></td>
+                        </tr>`;
+                    }
+
+                    snapshotsToSave.push({
+                        date: date,
+                        tableHTML: tableHTML,
+                        rowCount: rows.length
+                    });
+                }
+                
+                if (snapshotsToSave.length === 0) {
+                    showToast("Import failed. No valid dates found in the 'Date' column.", true);
+                    return;
+                }
+
+                // 5. Ask for confirmation
+                const msg = `Found ${snapshotsToSave.length} unique date(s). This will add or update ${snapshotsToSave.length} snapshots in your archive. Continue?`;
+                
+                showConfirm(msg, async () => {
+                    try {
+                        const res = await authFetch(`${API}/daily-progress/batch-import`, {
+                            method: 'POST',
+                            body: JSON.stringify(snapshotsToSave)
+                        });
+
+                        const resultData = await res.json();
+                        if (res.ok) {
+                            showToast(resultData.message);
+                            loadSavedProgress();
+                        } else {
+                            throw new Error(resultData.error || "Batch import failed");
+                        }
+                    } catch (err) {
+                        console.error("Batch import error:", err);
+                        showToast(err.message, true);
+                    }
+                }, 'btn-import-label');
+            };
+            
+            reader.onerror = function() { showToast("There was an error reading the file.", true); };
+            reader.readAsArrayBuffer(file);
+
+            event.target.value = null;
+        }
+
+
+        let selectedCells = [];
+        let lastSelectedRow = null; 
+        sheetTbody.addEventListener('click', e => {
+            const td = e.target.closest('td');
+            if (!td) return; 
+            const tr = td.parentElement;
+            if (lastSelectedRow) {
+                lastSelectedRow.classList.remove('selected-row');
+            }
+            tr.classList.add('selected-row');
+            lastSelectedRow = tr;
+            if (td === td.parentElement.lastElementChild) {
+                 selectedCells.forEach(c => c.style.background = '');
+                 selectedCells = [];
+                 return;
+            }
+            if (e.shiftKey) {
+                if (!selectedCells.includes(td)) {
+                    td.style.background = 'lightblue';
+                    selectedCells.push(td);
+                } else {
+                    td.style.background = '';
+                    selectedCells.splice(selectedCells.indexOf(td), 1);
+                }
+            } else {
+                selectedCells.forEach(c => c.style.background = '');
+                selectedCells = [td];
+                td.style.background = 'lightblue';
+            }
+        });
+        function mergeCells() {
+            if (selectedCells.length < 2) return showToast('Select 2+ cells with Shift+Click.', true);
+            const rows = selectedCells.map(c => Array.from(sheetTbody.rows).indexOf(c.parentElement));
+            const cols = selectedCells.map(c => Array.from(c.parentElement.children).indexOf(c));
+            const minRow = Math.min(...rows), maxRow = Math.max(...rows);
+            const minCol = Math.min(...cols), maxCol = Math.max(...cols);
+            const topLeft = sheetTbody.rows[minRow].children[minCol];
+            topLeft.setAttribute('rowspan', maxRow - minRow + 1);
+            topLeft.setAttribute('colspan', maxCol - minCol + 1);
+            for (const cell of selectedCells) {
+                if (cell !== topLeft) cell.remove();
+            }
+            selectedCells.forEach(c => c.style.background = '');
+            selectedCells = [];
+            updateRowNumbers();
+        }
+        function unmergeCells() {
+            sheetTbody.querySelectorAll('td[rowspan], td[colspan]').forEach(td => {
+                const rowIndex = Array.from(sheetTbody.rows).indexOf(td.parentElement);
+                const colIndex = Array.from(td.parentElement.children).indexOf(td);
+                const rowspan = parseInt(td.getAttribute('rowspan') || 1);
+                const colspan = parseInt(td.getAttribute('colspan') || 1);
+                td.removeAttribute('rowspan');
+                td.removeAttribute('colspan');
+                for (let r = rowIndex; r < rowIndex + rowspan; r++) {
+                    const targetRow = sheetTbody.rows[r];
+                    for (let c = colIndex; c < colIndex + colspan; c++) {
+                        if (r === rowIndex && c === colIndex) continue;
+                        const newTd = document.createElement('td');
+                        newTd.contentEditable = true;
+                        newTd.setAttribute('role','gridcell');
+                        if (c >= targetRow.children.length) {
+                             targetRow.appendChild(newTd);
+                        } else {
+                             targetRow.insertBefore(newTd, targetRow.children[c]);
+                        }
+                    }
+                }
+            });
+            updateRowNumbers();
+        }
+
+       async function previewSnapshot(id) {
+            const modal = document.getElementById('snapshotPreviewModal');
+            const contentEl = document.getElementById('snapshotFrame');
+            
+            contentEl.innerHTML = '<h4>Loading snapshot...</h4>';
+            modal.style.display = 'flex';
+
+            try {
+                const res = await authFetch(`${API}/daily-progress/${id}`);
+                if (!res.ok) throw new Error('Snapshot not found');
+                
+                const snapshot = await res.json();
+                
+                // Get the main table's headers HTML
+                const theadHTML = document.querySelector('#progressTable thead').innerHTML;
+                
+                // Construct the full, "neat" table for preview
+                contentEl.innerHTML = `
+                    <h3>Daily progress on: ${snapshot.date}</h3>
+                    <table id="previewTable">
+                        <thead>${theadHTML}</thead>
+                        <tbody>${snapshot.tableHTML}</tbody>
+                    </table>
+                `;
+                
+                
+                // --- FIX 1: Remove "Row" column from header ---
+                const previewTheadTR = contentEl.querySelector('#previewTable thead tr');
+                if (previewTheadTR && previewTheadTR.lastElementChild) {
+                    previewTheadTR.removeChild(previewTheadTR.lastElementChild); // Remove last <th> ("Row")
+                }
+                
+                const previewTbodyTRs = contentEl.querySelectorAll('#previewTable tbody tr');
+                
+                // --- NEW LOGIC: Hide duplicate dates (but not on new groups) ---
+                let previousDate = null;
+                previewTbodyTRs.forEach(tr => {
+                    const dateCell = tr.children[0];
+                    const divisionCell = tr.children[1]; // Get the Division cell
+                    
+                    if (dateCell) {
+                        const currentDate = dateCell.textContent;
+                        
+                        // Only clear the date if it's the same as the row above
+                        // AND the division cell for this row is empty.
+                        if (currentDate === previousDate && (divisionCell && divisionCell.textContent.trim() === '')) {
+                            dateCell.textContent = ''; // Clear the text
+                        } else if (currentDate.trim() !== '') {
+                            // This is a new date, store it
+                            previousDate = currentDate;
+                        }
+                    }
+                    // --- End of New Logic ---
+                    
+                    // Remove last <td> (the row/button cell)
+                    if (tr.lastElementChild) {
+                        tr.removeChild(tr.lastElementChild);
+                    }
+                });
+
+                // --- FIX 2: Remove 'contenteditable' from all preview cells ---
+                contentEl.querySelectorAll('#previewTable td[contenteditable="true"]').forEach(cell => {
+                    cell.removeAttribute('contenteditable');
+                    cell.style.background = 'none'; // Also remove the yellow-ish edit background
+                });
+
+            } catch (err) {
+                contentEl.innerHTML = `<h4>Error loading snapshot: ${err.message}</h4>`;
+            }
+        }
+        function closeSnapshotPreview() {
+            document.getElementById('snapshotPreviewModal').style.display = 'none';
+            document.getElementById('snapshotFrame').innerHTML = '';
+        }
+        function printSnapshot() {
+            const content = document.getElementById('snapshotFrame').innerHTML;
+            const printWindow = window.open('', '', 'height=800,width=1000');
+            printWindow.document.write('<html><head><title>Print Snapshot</title><style>body{font-family:Arial}h3{font-size:1.2rem}table{width:100%;border-collapse:collapse;margin-top:10px}th,td{border:1px solid #000;padding:8px;text-align:left;white-space:normal;word-break:break-word}th{background:#eee}td button{display:none}</style></head><body>');
+            printWindow.document.write(content);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            printWindow.focus(); 
+            setTimeout(() => { printWindow.print(); printWindow.close(); }, 250);
+        }
+        
+        /* --- MODIFIED: Manual Save Draft Logic --- */
+        const autoSaveMsgEl = document.getElementById('autoSaveMsg');
+
+        function saveDraft() {
+            const currentHTML = sheetTbody.innerHTML;
+            localStorage.setItem('dailyProgressDraft', currentHTML);
+            autoSaveMsgEl.textContent = `Draft saved at ${new Date().toLocaleTimeString()}`;
+            showToast('Draft saved locally.');
+        }
+        
+        function restoreDraft() {
+            const savedDraft = localStorage.getItem('dailyProgressDraft');
+            if (savedDraft) {
+                showConfirm('An unsaved draft was found. Do you want to restore it?', () => {
+                    sheetTbody.innerHTML = savedDraft;
+                    updateRowNumbers();
+                    styleProgressRows();
+                    showToast('Draft restored.');
+                }, 'restore-btn');
+                
+                // --- If they cancel, delete the draft ---
+                const originalCancelClick = confirmCancelBtn.onclick;
+                confirmCancelBtn.onclick = () => {
+                    originalCancelClick(); // Run original logic
+                    localStorage.removeItem('dailyProgressDraft');
+                    showToast('Draft discarded.');
+                };
+            }
+        }
+
+function deleteSelected() {
+    const ids = getSelectedIds();
+
+    if (ids.length === 0) {
+        alert("Select at least one record to delete.");
+        return;
+    }
+
+    if (!confirm("Delete selected CL records?")) return;
+
+    ids.forEach(id => {
+        authFetch(`${API}/cl/${id}`, { method: "DELETE" })
+            .then(() => loadCLData());
+    });
+}
+
+
+        
+        /* --- Collapsible Form Logic --- */
+        const formToggle = document.getElementById('formToggle');
+        const formWrapper = document.getElementById('formWrapper');
+        
+        formToggle.addEventListener('click', () => {
+            if (formWrapper.style.display === 'none') {
+                formWrapper.style.display = 'block';
+                formToggle.textContent = 'Add / Edit Record ➖';
+            } else {
+                formWrapper.style.display = 'none';
+                formToggle.textContent = 'Add / Edit Record ➕';
+            }
+        });
+
+        /* --- Drag-and-Drop Row Logic --- */
+        let draggedRow = null;
+
+        sheetTbody.addEventListener('dragstart', e => {
+            if (e.target.tagName === 'BUTTON') {
+                e.preventDefault();
+                return;
+            }
+            const tr = e.target.closest('tr');
+            if (tr) {
+                draggedRow = tr;
+                e.dataTransfer.effectAllowed = 'move';
+                setTimeout(() => tr.classList.add('dragging'), 0);
+            }
+        });
+
+        sheetTbody.addEventListener('dragend', e => {
+            if (draggedRow) {
+                draggedRow.classList.remove('dragging');
+            }
+            draggedRow = null;
+        });
+
+        sheetTbody.addEventListener('dragover', e => {
+            e.preventDefault();
+        });
+
+        sheetTbody.addEventListener('drop', e => {
+            e.preventDefault();
+            if (!draggedRow) return;
+
+            draggedRow.classList.remove('dragging');
+            const targetRow = e.target.closest('tr');
+
+            if (targetRow && targetRow !== draggedRow) {
+                const rect = targetRow.getBoundingClientRect();
+                const midY = rect.top + rect.height / 2;
+                if (e.clientY < midY) {
+                    targetRow.before(draggedRow);
+                } else {
+                    targetRow.after(draggedRow);
+                }
+            } else if (!targetRow) {
+                sheetTbody.appendChild(draggedRow);
+            }
+            
+            updateRowNumbers();
+            draggedRow = null;
+        });
+
+
+        /* =================================================================== */
+        /* ========================= INITIAL LOAD ========================== */
+        /* =================================================================== */
+        
+        loadRecords();
+        initSheet();
+        setDefaultDate(); 
+        loadSavedProgress();
+        restoreDraft();
+        loadCLData();
+        
+    </script></body>
+
 </html>
-
-
-
-
-
 
 
 
