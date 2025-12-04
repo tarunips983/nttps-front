@@ -1720,13 +1720,21 @@ function previewPDF(path) {
         function goHome() { window.location.href = 'index.html'; }
         
         function logout() {
-    localStorage.removeItem("adminToken");
+  // Prevent auto-login loop
+  sessionStorage.setItem("fromLogout", "true");
+
+  // Clear ALL stored login data
+  localStorage.removeItem("adminToken");
   localStorage.removeItem("isAdmin");
   localStorage.removeItem("rememberToken");
   localStorage.removeItem("savedEmail");
 
-  window.location.href = "login.html";
+  // Delay redirect to ensure everything is cleared
+  setTimeout(() => {
+    window.location.href = "login.html";
+  }, 100);
 }
+
 
         async function autoExtractPDF() {
             const fileInput = document.getElementById("pdfFile");
@@ -2555,6 +2563,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
