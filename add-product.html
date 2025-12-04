@@ -2,13 +2,33 @@
 <html lang="en">
 <head>
     <script>
-     const token = localStorage.getItem('adminToken');
-      const isAdmin = localStorage.getItem('isAdmin');
-        
-       if (!token || isAdmin !== "true") {
-      alert("You must be logged in to access this page.");
-     window.location.href = "login.html";
-       }
+     const token = localStorage.getItem("adminToken");
+const isAdmin = localStorage.getItem("isAdmin");
+
+// Prevent redirect loop if user logged out manually
+const loggedOut = sessionStorage.getItem("loggedOut");
+
+if (!token || isAdmin !== "true") {
+
+    // If user manually logged out → DO NOT auto-login → go to login page normally
+    if (loggedOut) {
+        window.location.href = "login.html";
+    }
+
+    // If Remember Me login exists → auto-login
+    const rememberToken = localStorage.getItem("rememberToken");
+    if (rememberToken) {
+        localStorage.setItem("adminToken", rememberToken);
+        localStorage.setItem("isAdmin", "true");
+    } else {
+        alert("You must be logged in to access this page.");
+        window.location.href = "login.html";
+    }
+}
+
+// Clear logout flag
+sessionStorage.removeItem("loggedOut");
+
     </script>
     <meta charset="UTF-8" />
     <title>Admin - PDF Database + Daily Progress</title>
@@ -2563,6 +2583,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
