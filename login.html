@@ -525,24 +525,16 @@ async function handleForgotStep2() {
 //-------------------------------------------------------
 
 document.addEventListener("DOMContentLoaded", () => {
-  const savedEmail = localStorage.getItem("savedEmail");
+    const savedToken = localStorage.getItem("rememberToken");
+    const loggedOut = sessionStorage.getItem("loggedOut");
 
-  if (savedEmail) {
-    emailField.value = savedEmail;
-    document.getElementById("rememberMe").checked = true;
-  }
+    // Only auto-login if NOT logged out manually
+    if (savedToken && !loggedOut) {
+        window.location.href = "add-product.html";
+    }
 
-  // Auto-login if remember token exists
-  const savedToken = localStorage.getItem("rememberToken");
-const loggedOut = sessionStorage.getItem("loggedOut");
-
-if (savedToken && !loggedOut && window.location.pathname.includes("login")) {
-    window.location.href = "add-product.html";
-}
-
-// Clear logout flag AFTER page loads
-sessionStorage.removeItem("loggedOut");
-
+    // Clear logout flag once page is loaded
+    sessionStorage.removeItem("loggedOut");
 });
 
 //-------------------------------------------------------
@@ -589,6 +581,7 @@ async function handleLogin() {
   </script>
 </body>
 </html>
+
 
 
 
