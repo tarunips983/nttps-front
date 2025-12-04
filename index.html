@@ -1530,27 +1530,39 @@ async function renderCLBioData() {
     window.verifyPassword = async function(){
   const username = document.getElementById('usernameInput').value.trim();
   const pass = document.getElementById('passwordInput').value.trim();
-  if(!username || !pass){ alert('Please enter a username and password.'); return; }
+
+  if(!username || !pass){ 
+    alert('Please enter a username and password.'); 
+    return; 
+  }
+
   try{
     const res = await fetch(`${SERVER_URL}/login`, {
       method:'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ email: username, password: pass })  // <-- FIXED HERE
+      body: JSON.stringify({ email: username, password: pass })
     });
+
     if(res.ok){
       const data = await res.json();
+
+      // MUST SAVE BOTH
       localStorage.setItem('adminToken', data.token);
+      localStorage.setItem('isAdmin', 'true');  // <-- FIXED LINE
+
       closePasswordModal();
       window.location.href = 'add-product.html';
     } else {
       const err = await res.json();
       alert('❌ ' + (err.message || 'Incorrect email or password!'));
     }
+
   } catch(e){
     console.error('Login error', e);
     alert('⚠️ Could not connect to the login server.');
   }
 };
+
 
     // Mobile sidebar toggles (slide-in from LEFT)
     function toggleSidebar(buttonId, sidebarId){
@@ -1676,6 +1688,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
