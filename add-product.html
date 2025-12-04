@@ -1721,8 +1721,11 @@ function previewPDF(path) {
         
         function logout() {
     localStorage.removeItem("adminToken");
-    localStorage.removeItem("isAdmin");
-    window.location.href = "login.html";
+  localStorage.removeItem("isAdmin");
+  localStorage.removeItem("rememberToken");
+  localStorage.removeItem("savedEmail");
+
+  window.location.href = "login.html";
 }
 
         async function autoExtractPDF() {
@@ -2552,6 +2555,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
