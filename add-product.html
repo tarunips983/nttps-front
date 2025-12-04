@@ -1725,12 +1725,14 @@ function previewPDF(path) {
     localStorage.removeItem("isAdmin");
     localStorage.removeItem("savedEmail");
     localStorage.removeItem("rememberToken");
+    localStorage.removeItem("savedToken");  // <-- IMPORTANT FIX
 
-    // IMPORTANT — avoid redirect loop
+    // Prevent auto-login
     sessionStorage.setItem("loggedOut", "true");
 
     window.location.href = "login.html";
 }
+
 
 
 
@@ -2561,6 +2563,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
