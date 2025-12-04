@@ -976,11 +976,14 @@ main {
         console.error("Failed to load records", e);
         allRecords = []; // fallback
       } finally {
-        document.getElementById("loader").style.display = "none";
-        document.getElementById("product-list").style.display = "grid";
-        renderRecords(allRecords);
-        showMainView('pdf');
-      }
+    document.getElementById("loader").style.display = "none";
+    document.getElementById("product-list").style.display = "grid";
+
+    renderRecords(allRecords);
+    buildDynamicDivisionFilters();   // ⬅️ ADD HERE
+
+    showMainView('pdf');
+}
     }
 
     // summary helper
@@ -1645,94 +1648,14 @@ window.addEventListener('keydown', (e) => {
 // PAGE LOAD INIT
 window.addEventListener("load", () => {
     applyUserSettings();
-    loadRecords();
     loadDailyProgressDates();
     renderRecords(allRecords);
     buildDynamicDivisionFilters();
+    loadRecords();
 
 });
 
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
