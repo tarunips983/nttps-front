@@ -809,6 +809,9 @@ async function authFetch(url, options = {}) {
         /* ----------------- Tab switching ----------------- */
         function showPanel(name) {
     // Hide all
+    confirmModal.style.display = "none";
+    onConfirmCallback = null;
+            
     document.getElementById('pdfPanel').classList.remove('active');
     document.getElementById('dailyPanel').classList.remove('active');
     document.getElementById('clPanel').classList.remove('active');
@@ -996,9 +999,10 @@ async function editSelected() {
         };
 
         confirmCancelBtn.onclick = () => {
-            onConfirmCallback = null;
-            confirmModal.style.display = 'none';
-        };
+    confirmModal.style.display = 'none';
+    onConfirmCallback = null; // RESET callback
+};
+
 
 
         /* =================================================================== */
@@ -2234,6 +2238,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
