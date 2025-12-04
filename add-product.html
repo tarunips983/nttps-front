@@ -574,6 +574,164 @@ sessionStorage.removeItem("loggedOut");
          .tabs { flex-direction: column; align-items: stretch; }
          .tab-btn { text-align: center; }
     }
+
+/* -------- Global mobile basics -------- */
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* -------- Mobile / small tablets -------- */
+@media (max-width: 900px) {
+
+    body {
+        padding: 8px;
+        background: #f4f4f4;
+    }
+
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 10px 12px;
+    }
+
+    header h1 {
+        font-size: 1.0rem;
+        line-height: 1.3;
+    }
+
+    header .buttons {
+        width: 100%;
+        justify-content: flex-start;
+        gap: 8px;
+    }
+
+    header .buttons button {
+        padding: 6px 10px;
+        font-size: 0.85rem;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 100%;
+        margin: 10px auto 40px;
+        padding: 0;
+    }
+
+    /* Tabs → horizontal scroll on small screens */
+    .tabs {
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 4px;
+    }
+    .tab-btn {
+        flex: 0 0 auto;
+        font-size: 0.85rem;
+        padding: 6px 10px;
+    }
+
+    /* Panels & cards a bit flatter on mobile */
+    .panel {
+        padding: 12px;
+        border-radius: 8px;
+        box-shadow: none;
+    }
+
+    #pdfEntryWrapper,
+    #clTableContainer {
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: none;
+    }
+
+    h2, h3 {
+        font-size: 1rem;
+    }
+
+    .muted {
+        font-size: 0.8rem;
+    }
+
+    /* Dashboard tiles – 2 columns */
+    .pdf-dashboard-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+    .dash-box {
+        padding: 10px;
+    }
+    .dash-box h4 {
+        font-size: 0.8rem;
+    }
+    .dash-box p {
+        font-size: 1.1rem;
+    }
+
+    /* Controls / buttons bar */
+    .sheet-controls,
+    #pdfEntryControls,
+    .filter-bar,
+    .search-row {
+        padding: 8px;
+        gap: 10px;
+    }
+
+    .small,
+    .btn-import-label,
+    .btn-add,
+    .btn-save,
+    .btn-clear,
+    .btn-export {
+        font-size: 0.8rem;
+        padding: 6px 8px;
+    }
+
+    /* Generic scroll wrapper for big tables */
+    .table-scroll {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Give tables a minimum width so they don’t squeeze too much.
+       You’ll scroll sideways to see all columns. */
+    #pdfEntryTable,
+    #progressTable,
+    #savedProgressTable,
+    #clTable,
+    #pdfListTable {
+        min-width: 900px;
+    }
+
+    /* Remove the fixed max-height on mobile – scrolling the page is easier */
+    table {
+        max-height: none !important;
+        display: table;
+    }
+
+    /* “All records” pagination text smaller */
+    #pageInfo,
+    #savedPageInfo {
+        font-size: 0.8rem;
+    }
+}
+
+/* Extra-narrow phones */
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 0.9rem;
+    }
+
+    .tab-btn {
+        font-size: 0.8rem;
+    }
+
+    .dash-box p {
+        font-size: 1rem;
+    }
+}
+
+        
 </style>
 </head>
 <body>
@@ -614,8 +772,8 @@ sessionStorage.removeItem("loggedOut");
             <span class="muted">Fill any row(s) and click <b>Save Row</b>. Each row saves one PDF record.</span>
         </div>
 
-        <div style="overflow:auto; max-height:420px; border:1px solid #ddd; border-radius:6px;">
-            <table id="pdfEntryTable">
+        <div class="table-scroll" style="overflow:auto; max-height:420px; border:1px solid #ddd; border-radius:6px;">
+        <table id="pdfEntryTable">
                 <thead>
                     <tr>
                         <th>S.No</th>
@@ -662,13 +820,17 @@ sessionStorage.removeItem("loggedOut");
                         <button class="pagination-btn" onclick="nextPage()">Next ➡</button>
                     </div>
                 </div>
-                <table>
-                    <thead>
-                        <tr id="pdfTableHead">
-                            </tr>
-                    </thead>
-                    <tbody id="recordTable"></tbody>
-                </table>
+                <div class="table-scroll" style="border:1px solid #ddd; border-radius:6px;">
+    <table id="pdfListTable">
+        <thead>
+            <tr id="pdfTableHead">
+                <!-- filled by JS -->
+            </tr>
+        </thead>
+        <tbody id="recordTable"></tbody>
+    </table>
+</div>
+
             </div>
 
         </div> 
@@ -712,7 +874,7 @@ sessionStorage.removeItem("loggedOut");
             <span id="autoSaveMsg" class="muted" style="margin-left: auto;"></span>
         </div>
             
-            <div style="overflow:auto; border:1px solid #ddd; border-radius:6px;">
+            <div class="table-scroll" style="overflow:auto; border:1px solid #ddd; border-radius:6px;">
                 <table id="progressTable" aria-label="Editable daily progress sheet">
                     <thead>
                         <tr>
@@ -740,7 +902,7 @@ sessionStorage.removeItem("loggedOut");
                     <button class="small" onclick="nextSavedPage()">Next ➡</button>
                 </div>
             </div>
-            <div style="overflow:auto; margin-top:8px; border:1px solid #eee; border-radius:6px;">
+            <div class="table-scroll" style="overflow:auto; margin-top:8px; border:1px solid #eee; border-radius:6px;">
                 <table id="savedProgressTable" aria-label="Saved daily progress snapshots">
                     <thead>
                         <tr>
@@ -830,7 +992,7 @@ sessionStorage.removeItem("loggedOut");
     <button class="top-btn" onclick="deleteSelected()">Delete</button>
 </div>
 
-<div id="clTableContainer">
+<div id="clTableContainer" class="table-scroll">
     <table id="clTable">
         <thead>
             <tr>
@@ -2583,6 +2745,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
