@@ -731,7 +731,179 @@ html, body {
     }
 }
 
-        
+ /* ================= MOBILE / TABLET LAYOUT ================= */
+
+.desktop-only { display: block; }
+.mobile-only { display: none; }
+
+@media (max-width: 768px) {
+
+  html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  body {
+    padding: 0;
+  }
+
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  header h1 {
+    font-size: 1rem;
+  }
+  header .buttons {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+  header .buttons button {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 10px;
+  }
+
+  .tabs {
+    overflow-x: auto;
+    padding-bottom: 6px;
+  }
+  .tab-btn {
+    flex: 1;
+    white-space: nowrap;
+    font-size: 0.85rem;
+  }
+
+  .panel {
+    padding: 10px;
+    box-shadow: none;
+    border-radius: 6px;
+  }
+
+  /* Dashboard cards a bit more compact */
+  .pdf-dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .dash-box {
+    padding: 10px;
+  }
+  .dash-box h4 {
+    font-size: 0.75rem;
+  }
+  .dash-box p {
+    font-size: 1.1rem;
+  }
+
+  /* PR entry & daily progress tables: make them scroll instead of shrinking */
+  #pdfEntryWrapper > div,
+  #progressTable,
+  #savedProgressTable,
+  #clTableContainer {
+    overflow-x: auto;
+  }
+  #pdfEntryTable,
+  #progressTable,
+  #savedProgressTable,
+  #clTable {
+    min-width: 700px;        /* Don’t squeeze columns too much */
+    font-size: 0.8rem;
+  }
+
+  /* Switch to mobile cards for lists */
+  .desktop-only { display: none !important; }
+  .mobile-only { display: block !important; }
+
+  /* ====== ALL RECORDS – MOBILE CARDS ====== */
+  .record-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .record-card,
+  .record-card-trash {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 10px 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    font-size: 0.9rem;
+  }
+
+  .record-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .record-name {
+    font-weight: 650;
+    color: #222;
+    max-width: 70%;
+  }
+  .record-type {
+    font-size: 0.75rem;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: #e3f2fd;
+    color: #0d47a1;
+  }
+
+  .record-meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px 10px;
+    margin-bottom: 6px;
+  }
+  .record-meta-row {
+    font-size: 0.78rem;
+    color: #444;
+  }
+  .record-meta-label {
+    font-weight: 600;
+    color: #666;
+    margin-right: 4px;
+  }
+
+  .record-send-to {
+    font-size: 0.78rem;
+    margin-bottom: 8px;
+    color: #555;
+  }
+
+  .record-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .record-card-actions .small-btn {
+    flex: 1 1 45%;
+    text-align: center;
+    padding: 6px 8px;
+    font-size: 0.8rem;
+  }
+
+  /* Trash cards */
+  .record-card-trash-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .record-card-trash-meta {
+    font-size: 0.8rem;
+    color: #555;
+    margin-bottom: 6px;
+  }
+}
+       
 </style>
 </head>
 <body>
@@ -1501,79 +1673,167 @@ function initPdfEntryGrid() {
         filterSubDivisionEl.addEventListener('change', applyAllFilters);
         filterRecordTypeEl.addEventListener('change', applyAllFilters);
 
-        function renderRecords(data, isTrash = false) {
-            const tableHead = document.getElementById('pdfTableHead');
-            if (isTrash) {
-                tableHead.innerHTML = `
-                    <th class="wrap">Name</th>
-                    <th class="wrap">PR No</th>
-                    <th class="wrap">Sub Div</th>
-                    <th class="wrap">Deleted On</th>
-                    <th class="wrap">Actions</th>
-                `;
-            } else {
-                tableHead.innerHTML = `
-                    <th class="wrap" onclick="sortRecords('id')">ID ↕️</th>
-                    <th class="wrap" onclick="sortRecords('workName')">Name ↕️</th>
-                    <th class="wrap" onclick="sortRecords('prNo')">PR No ↕️</th>
-                    <th class="wrap" onclick="sortRecords('subDivision')">Sub Div ↕️</th>
-                    <th class="wrap" onclick="sortRecords('recordType')">Type ↕️</th>
-                    <th class="wrap" onclick="sortRecords('amount')">Amount ↕️</th>
-                    <th class="wrap" onclick="sortRecords('sendTo')">Send To ↕️</th>
-                    <th class="wrap">Actions</th>
-                `;
-            }
+function renderRecords(data, isTrash = false) {
+  const tableHead = document.getElementById('pdfTableHead');
+  const cardsContainer = document.getElementById('recordCards');
 
-            const start = (currentPage - 1) * recordsPerPage;
-            const end = start + recordsPerPage;
-            const paginated = data.slice(start, end);
+  // Build table header (desktop)
+  if (isTrash) {
+    tableHead.innerHTML = `
+      <th class="wrap">Name</th>
+      <th class="wrap">PR No</th>
+      <th class="wrap">Sub Div</th>
+      <th class="wrap">Deleted On</th>
+      <th class="wrap">Actions</th>
+    `;
+  } else {
+    tableHead.innerHTML = `
+      <th class="wrap" onclick="sortRecords('id')">ID ↕️</th>
+      <th class="wrap" onclick="sortRecords('workName')">Name ↕️</th>
+      <th class="wrap" onclick="sortRecords('prNo')">PR No ↕️</th>
+      <th class="wrap" onclick="sortRecords('subDivision')">Sub Div ↕️</th>
+      <th class="wrap" onclick="sortRecords('recordType')">Type ↕️</th>
+      <th class="wrap" onclick="sortRecords('amount')">Amount ↕️</th>
+      <th class="wrap" onclick="sortRecords('sendTo')">Send To ↕️</th>
+      <th class="wrap">Actions</th>
+    `;
+  }
 
-            recordTable.innerHTML = '';
-            if (!paginated.length) {
-                const cols = isTrash ? 5 : 8;
-                recordTable.innerHTML = `<tr><td colspan="${cols}">No records found</td></tr>`;
-                document.getElementById('pageInfo').textContent = `Page 1 of 1`;
-                return;
-            }
+  const start = (currentPage - 1) * recordsPerPage;
+  const end   = start + recordsPerPage;
+  const paginated = data.slice(start, end);
 
-            paginated.forEach(r => {
-                const tr = document.createElement('tr');
-                if (isTrash) {
-                    tr.innerHTML = `
-                        <td class="wrap">${r.workName || ''}</td>
-                        <td class="wrap">${r.prNo || ''}</td>
-                        <td class="wrap">${r.subDivision || ''}</td>
-                        <td class="wrap">${new Date(r.deletedOn).toLocaleString()}</td>
-                        <td class="wrap">
-                            <div class="actions">
-                                <button class="small-btn restore-btn" onclick="restoreRecord(${r.id})">Restore</button>
-                                <button class="small-btn delete-btn" onclick="deleteRecordPermanently(${r.id})">Delete Perm.</button>
-                            </div>
-                        </td>
-                    `;
-                } else {
-                    tr.innerHTML = `
-                        <td class="wrap">${r.id || ''}</td>
-                        <td class="wrap">${r.workName || ''}</td>
-                        <td class="wrap">${r.prNo || ''}</td>
-                        <td class="wrap">${r.subDivision || ''}</td>
-                        <td class="wrap">${r.recordType || ''}</td>
-                        <td class="wrap">₹${r.amount ? parseFloat(r.amount).toLocaleString('en-IN') : '0'}</td>
-                        <td class="wrap">${r.sendTo || ''}</td>
-                        <td class="wrap">
-                            <div class="actions">
-                                ${r.pdfPath ? `<button class="small-btn preview-btn" onclick="previewPDF('${r.pdfPath}')">Preview</button>` : ''}
-                                <button class="small-btn edit-btn" onclick="editRecord(${r.id})">Edit</button>
-                                <button class="small-btn delete-btn" onclick="deleteRecord(${r.id})">Trash</button>
-                                ${r.pdfPath ? `<button class="small-btn download-btn" onclick="downloadPDF('${r.pdfPath}')">Download</button>` : ''}
-                            </div>
-                        </td>
-                    `;
-                }
-                recordTable.appendChild(tr);
-            });
-            document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${Math.max(1, Math.ceil(data.length / recordsPerPage))}`;
-        }
+  // Clear desktop table + mobile cards
+  recordTable.innerHTML = '';
+  if (cardsContainer) cardsContainer.innerHTML = '';
+
+  if (!paginated.length) {
+    const cols = isTrash ? 5 : 8;
+    recordTable.innerHTML = `<tr><td colspan="${cols}">No records found</td></tr>`;
+    if (cardsContainer) {
+      const empty = document.createElement('div');
+      empty.textContent = 'No records found';
+      empty.style.fontSize = '0.9rem';
+      cardsContainer.appendChild(empty);
+    }
+    document.getElementById('pageInfo').textContent = `Page 1 of 1`;
+    return;
+  }
+
+  paginated.forEach(r => {
+    /* ========= DESKTOP TABLE ROW ========= */
+    const tr = document.createElement('tr');
+
+    if (isTrash) {
+      tr.innerHTML = `
+        <td class="wrap">${r.workName || ''}</td>
+        <td class="wrap">${r.prNo || ''}</td>
+        <td class="wrap">${r.subDivision || ''}</td>
+        <td class="wrap">${
+          r.deletedOn ? new Date(r.deletedOn).toLocaleString() : ''
+        }</td>
+        <td class="wrap">
+          <div class="actions">
+            <button class="small-btn restore-btn" onclick="restoreRecord(${r.id})">Restore</button>
+            <button class="small-btn delete-btn" onclick="deleteRecordPermanently(${r.id})">Delete Perm.</button>
+          </div>
+        </td>
+      `;
+    } else {
+      tr.innerHTML = `
+        <td class="wrap">${r.id || ''}</td>
+        <td class="wrap">${r.workName || ''}</td>
+        <td class="wrap">${r.prNo || ''}</td>
+        <td class="wrap">${r.subDivision || ''}</td>
+        <td class="wrap">${r.recordType || ''}</td>
+        <td class="wrap">₹${r.amount ? parseFloat(r.amount).toLocaleString('en-IN') : '0'}</td>
+        <td class="wrap">${r.sendTo || ''}</td>
+        <td class="wrap">
+          <div class="actions">
+            ${r.pdfPath ? `<button class="small-btn preview-btn" onclick="previewPDF('${r.pdfPath}')">Preview</button>` : ''}
+            <button class="small-btn edit-btn" onclick="editRecord(${r.id})">Edit</button>
+            <button class="small-btn delete-btn" onclick="deleteRecord(${r.id})">Trash</button>
+            ${r.pdfPath ? `<button class="small-btn download-btn" onclick="downloadPDF('${r.pdfPath}')">Download</button>` : ''}
+          </div>
+        </td>
+      `;
+    }
+    recordTable.appendChild(tr);
+
+    /* ========= MOBILE CARD ========= */
+    if (!cardsContainer) return;
+
+    if (isTrash) {
+      const card = document.createElement('div');
+      card.className = 'record-card-trash';
+      card.innerHTML = `
+        <div class="record-card-trash-title">${r.workName || 'No name'}</div>
+        <div class="record-card-trash-meta">
+          <div><strong>PR No:</strong> ${r.prNo || '-'}</div>
+          <div><strong>Sub Div:</strong> ${r.subDivision || '-'}</div>
+          <div><strong>Deleted:</strong> ${
+            r.deletedOn ? new Date(r.deletedOn).toLocaleString() : '-'
+          }</div>
+        </div>
+        <div class="record-card-actions">
+          <button class="small-btn restore-btn" onclick="restoreRecord(${r.id})">Restore</button>
+          <button class="small-btn delete-btn" onclick="deleteRecordPermanently(${r.id})">Delete Permanently</button>
+        </div>
+      `;
+      cardsContainer.appendChild(card);
+    } else {
+      const card = document.createElement('div');
+      card.className = 'record-card';
+
+      const amountText = r.amount
+        ? `₹${parseFloat(r.amount).toLocaleString('en-IN')}`
+        : '₹0';
+
+      card.innerHTML = `
+        <div class="record-card-header">
+          <span class="record-name">${r.workName || 'No name'}</span>
+          <span class="record-type">${r.recordType || ''}</span>
+        </div>
+
+        <div class="record-meta">
+          <div class="record-meta-row">
+            <span class="record-meta-label">ID:</span>
+            <span>${r.id || '-'}</span>
+          </div>
+          <div class="record-meta-row">
+            <span class="record-meta-label">PR No:</span>
+            <span>${r.prNo || '-'}</span>
+          </div>
+          <div class="record-meta-row">
+            <span class="record-meta-label">Sub Div:</span>
+            <span>${r.subDivision || '-'}</span>
+          </div>
+          <div class="record-meta-row">
+            <span class="record-meta-label">Amount:</span>
+            <span>${amountText}</span>
+          </div>
+        </div>
+
+        <div class="record-send-to">
+          <span class="record-meta-label">Send To:</span>
+          <span>${r.sendTo || '-'}</span>
+        </div>
+
+        <div class="record-card-actions">
+          ${r.pdfPath ? `<button class="small-btn preview-btn" onclick="previewPDF('${r.pdfPath}')">Preview</button>` : ''}
+          <button class="small-btn edit-btn" onclick="editRecord(${r.id})">Edit</button>
+          <button class="small-btn delete-btn" onclick="deleteRecord(${r.id})">Trash</button>
+          ${r.pdfPath ? `<button class="small-btn download-btn" onclick="downloadPDF('${r.pdfPath}')">Download</button>` : ''}
+        </div>
+      `;
+      cardsContainer.appendChild(card);
+    }
+  });
+
+  document.getElementById('pageInfo').textContent =
+    `Page ${currentPage} of ${Math.max(1, Math.ceil(data.length / recordsPerPage))}`;
+}
+
 
         function nextPage() {
             if (currentPage < Math.ceil(filteredRecords.length / recordsPerPage)) {
@@ -2745,6 +3005,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
