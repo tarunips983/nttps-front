@@ -95,6 +95,24 @@ header h1 { margin: 0; font-size: 22px; }
     background: #f4f4f4;
 }
 
+/* Allow horizontal scrolling on mobile */
+@media (max-width: 768px) {
+  #pdf-grid-wrapper {
+    overflow-x: auto !important;
+    overflow-y: auto;
+    white-space: nowrap;
+  }
+
+  table {
+    min-width: 900px; /* or whatever width needed */
+  }
+
+  .right-panel {
+    overflow-x: auto !important;
+  }
+}
+
+    
 #clBioGrid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -1688,6 +1706,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
