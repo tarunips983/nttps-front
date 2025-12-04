@@ -1639,43 +1639,7 @@ function previewPDF(path) {
             });
         }
 
-        recordForm.addEventListener('submit', async e => {
-            e.preventDefault();
-            const formData = new FormData();
-            const pdfFile = document.getElementById('pdfFile').files[0];
-            if (pdfFile) formData.append('pdfs', pdfFile);
-            else if (editId.value) formData.append('pdfPath', document.getElementById('currentPdf').value);
-            formData.append('workName', document.getElementById('workName').value);
-            formData.append('prNo', document.getElementById('prNo').value);
-            formData.append('subDivision', document.getElementById('subDivision').value);
-            formData.append('recordType', document.getElementById('recordType').value);
-            formData.append('amount', document.getElementById('amount').value);
-            formData.append('sendTo', document.getElementById('sendTo').value);
-            if (editId.value) formData.append('id', editId.value);
-
-            try {
-                const res = await authFetch(`${API}/upload`, { 
-                    method: 'POST', 
-                    body: formData 
-                });
-                
-                const data = await res.json();
-                if (data.success || data.records) {
-                    showToast(editId.value ? 'Record updated' : 'Record added');
-                    recordForm.reset();
-                    editId.value = '';
-                    document.getElementById('currentPdf').value = '';
-                    loadRecords();
-                    
-                    document.getElementById('formWrapper').style.display = 'none';
-                    document.getElementById('formToggle').textContent = 'Add / Edit Record ➕';
-
-                } else showToast('Operation failed', true);
-            } catch (err) {
-                console.error(err);
-                showToast('Server error', true);
-            }
-        });
+        
 
         function downloadPDF(path) {
             const a = document.createElement('a');
@@ -2534,6 +2498,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
