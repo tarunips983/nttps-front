@@ -852,6 +852,11 @@
         
 const API = "https://nttps-backend.onrender.com";
 
+        let savedEntries = [];
+        let savedFiltered = [];
+        let savedPage = 1;
+        const savedPerPage = 8;
+        
 // Safe auth wrapper for all API calls
 async function authFetch(url, options = {}) {
   // Always read the latest token from localStorage
@@ -1729,10 +1734,7 @@ function previewPDF(path) {
         const snapshotIdEl = document.getElementById('snapshotId');
         let loadedSnapshotDate = null; // <-- ADD THIS LINE
         
-        let savedEntries = [];
-        let savedFiltered = [];
-        let savedPage = 1;
-        const savedPerPage = 8;
+
         
         function styleRow(tr) {
             if (!tr) return;
@@ -2532,6 +2534,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
