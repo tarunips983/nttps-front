@@ -533,9 +533,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Auto-login if remember token exists
-  if (savedToken && window.location.pathname.includes("login")) {
-    window.location.href = "add-product.html";
-  }
+  const fromLogout = sessionStorage.getItem("fromLogout");
+
+if (savedToken && !fromLogout && window.location.pathname.includes("login")) {
+  window.location.href = "add-product.html";
+}
+
+// Cleanup flag
+sessionStorage.removeItem("fromLogout");
+
 });
 
 //-------------------------------------------------------
@@ -582,6 +588,7 @@ async function handleLogin() {
   </script>
 </body>
 </html>
+
 
 
 
