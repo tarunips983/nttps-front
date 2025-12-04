@@ -1393,11 +1393,11 @@ async function savePdfRow(btn) {
         showToast('Description is required.', true);
         return;
     }
-    if (!recordId && !file) {
+    //if (!recordId && !file) {
         // new record must have a PDF
-        showToast('Please choose a PDF file for this row.', true);
-        return;
-    }
+     //   showToast('Please choose a PDF file for this row.', true);
+     //   return;
+   // }
 
     const formData = new FormData();
 
@@ -2484,6 +2484,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
