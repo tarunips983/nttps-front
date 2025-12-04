@@ -733,7 +733,7 @@
     <table id="clTable">
         <thead>
             <tr>
-                <th><input type="checkbox" onclick="toggleSelectAll(this)"></th>
+                <th><input id="selectAll" type="checkbox" onclick="toggleSelectAll(this)"></th>
                 <th>S.No</th>
                 <th>Name</th>
                 <th>Gender</th>
@@ -911,8 +911,8 @@ async function loadCLData() {
     });
 }
 
-function toggleSelectAll() {
-    const checked = document.getElementById("selectAll").checked;
+function toggleSelectAll(el) {
+    const checked = el.checked;
     document.querySelectorAll(".clSelect").forEach(ch => ch.checked = checked);
 }
 
@@ -2234,6 +2234,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
