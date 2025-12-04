@@ -1286,7 +1286,7 @@ function previewPDF(path) {
 
         async function loadTrash() {
             try {
-                const res = await authFetch('${API}/records/trash');
+                const res = await authFetch(`${API}/records/trash`);
                 if (!res.ok) throw new Error('Failed to load trash');
                 
                 const trashRecords = await res.json();
@@ -2234,6 +2234,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
