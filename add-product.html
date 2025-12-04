@@ -508,30 +508,37 @@
             <div>
                 <h2 id="formToggle">Add / Edit Record ➕</h2>
                 <div id="formWrapper" style="display: none; overflow: hidden; animation: fadeIn 0.3s ease-out;">
-                    <h3>📄 PDF Database Editor</h3>
-
-<div style="padding:10px 0;">
-    <button id="addRowBtn" class="btn btn-success">➕ Add Row</button>
-    <button id="savePDFBtn" class="btn btn-primary">💾 Save All</button>
-</div>
-
-<table id="pdfTable" class="table table-bordered" style="width:100%; background:white;">
-    <thead>
-        <tr>
-            <th>Name of Work</th>
-            <th>PR No</th>
-            <th>Sub Division</th>
-            <th>Record Type</th>
-            <th>PDF File</th>
-            <th>Amount</th>
-            <th>Send To</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody id="pdfTableBody">
-    </tbody>
-</table>
-
+                   <form id="recordForm">
+                        <input type="hidden" id="editId">
+                        <input type="hidden" id="currentPdf">
+                        <label>Name of the Work</label>
+                        <input type="text" id="workName" required>
+                        <label>PR No.</label>
+                        <input type="text" id="prNo" required>
+                        <label>Sub Division</label>
+                        <select id="subDivision" required>
+                            <option value="">Select Sub Division</option>
+                            <option value="Sub Div-I">Sub Div-I</option>
+                            <option value="Sub Div-II">Sub Div-II</option>
+                            <option value="Sub Div-III">Sub Div-III</option>
+                            <option value="Sub Div-IV">Sub Div-IV</option>
+                        </select>
+                        <label>Record Type</label>
+                        <select id="recordType" required>
+                            <option value="">Select Type</option>
+                            <option value="PR">PR</option>
+                            <option value="Estimate">Estimate</option>
+                            <option value="Drawing">Drawing</option>
+                            <option value="Other">Other Record</option>
+                        </select>
+                        <label>PDF File</label>
+                        <input type="file" id="pdfFile" accept="application/pdf" onchange="autoExtractPDF()">
+                        <label>Amount</label>
+                        <input type="number" id="amount" required>
+                        <label>Send To</label>
+                        <input type="text" id="sendTo" required>
+                        <button type="submit" class="primary">Add / Update Record</button>
+                    </form>
                 </div>
             </div>
             
@@ -2310,6 +2317,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
