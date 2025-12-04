@@ -98,6 +98,81 @@
         z-index:1000;
         animation: fadeIn 0.2s ease-out;
     }
+/* === PDF ENTRY GRID (PR REGISTER STYLE) === */
+#pdfEntryWrapper {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+
+#pdfEntryControls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+#pdfEntryControls .small {
+    font-size: 0.85rem;
+}
+
+#pdfEntryTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+#pdfEntryTable thead th {
+    background: #0d8ebb;           /* Excel-like blue */
+    color: #ffffff;
+    padding: 8px 6px;
+    text-align: left;
+    border: 1px solid #cde8f2;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    white-space: nowrap;
+}
+
+#pdfEntryTable tbody td {
+    border: 1px solid #e0e0e0;
+    padding: 6px 6px;
+    vertical-align: top;
+    background: #fdfdfd;
+}
+
+#pdfEntryTable tbody tr:nth-child(even) td {
+    background: #f7fbff;          /* light alt row like daily progress */
+}
+
+#pdfEntryTable td[contenteditable="true"] {
+    background: #fffdf0;          /* light yellow like editable daily grid */
+    outline: none;
+}
+
+#pdfEntryTable td[contenteditable="true"]:focus {
+    box-shadow: inset 0 0 0 1px #007bff;
+    background: #fffbe7;
+}
+
+.pdf-file-input {
+    width: 150px;
+    font-size: 12px;
+}
+
+.save-row-btn {
+    background: #28a745;
+    color: #fff;
+}
+
+.clear-row-btn {
+    background: #6c757d;
+    color: #fff;
+    margin-left: 4px;
+}
 
     #previewModalContent { background:white; border-radius:10px; max-width:95%; width:1000px; height:90%; position:relative; padding:10px; display:flex; flex-direction:column; }
     #previewModalContent button.closeBtn { position:absolute; top:10px; right:10px; background:#dc3545; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; z-index: 10; }
@@ -506,42 +581,44 @@
             <hr style="margin:20px 0;">
 
             <div>
-                <h2 id="formToggle">Add / Edit Record ➕</h2>
-                <div id="formWrapper" style="display: none; overflow: hidden; animation: fadeIn 0.3s ease-out;">
-                   <form id="recordForm">
-                        <input type="hidden" id="editId">
-                        <input type="hidden" id="currentPdf">
-                        <label>Name of the Work</label>
-                        <input type="text" id="workName" required>
-                        <label>PR No.</label>
-                        <input type="text" id="prNo" required>
-                        <label>Sub Division</label>
-                        <select id="subDivision" required>
-                            <option value="">Select Sub Division</option>
-                            <option value="Sub Div-I">Sub Div-I</option>
-                            <option value="Sub Div-II">Sub Div-II</option>
-                            <option value="Sub Div-III">Sub Div-III</option>
-                            <option value="Sub Div-IV">Sub Div-IV</option>
-                        </select>
-                        <label>Record Type</label>
-                        <select id="recordType" required>
-                            <option value="">Select Type</option>
-                            <option value="PR">PR</option>
-                            <option value="Estimate">Estimate</option>
-                            <option value="Drawing">Drawing</option>
-                            <option value="Other">Other Record</option>
-                        </select>
-                        <label>PDF File</label>
-                        <input type="file" id="pdfFile" accept="application/pdf" onchange="autoExtractPDF()">
-                        <label>Amount</label>
-                        <input type="number" id="amount" required>
-                        <label>Send To</label>
-                        <input type="text" id="sendTo" required>
-                        <button type="submit" class="primary">Add / Update Record</button>
-                    </form>
-                </div>
-            </div>
-            
+    <h2>🧾 PR Register – Add / Edit (Table View)</h2>
+
+    <div id="pdfEntryWrapper">
+        <div id="pdfEntryControls">
+            <button class="small btn-add" type="button" onclick="addPdfRow()">➕ Add Row</button>
+            <button class="small btn-clear" type="button" onclick="clearPdfGrid()">🧹 Clear Empty Rows</button>
+            <span class="muted">Fill any row(s) and click <b>Save Row</b>. Each row saves one PDF record.</span>
+        </div>
+
+        <div style="overflow:auto; max-height:420px; border:1px solid #ddd; border-radius:6px;">
+            <table id="pdfEntryTable">
+                <thead>
+                    <tr>
+                        <th>S.No</th>
+                        <th>PR No</th>
+                        <th>Date</th>
+                        <th>Procurement Description</th>
+                        <th>Amount</th>
+                        <th>Budget Head</th>
+                        <th>PO No</th>
+                        <th>Date 2</th>
+                        <th>Name of the Firm</th>
+                        <th>Division</th>
+                        <th>Pg No</th>
+                        <th>Remarks</th>
+                        <th>High Value Spares</th>
+                        <th>PDF File</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="pdfEntryBody">
+                    <!-- rows added by JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
             <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
 
             <div> <h2 id="pdfListTitle">All Records</h2>
@@ -1079,6 +1156,63 @@ async function editSelected() {
             `;
         }
 
+// ======== PDF ENTRY GRID (FRONT-END EDITOR) ========
+const pdfEntryBody = document.getElementById('pdfEntryBody');
+
+function rowIsEmpty(tr) {
+    // check all editable cells except S.No & action/pdf columns
+    const tds = tr.querySelectorAll('td[contenteditable="true"]');
+    for (const td of tds) {
+        if (td.textContent.trim() !== '') return false;
+    }
+    const fileInput = tr.querySelector('.pdf-file-input');
+    if (fileInput && fileInput.files.length > 0) return false;
+    return true;
+}
+
+function renumberPdfRows() {
+    [...pdfEntryBody.rows].forEach((tr, idx) => {
+        const snoCell = tr.querySelector('td[data-col="sno"]');
+        if (snoCell) snoCell.textContent = idx + 1;
+    });
+}
+
+function addPdfRow(prefill = {}) {
+    const tr = document.createElement('tr');
+
+    tr.innerHTML = `
+        <td data-col="sno">${pdfEntryBody.rows.length + 1}</td>
+        <td contenteditable="true" data-col="prNo">${prefill.prNo || ''}</td>
+        <td contenteditable="true" data-col="date">${prefill.date || ''}</td>
+        <td contenteditable="true" data-col="description">${prefill.description || ''}</td>
+        <td contenteditable="true" data-col="amount">${prefill.amount || ''}</td>
+        <td contenteditable="true" data-col="budgetHead">${prefill.budgetHead || ''}</td>
+        <td contenteditable="true" data-col="poNo">${prefill.poNo || ''}</td>
+        <td contenteditable="true" data-col="date2">${prefill.date2 || ''}</td>
+        <td contenteditable="true" data-col="firmName">${prefill.firmName || ''}</td>
+        <td contenteditable="true" data-col="division">${prefill.division || ''}</td>
+        <td contenteditable="true" data-col="pgNo">${prefill.pgNo || ''}</td>
+        <td contenteditable="true" data-col="remarks">${prefill.remarks || ''}</td>
+        <td contenteditable="true" data-col="highValue">${prefill.highValue || ''}</td>
+        <td data-col="pdf">
+            <input type="file" class="pdf-file-input" accept="application/pdf">
+        </td>
+        <td data-col="actions">
+            <button type="button" class="small-btn save-row-btn" onclick="savePdfRow(this)">Save Row</button>
+            <button type="button" class="small-btn clear-row-btn" onclick="clearPdfRow(this)">Clear</button>
+        </td>
+    `;
+
+    pdfEntryBody.appendChild(tr);
+}
+
+/** Make 10 starter rows on first load */
+function initPdfEntryGrid() {
+    pdfEntryBody.innerHTML = '';
+    for (let i = 0; i < 10; i++) addPdfRow();
+}
+
+        
         function applyAllFilters() {
             const searchTerm = searchInputEl.value.toLowerCase();
             const subDiv = filterSubDivisionEl.value;
@@ -1222,6 +1356,139 @@ async function editSelected() {
         }
        const BACKEND = "https://nttps-backend.onrender.com";
 
+async function savePdfRow(btn) {
+    const tr = btn.closest('tr');
+    if (!tr) return;
+
+    const get = col => (tr.querySelector(`td[data-col="${col}"]`)?.textContent || '').trim();
+
+    const prNo       = get('prNo');
+    const description= get('description');
+    const amount     = get('amount');
+    const budgetHead = get('budgetHead');
+    const poNo       = get('poNo');
+    const date       = get('date');
+    const date2      = get('date2');
+    const firmName   = get('firmName');
+    const division   = get('division');
+    const pgNo       = get('pgNo');
+    const remarks    = get('remarks');
+    const highValue  = get('highValue');
+
+    const fileInput = tr.querySelector('.pdf-file-input');
+    const file = fileInput?.files[0] || null;
+
+    const recordId = tr.dataset.recordId || '';
+    const existingPdfPath = tr.dataset.pdfPath || '';
+
+    if (!prNo) {
+        showToast('PR No is required.', true);
+        return;
+    }
+    if (!description) {
+        showToast('Description is required.', true);
+        return;
+    }
+    if (!recordId && !file) {
+        // new record must have a PDF
+        showToast('Please choose a PDF file for this row.', true);
+        return;
+    }
+
+    const formData = new FormData();
+
+    // PDF handling
+    if (file) {
+        formData.append('pdfs', file);       // backend already expects this
+    } else if (recordId && existingPdfPath) {
+        formData.append('pdfPath', existingPdfPath); // reuse old PDF
+    }
+
+    // existing fields used by your backend today
+    formData.append('prNo', prNo);
+    formData.append('workName', description);
+    formData.append('amount', amount || '0');
+    formData.append('subDivision', division || '');
+    formData.append('recordType', 'PR');
+    formData.append('sendTo', firmName || '');
+
+    // 🔴 EXTRA COLUMNS – require DB + server changes (see section 4)
+    formData.append('prDate', date);
+    formData.append('budgetHead', budgetHead);
+    formData.append('poNo', poNo);
+    formData.append('prDate2', date2);
+    formData.append('firmName', firmName);
+    formData.append('divisionLabel', division);
+    formData.append('pageNo', pgNo);
+    formData.append('remarks', remarks);
+    formData.append('highValueSpares', highValue);
+
+    if (recordId) {
+        formData.append('id', recordId);
+    }
+
+    try {
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+
+        const res = await authFetch(`${API}/upload`, {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || (!data.success && !data.record)) {
+            throw new Error(data.error || 'Save failed');
+        }
+
+        const saved = data.record || data.records?.[0];
+        tr.dataset.recordId = saved.id;
+        tr.dataset.pdfPath = saved.pdfPath || saved.pdf_url || '';
+
+        showToast(recordId ? 'Row updated successfully.' : 'Row saved successfully.');
+
+        // clear file input (keep the rest)
+        if (fileInput) fileInput.value = '';
+
+        // refresh the "All Records" list + dashboard
+        await loadRecords();
+
+    } catch (err) {
+        console.error('savePdfRow error:', err);
+        showToast(err.message || 'Server error', true);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save Row';
+    }
+}
+function clearPdfRow(btn) {
+    const tr = btn.closest('tr');
+    if (!tr) return;
+    // if row is fully empty -> just clear file input and cells
+    tr.querySelectorAll('td[contenteditable="true"]').forEach(td => td.textContent = '');
+    const fileInput = tr.querySelector('.pdf-file-input');
+    if (fileInput) fileInput.value = '';
+    delete tr.dataset.recordId;
+    delete tr.dataset.pdfPath;
+}
+
+function clearPdfGrid() {
+    showConfirm('Remove all completely empty rows and reset S.No?', () => {
+        // remove rows that are fully empty
+        [...pdfEntryBody.rows].forEach(tr => {
+            if (rowIsEmpty(tr)) tr.remove();
+        });
+        // if none left, recreate 10
+        if (pdfEntryBody.rows.length === 0) {
+            initPdfEntryGrid();
+        } else {
+            renumberPdfRows();
+        }
+    }, 'btn-clear');
+}
+
+        
 function previewPDF(path) {
     const iframe = document.getElementById("pdfFrame");
     iframe.src = path;
@@ -1234,22 +1501,48 @@ function previewPDF(path) {
         }
 
         function editRecord(id) {
-            const r = allRecords.find(r => r.id === id);
-            if (!r) return;
-            document.getElementById('workName').value = r.workName;
-            document.getElementById('prNo').value = r.prNo;
-            document.getElementById('subDivision').value = r.subDivision;
-            document.getElementById('recordType').value = r.recordType;
-            document.getElementById('amount').value = r.amount;
-            document.getElementById('sendTo').value = r.sendTo;
-            editId.value = r.id;
-            document.getElementById('currentPdf').value = r.pdfPath || '';
-            
-            document.getElementById('formWrapper').style.display = 'block';
-            document.getElementById('formToggle').textContent = 'Add / Edit Record ➖';
-            
-            window.scrollTo(0, 0); 
-        }
+    const r = allRecords.find(rec => rec.id === id);
+    if (!r) {
+        showToast('Record not found.', true);
+        return;
+    }
+
+    // find an empty row, or create a new one at bottom
+    let targetRow = [...pdfEntryBody.rows].find(row => rowIsEmpty(row));
+    if (!targetRow) {
+        addPdfRow();
+        targetRow = pdfEntryBody.rows[pdfEntryBody.rows.length - 1];
+    }
+
+    targetRow.dataset.recordId = r.id;
+    targetRow.dataset.pdfPath  = r.pdfPath || '';
+
+    const set = (col, val) => {
+        const td = targetRow.querySelector(`td[data-col="${col}"]`);
+        if (td) td.textContent = val || '';
+    };
+
+    set('prNo',       r.prNo || '');
+    set('description',r.workName || '');
+    set('amount',     r.amount || '');
+    set('division',   r.subDivision || '');
+    set('firmName',   r.sendTo || '');
+
+    // if you already have these new columns in DB, fill them too:
+    set('date',       r.prDate || '');
+    set('budgetHead', r.budgetHead || '');
+    set('poNo',       r.poNo || '');
+    set('date2',      r.prDate2 || '');
+    set('pgNo',       r.pageNo || '');
+    set('remarks',    r.remarks || '');
+    set('highValue',  r.highValueSpares || '');
+
+    showToast('Loaded into PR grid. Edit row and click "Save Row".');
+    
+    // scroll to table
+    targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
 
         async function deleteRecord(id) {
             showConfirm('Move this record to the trash bin?', async () => {
@@ -2229,6 +2522,7 @@ function deleteSelected() {
         /* =================================================================== */
         
         loadRecords();
+        initPdfEntryGrid();
         initSheet();
         setDefaultDate(); 
         loadSavedProgress();
@@ -2238,6 +2532,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
