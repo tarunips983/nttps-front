@@ -1421,14 +1421,7 @@ function previewPDF(path) {
             }
         }
 
-async function loadExistingPDFRecords() {
-    const res = await fetch(`${SERVER_URL}/records`);
-    const data = await res.json();
 
-    data.forEach(r => addPDFRow(r));
-}
-
-window.onload = loadExistingPDFRecords;
 
 
         /* =================================================================== */
@@ -2242,6 +2235,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
