@@ -850,46 +850,6 @@ main {
       <aside id="pdf-nav-bar" class="left-bar" aria-hidden="true">
         <h3>Filter Records</h3>
         <button class="pdf-nav-btn show-all active" onclick="showAllPDFs(this)">📂 Show All</button>
-
-        <div>
-          <button class="pdf-nav-header" onclick="togglePdfNav(this)">Sub Div-I</button>
-          <div class="pdf-nav-content">
-            <button onclick="filterRecords('Sub Div-I','PR', this)">PRs</button>
-            <button onclick="filterRecords('Sub Div-I','Estimate', this)">Estimates</button>
-            <button onclick="filterRecords('Sub Div-I','Drawing', this)">Drawings</button>
-            <button onclick="filterRecords('Sub Div-I','Other Record', this)">Other Records</button>
-          </div>
-        </div>
-
-        <div>
-          <button class="pdf-nav-header" onclick="togglePdfNav(this)">Sub Div-II</button>
-          <div class="pdf-nav-content">
-            <button onclick="filterRecords('Sub Div-II','PR', this)">PRs</button>
-            <button onclick="filterRecords('Sub Div-II','Estimate', this)">Estimates</button>
-            <button onclick="filterRecords('Sub Div-II','Drawing', this)">Drawings</button>
-            <button onclick="filterRecords('Sub Div-II','Other Record', this)">Other Records</button>
-          </div>
-        </div>
-
-        <div>
-          <button class="pdf-nav-header" onclick="togglePdfNav(this)">Sub Div-III</button>
-          <div class="pdf-nav-content">
-            <button onclick="filterRecords('Sub Div-III','PR', this)">PRs</button>
-            <button onclick="filterRecords('Sub Div-III','Estimate', this)">Estimates</button>
-            <button onclick="filterRecords('Sub Div-III','Drawing', this)">Drawings</button>
-            <button onclick="filterRecords('Sub Div-III','Other Record', this)">Other Records</button>
-          </div>
-        </div>
-
-        <div>
-          <button class="pdf-nav-header" onclick="togglePdfNav(this)">Sub Div-IV</button>
-          <div class="pdf-nav-content">
-            <button onclick="filterRecords('Sub Div-IV','PR', this)">PRs</button>
-            <button onclick="filterRecords('Sub Div-IV','Estimate', this)">Estimates</button>
-            <button onclick="filterRecords('Sub Div-IV','Drawing', this)">Drawings</button>
-            <button onclick="filterRecords('Sub Div-IV','Other Record', this)">Other Records</button>
-          </div>
-        </div>
       </aside>
 
       <section id="pdf-grid-wrapper" class="right-panel">
@@ -1201,6 +1161,42 @@ container.innerHTML = records.map((r, i) => {
     }
 });
 
+function buildDynamicDivisionFilters() {
+    const sidebar = document.getElementById("pdf-nav-bar");
+
+    // Reset sidebar
+    sidebar.innerHTML = `
+        <h3>Filter Records</h3>
+        <button class="pdf-nav-btn show-all active" onclick="showAllPDFs(this)">📂 Show All</button>
+    `;
+
+    // Get unique divisions (skip null/blank)
+    const divisions = [...new Set(
+        allRecords
+            .map(r => r.subDivision)
+            .filter(x => x && x.trim() !== "")
+    )];
+
+    divisions.forEach(div => {
+        const section = document.createElement("div");
+        section.classList.add("pdf-nav-section");
+
+        section.innerHTML = `
+            <button class="pdf-nav-header" onclick="togglePdfNav(this)">${div}</button>
+
+            <div class="pdf-nav-content">
+                <button onclick="filterRecords('${div}', 'PR', this)">PRs</button>
+                <button onclick="filterRecords('${div}', 'Estimate', this)">Estimates</button>
+                <button onclick="filterRecords('${div}', 'Drawing', this)">Drawings</button>
+                <button onclick="filterRecords('${div}', 'Other Record', this)">Other Records</button>
+            </div>
+        `;
+        sidebar.appendChild(section);
+    });
+}
+
+
+    
 function toggleSearchBar() {
     const input = document.getElementById("searchInput");
     input.classList.toggle("active");
@@ -1652,12 +1648,14 @@ window.addEventListener("load", () => {
     loadRecords();
     loadDailyProgressDates();
     renderRecords(allRecords);
+    buildDynamicDivisionFilters();
 
 });
 
   </script>
 </body>
 </html>
+
 
 
 
