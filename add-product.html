@@ -1764,8 +1764,7 @@ loadedSnapshotDate = null;
 
         function deleteSaved(id){
             showConfirm('Delete this saved snapshot? This cannot be undone.', () => {
-                authFetch(`${API}/daily-progress
-/${id}`, {method:'DELETE'})
+                authFetch(`${API}/daily-progress/${id}`, { method: 'DELETE' })
                     .then(r=>r.json())
                     .then(data=>{
                         if(data.success) {
@@ -2235,6 +2234,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
