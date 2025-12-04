@@ -1420,82 +1420,7 @@ function previewPDF(path) {
                 showToast(err.message, true);
             }
         }
-function addPDFRow(data = {}) {
-    const table = document.getElementById("pdfTableBody");
 
-    const row = document.createElement("tr");
-
-    row.innerHTML = `
-        <td><input class="form-control" value="${data.workName || ''}" /></td>
-        <td><input class="form-control" value="${data.prNo || ''}" /></td>
-
-        <td>
-            <select class="form-control">
-                <option>Sub Div-I</option>
-                <option>Sub Div-II</option>
-                <option>Sub Div-III</option>
-                <option>Sub Div-IV</option>
-            </select>
-        </td>
-
-        <td>
-            <select class="form-control">
-                <option>PR</option>
-                <option>Estimate</option>
-                <option>Drawing</option>
-                <option>Other Record</option>
-            </select>
-        </td>
-
-        <td><input type="file" class="form-control" accept="application/pdf" /></td>
-
-        <td><input class="form-control" value="${data.amount || ''}" /></td>
-
-        <td><input class="form-control" value="${data.sendTo || ''}" /></td>
-
-        <td>
-            <button class="btn btn-danger" onclick="this.closest('tr').remove()">❌</button>
-        </td>
-    `;
-
-    table.appendChild(row);
-}
-
-
-// ADD NEW EMPTY ROW
-document.getElementById("addRowBtn").addEventListener("click", () => {
-    addPDFRow();
-});
-
-
-// SAVE ALL PDF RECORDS
-document.getElementById("savePDFBtn").addEventListener("click", async () => {
-    const rows = document.querySelectorAll("#pdfTableBody tr");
-    const records = [];
-
-    for (let r of rows) {
-        const inputs = r.querySelectorAll("input, select");
-        const pdfFile = inputs[4].files[0];
-
-        const formData = new FormData();
-        formData.append("workName", inputs[0].value);
-        formData.append("prNo", inputs[1].value);
-        formData.append("subDivision", inputs[2].value);
-        formData.append("recordType", inputs[3].value);
-        formData.append("amount", inputs[5].value);
-        formData.append("sendTo", inputs[6].value);
-
-        if (pdfFile) formData.append("pdfFile", pdfFile);
-
-        // PUSH TO SERVER
-        await fetch(`${SERVER_URL}/records`, {
-            method: "POST",
-            body: formData
-        });
-    }
-
-    alert("✅ All Records Saved!");
-});
 async function loadExistingPDFRecords() {
     const res = await fetch(`${SERVER_URL}/records`);
     const data = await res.json();
@@ -2317,6 +2242,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
