@@ -802,6 +802,22 @@ main {
         display: block;
     }
 }
+/* Modern Circle Loader */
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid #ddd;
+  border-top-color: #007bff;
+  border-radius: 50%;
+  animation: spinLoader 0.8s linear infinite;
+  margin: 30px auto;
+}
+
+@keyframes spinLoader {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 </style>
 
@@ -853,8 +869,10 @@ main {
       </aside>
 
       <section id="pdf-grid-wrapper" class="right-panel">
-        <div id="loader" style="text-align:center;padding:20px">Loading...</div>
-        <div class="product-grid" id="product-list" style="display:none"></div>
+        
+        <div class="product-grid" id="product-list" style="display:none">
+          <div id="loader" class="loader"></div>
+        </div>
       </section>
     </div>
 
@@ -1658,4 +1676,5 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
