@@ -192,6 +192,8 @@ input[type="password"] {
 </label>
 
 <a href="#" id="forgotPasswordLink" class="toggle-link">Forgot Password?</a>
+      <a href="#" id="loginBackLink" class="toggle-link" style="display:none;">Back to Login</a>
+
 
       <button type="submit" id="submitButton">Login</button>
 
@@ -233,15 +235,41 @@ input[type="password"] {
         element.textContent = "";
       }, 4000);
     }
+document.getElementById("loginBackLink").addEventListener("click", (e) => {
+  e.preventDefault();
+
+  isForgotMode = false;
+  isVerifyForgot = false;
+
+  // RESET VIEW TO LOGIN MODE
+  formTitle.innerHTML = "🔐 Admin Login";
+
+  emailField.style.display = "block";
+  passwordField.style.display = "block";
+  confirmPasswordField.style.display = "none";
+  inviteCodeField.style.display = "none";
+  otpField.style.display = "none";
+
+  submitButton.textContent = "Login";
+  submitButton.style.backgroundColor = "#ff9900";
+
+  // SHOW RIGHT ELEMENTS
+  document.getElementById("rememberMe").parentElement.style.display = "flex";
+  document.getElementById("forgotPasswordLink").style.display = "block";
+  document.getElementById("toggleLink").style.display = "block";
+
+  // HIDE LOGIN BACK LINK
+  document.getElementById("loginBackLink").style.display = "none";
+});
 
 
 document.getElementById("forgotPasswordLink").addEventListener("click", (e) => {
   e.preventDefault();
 
   isLoginMode = false;
+  isRegisterMode = false;
   isForgotMode = true;
   isVerifyForgot = false;
-  isRegisterMode = false;
 
   form.reset();
   errorMsg.style.display = "none";
@@ -257,7 +285,16 @@ document.getElementById("forgotPasswordLink").addEventListener("click", (e) => {
 
   submitButton.textContent = "Send OTP";
   submitButton.style.backgroundColor = "#007bff";
+
+  // HIDE UNWANTED OPTIONS
+  document.getElementById("rememberMe").parentElement.style.display = "none";
+  document.getElementById("forgotPasswordLink").style.display = "none";
+  document.getElementById("toggleLink").style.display = "none";
+
+  // SHOW BACK TO LOGIN
+  document.getElementById("loginBackLink").style.display = "block";
 });
+
 
     
     function toggleMode(e) {
@@ -545,6 +582,7 @@ async function handleLogin() {
   </script>
 </body>
 </html>
+
 
 
 
