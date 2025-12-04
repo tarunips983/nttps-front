@@ -1090,7 +1090,6 @@ async function editSelected() {
         /* =================================================================== */
         /* ===================== PDF DATABASE PANEL CODE ===================== */
         /* =================================================================== */
-        const recordForm = document.getElementById('recordForm');
         const recordTable = document.getElementById('recordTable');
         const editId = document.getElementById('editId');
         let allRecords = [];
@@ -2418,20 +2417,7 @@ function deleteSelected() {
 
 
         
-        /* --- Collapsible Form Logic --- */
-        const formToggle = document.getElementById('formToggle');
-        const formWrapper = document.getElementById('formWrapper');
-        
-        formToggle.addEventListener('click', () => {
-            if (formWrapper.style.display === 'none') {
-                formWrapper.style.display = 'block';
-                formToggle.textContent = 'Add / Edit Record ➖';
-            } else {
-                formWrapper.style.display = 'none';
-                formToggle.textContent = 'Add / Edit Record ➕';
-            }
-        });
-
+ 
         /* --- Drag-and-Drop Row Logic --- */
         let draggedRow = null;
 
@@ -2498,6 +2484,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
