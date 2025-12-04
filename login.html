@@ -191,9 +191,8 @@ input[type="password"] {
   Remember Me
 </label>
 
-<a href="#" id="forgotPasswordLink" class="toggle-link" style="margin-top:8px;color:#d9534f;">
-  Forgot Password?
-</a>
+<a href="#" id="forgotPasswordLink" class="toggle-link">Forgot Password?</a>
+
       <button type="submit" id="submitButton">Login</button>
 
       <div class="msg error-msg" id="errorMsg"></div>
@@ -202,33 +201,7 @@ input[type="password"] {
       <a href="#" id="toggleLink" class="toggle-link">Need to create an account? Register</a>
     </form>
   </div>
-<div id="forgotModal"
-  style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);
-         justify-content:center;align-items:center;z-index:2000;">
-  <div style="background:white;padding:20px;border-radius:10px;width:320px;text-align:center;">
-    <h3>Reset Password</h3>
 
-    <input id="fpEmail" type="email" placeholder="Enter Email"
-      style="width:100%;padding:10px;margin:10px 0;border-radius:6px;border:1px solid #ccc;" />
-
-    <button id="sendFPOTP" style="width:100%;padding:10px;background:#007bff;color:white;border:0;border-radius:6px;">
-      Send OTP
-    </button>
-
-    <input id="fpOTP" placeholder="Enter OTP" style="display:none;width:100%;padding:10px;margin:10px 0;border-radius:6px;border:1px solid #ccc;" />
-
-    <input id="fpNewPass" type="password" placeholder="New Password"
-      style="display:none;width:100%;padding:10px;margin:10px 0;border-radius:6px;border:1px solid #ccc;" />
-
-    <button id="resetPassBtn" style="display:none;width:100%;padding:10px;background:#28a745;color:white;border:0;border-radius:6px;">
-      Reset Password
-    </button>
-
-    <button onclick="closeForgotModal()" style="margin-top:10px;border:0;background:#dc3545;color:white;padding:8px 12px;border-radius:6px;">
-      Cancel
-    </button>
-  </div>
-</div>
 
   <script>
     const form = document.getElementById("authForm");
@@ -249,6 +222,8 @@ input[type="password"] {
     let isLoginMode = true;
     let isVerifyMode = false;
 
+    let isForgotMode = false;
+    let isVerifyForgot = false;
     function showMessage(element, message, isError = true) {
       element.textContent = message;
       element.style.display = "block";
@@ -259,6 +234,32 @@ input[type="password"] {
       }, 4000);
     }
 
+
+document.getElementById("forgotPasswordLink").addEventListener("click", (e) => {
+  e.preventDefault();
+
+  isLoginMode = false;
+  isForgotMode = true;
+  isVerifyForgot = false;
+  isRegisterMode = false;
+
+  form.reset();
+  errorMsg.style.display = "none";
+  successMsg.style.display = "none";
+
+  formTitle.innerHTML = "🔑 Reset Password";
+
+  emailField.style.display = "block";
+  passwordField.style.display = "none";
+  confirmPasswordField.style.display = "none";
+  inviteCodeField.style.display = "none";
+  otpField.style.display = "none";
+
+  submitButton.textContent = "Send OTP";
+  submitButton.style.backgroundColor = "#007bff";
+});
+
+    
     function toggleMode(e) {
       if (e) e.preventDefault();
       isLoginMode = !isLoginMode;
@@ -296,13 +297,12 @@ input[type="password"] {
       errorMsg.style.display = "none";
       successMsg.style.display = "none";
 
-      if (isLoginMode) {
-        await handleLogin();
-      } else if (isVerifyMode) {
-        await handleVerify();
-      } else {
-        await handleRegister();
-      }
+      if (isLoginMode) return handleLogin();
+if (isRegisterMode && !isVerifyMode) return handleRegister();
+if (isRegisterMode && isVerifyMode) return handleVerify();
+
+if (isForgotMode && !isVerifyForgot) return handleForgotStep1();
+if (isForgotMode && isVerifyForgot) return handleForgotStep2();
     });
 
     async function handleLogin() {
@@ -411,6 +411,77 @@ if (response.ok) {
     showMessage(errorMsg, "Could not connect to server.");
   }
 }
+
+    async function handleForgotStep1() {
+  const email = emailField.value.trim();
+
+  try {
+    const res = await fetch("https://nttps-email.vercel.app/api/send-forgot-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      showMessage(errorMsg, data.message);
+      return;
+    }
+
+    showMessage(successMsg, "OTP sent to your email!", false);
+
+    isVerifyForgot = true;
+
+    otpField.style.display = "block";
+    passwordField.style.display = "block";
+    confirmPasswordField.style.display = "block";
+
+    submitButton.textContent = "Reset Password";
+    submitButton.style.backgroundColor = "#28a745";
+
+  } catch (err) {
+    showMessage(errorMsg, "Server error");
+  }
+}
+async function handleForgotStep2() {
+  const email = emailField.value.trim();
+  const otp = otpField.value.trim();
+  const newPassword = passwordField.value;
+  const confirmPass = confirmPasswordField.value;
+
+  if (newPassword !== confirmPass) {
+    showMessage(errorMsg, "Passwords do not match");
+    return;
+  }
+
+  try {
+    const res = await fetch("https://nttps-email.vercel.app/api/reset-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, otp, newPassword }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      showMessage(errorMsg, data.message);
+      return;
+    }
+
+    showMessage(successMsg, "Password successfully reset!", false);
+
+    setTimeout(() => {
+      // go back to login screen
+      isForgotMode = false;
+      toggleMode();
+    }, 1500);
+
+  } catch (err) {
+    showMessage(errorMsg, "Server error");
+  }
+}
+
 //-------------------------------------------------------
 // REMEMBER ME — Auto fill email + auto-login
 //-------------------------------------------------------
@@ -471,74 +542,10 @@ async function handleLogin() {
   }
 }
 
-//-------------------------------------------------------
-// FORGOT PASSWORD — open modal
-//-------------------------------------------------------
-document.getElementById("forgotPasswordLink").onclick = function (e) {
-  e.preventDefault();
-  document.getElementById("forgotModal").style.display = "flex";
-};
-
-function closeForgotModal() {
-  document.getElementById("forgotModal").style.display = "none";
-}
-
-
-//-------------------------------------------------------
-// STEP 1 — SEND OTP
-//-------------------------------------------------------
-document.getElementById("sendFPOTP").onclick = async function () {
-  const email = document.getElementById("fpEmail").value.trim();
-
-  if (!email) return alert("Enter your email!");
-
-  const res = await fetch("https://nttps-email.vercel.app/api/send-forgot-otp", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email })
-  });
-
-  const data = await res.json();
-  if (res.ok) {
-    alert("OTP Sent to your email!");
-    document.getElementById("fpOTP").style.display = "block";
-    document.getElementById("fpNewPass").style.display = "block";
-    document.getElementById("resetPassBtn").style.display = "block";
-  } else {
-    alert(data.message);
-  }
-};
-
-
-//-------------------------------------------------------
-// STEP 2 — RESET PASSWORD
-//-------------------------------------------------------
-document.getElementById("resetPassBtn").onclick = async function () {
-  const email = document.getElementById("fpEmail").value.trim();
-  const otp = document.getElementById("fpOTP").value.trim();
-  const newPassword = document.getElementById("fpNewPass").value;
-
-  if (!otp || !newPassword) return alert("Fill all fields!");
-
-  const res = await fetch("https://nttps-email.vercel.app/api/reset-password", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, otp, newPassword })
-  });
-
-  const data = await res.json();
-
-  if (res.ok) {
-    alert("Password successfully reset!");
-    closeForgotModal();
-  } else {
-    alert(data.message);
-  }
-};
-
   </script>
 </body>
 </html>
+
 
 
 
