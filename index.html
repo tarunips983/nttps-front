@@ -869,9 +869,9 @@ main {
       </aside>
 
       <section id="pdf-grid-wrapper" class="right-panel">
-        
+        <div id="loader" class="loader"></div>
         <div class="product-grid" id="product-list" style="display:none">
-          <div id="loader" class="loader"></div>
+          
         </div>
       </section>
     </div>
@@ -880,7 +880,7 @@ main {
     <div id="daily-progress-container" class="main-view">
       <aside id="inlineLeftBar" class="left-bar" aria-hidden="true">
         <h3>Daily Progress</h3>
-        <div id="inlineDateList"><p>Loading dates...</p></div>
+        <div id="inlineDateList"><div id="loader" class="loader"></div><p>Loading dates...</p></div>
       </aside>
 
       <section id="inlineRightBar" class="right-panel">
@@ -1676,5 +1676,6 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
