@@ -587,6 +587,10 @@
         <div id="pdfEntryControls">
             <button class="small btn-add" type="button" onclick="addPdfRow()">➕ Add Row</button>
             <button class="small btn-clear" type="button" onclick="clearPdfGrid()">🧹 Clear Empty Rows</button>
+             <label class="btn-import-label">
+        📥 Import from Excel
+        <input type="file" id="prImportFile" onchange="importPRFromExcel(event)" accept=".xlsx,.xls" style="display:none;">
+    </label>
             <span class="muted">Fill any row(s) and click <b>Save Row</b>. Each row saves one PDF record.</span>
         </div>
 
@@ -1163,6 +1167,70 @@ async function editSelected() {
 // ======== PDF ENTRY GRID (FRONT-END EDITOR) ========
 const pdfEntryBody = document.getElementById('pdfEntryBody');
 
+async function importPRFromExcel(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+        // Convert sheet → array of rows
+        const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+        if (rows.length === 0) {
+            showToast("Excel file is empty!", true);
+            return;
+        }
+
+        // Clear old PR grid and add rows based on Excel
+        pdfEntryBody.innerHTML = "";
+
+        rows.forEach((r, index) => {
+            addPdfRow({
+                prNo: r["PR No"] || "",
+                date: r["Date"] || "",
+                description: r["Procurement Description"] || "",
+                amount: r["Amount"] || "",
+                budgetHead: r["Budget Head"] || "",
+                poNo: r["PO No"] || "",
+                date2: r["Date 2"] || "",
+                firmName: r["Name of the Firm"] || "",
+                division: r["Division"] || "",
+                pgNo: r["Page No"] || "",
+                remarks: r["Remarks"] || "",
+                highValue: r["High Value Spares"] || ""
+            });
+        });
+
+        renumberPdfRows();
+        showToast(`Imported ${rows.length} rows from Excel.`);
+
+        // Auto-save each row after import
+        await bulkSavePRRows();
+
+    } catch (err) {
+        console.error(err);
+        showToast("Excel import failed", true);
+    }
+}
+async function bulkSavePRRows() {
+    const rows = [...pdfEntryBody.rows];
+
+    for (let tr of rows) {
+        const saveBtn = tr.querySelector(".save-row-btn");
+        if (saveBtn) {
+            await savePdfRow(saveBtn); // Calling your existing saveRecord logic
+        }
+    }
+
+    showToast("All imported PR rows saved!");
+    await loadRecords(); // Refresh main list
+}
+
+
+        
 function rowIsEmpty(tr) {
     // check all editable cells except S.No & action/pdf columns
     const tds = tr.querySelectorAll('td[contenteditable="true"]');
@@ -2484,6 +2552,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
