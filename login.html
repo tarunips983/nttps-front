@@ -206,341 +206,63 @@ input[type="password"] {
 
 
   <script>
-    const form = document.getElementById("authForm");
-    const errorMsg = document.getElementById("errorMsg");
-    const successMsg = document.getElementById("successMsg");
-    const SERVER_URL = "https://nttps-backend.onrender.com";
 
-    const emailField = document.getElementById("email");
-    const passwordField = document.getElementById("password");
-    const formTitle = document.getElementById("formTitle");
-    const submitButton = document.getElementById("submitButton");
-    const toggleLink = document.getElementById("toggleLink");
-    const registerFields = document.getElementById("registerFields");
-    const confirmPasswordField = document.getElementById("confirmPassword");
-    const inviteCodeField = document.getElementById("inviteCode");
-    const otpField = document.getElementById("otp");
+const form = document.getElementById("authForm");
+const errorMsg = document.getElementById("errorMsg");
+const successMsg = document.getElementById("successMsg");
+const SERVER_URL = "https://nttps-backend.onrender.com";
 
-    let isLoginMode = true;
-    let isVerifyMode = false;
-    let isRegisterMode = false;
+const emailField = document.getElementById("email");
+const passwordField = document.getElementById("password");
+const formTitle = document.getElementById("formTitle");
+const submitButton = document.getElementById("submitButton");
+const toggleLink = document.getElementById("toggleLink");
+const registerFields = document.getElementById("registerFields");
+const confirmPasswordField = document.getElementById("confirmPassword");
+const inviteCodeField = document.getElementById("inviteCode");
+const otpField = document.getElementById("otp");
 
-    let isForgotMode = false;
-    let isVerifyForgot = false;
-    function showMessage(element, message, isError = true) {
-      element.textContent = message;
-      element.style.display = "block";
-      (isError ? successMsg : errorMsg).style.display = "none";
-      setTimeout(() => {
-        element.style.display = "none";
-        element.textContent = "";
-      }, 4000);
-    }
-document.getElementById("loginBackLink").addEventListener("click", (e) => {
-  e.preventDefault();
+let isLoginMode = true;
+let isRegisterMode = false;
+let isVerifyMode = false;
+let isForgotMode = false;
+let isVerifyForgot = false;
 
-  isForgotMode = false;
-  isVerifyForgot = false;
-
-  // RESET VIEW TO LOGIN MODE
-  formTitle.innerHTML = "🔐 Admin Login";
-
-  emailField.style.display = "block";
-  passwordField.style.display = "block";
-  confirmPasswordField.style.display = "none";
-  inviteCodeField.style.display = "none";
-  otpField.style.display = "none";
-
-  submitButton.textContent = "Login";
-  submitButton.style.backgroundColor = "#ff9900";
-
-  // SHOW RIGHT ELEMENTS
-  document.getElementById("rememberMe").parentElement.style.display = "flex";
-  document.getElementById("forgotPasswordLink").style.display = "block";
-  document.getElementById("toggleLink").style.display = "block";
-
-  // HIDE LOGIN BACK LINK
-  document.getElementById("loginBackLink").style.display = "none";
-});
-
-
-document.getElementById("forgotPasswordLink").addEventListener("click", (e) => {
-  e.preventDefault();
-
-  isLoginMode = false;
-  isRegisterMode = false;
-  isForgotMode = true;
-  isVerifyForgot = false;
-
-  form.reset();
-  errorMsg.style.display = "none";
-  successMsg.style.display = "none";
-
-  formTitle.innerHTML = "🔑 Reset Password";
-
-  emailField.style.display = "block";
-  passwordField.style.display = "none";
-  confirmPasswordField.style.display = "none";
-  inviteCodeField.style.display = "none";
-  otpField.style.display = "none";
-
-  submitButton.textContent = "Send OTP";
-  submitButton.style.backgroundColor = "#007bff";
-
-  // HIDE UNWANTED OPTIONS
-  document.getElementById("rememberMe").parentElement.style.display = "none";
-  document.getElementById("forgotPasswordLink").style.display = "none";
-  document.getElementById("toggleLink").style.display = "none";
-
-  // SHOW BACK TO LOGIN
-  document.getElementById("loginBackLink").style.display = "block";
-});
-
-
-    
-    function toggleMode(e) {
-      if (e) e.preventDefault();
-      isLoginMode = !isLoginMode;
-      isVerifyMode = false;
-      form.reset();
-
-      errorMsg.style.display = "none";
-      successMsg.style.display = "none";
-
-      if (isLoginMode) {
-        formTitle.innerHTML = "🔐 Admin Login";
-        submitButton.textContent = "Login";
-        submitButton.style.backgroundColor = "#ff9900";
-        toggleLink.textContent = "Need to create an account? Register";
-        registerFields.style.display = "none";
-        passwordField.style.display = "block";
-      } else {
-        formTitle.innerHTML = "📝 Create Account";
-        submitButton.textContent = "Send Verification Code";
-        submitButton.style.backgroundColor = "#28a745";
-        toggleLink.textContent = "Already have an account? Login";
-        registerFields.style.display = "block";
-
-        passwordField.style.display = "block";
-        confirmPasswordField.style.display = "block";
-        inviteCodeField.style.display = "block";
-        otpField.style.display = "none";
-      }
-    }
-
-    toggleLink.addEventListener("click", toggleMode);
-
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      errorMsg.style.display = "none";
-      successMsg.style.display = "none";
-
-      if (isLoginMode) return handleLogin();
-if (isRegisterMode && !isVerifyMode) return handleRegister();
-if (isRegisterMode && isVerifyMode) return handleVerify();
-
-if (isForgotMode && !isVerifyForgot) return handleForgotStep1();
-if (isForgotMode && isVerifyForgot) return handleForgotStep2();
-    });
-
-    async function handleLogin() {
-  const email = emailField.value.trim();
-  const password = passwordField.value;
-
-  try {
-    const response = await fetch(`${SERVER_URL}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
-    });
-
-    const data = await response.json();
-if (response.ok) {
-  localStorage.setItem("adminToken", data.token);
-  localStorage.setItem("isAdmin", "true");
-  window.location.href = "add-product.html";
-    } else {
-      showMessage(errorMsg, data.message || "Invalid email or password");
-    }
-  } catch (err) {
-    console.error("Login fetch error:", err);
-    showMessage(errorMsg, "Error connecting to server.");
-  }
+function showMessage(element, message, isError = true) {
+  element.textContent = message;
+  element.style.display = "block";
+  (isError ? successMsg : errorMsg).style.display = "none";
+  setTimeout(() => {
+    element.style.display = "none";
+    element.textContent = "";
+  }, 3000);
 }
 
-
-
-    async function handleRegister() {
-  const email = emailField.value.trim();
-  const password = passwordField.value;
-  const confirmPassword = confirmPasswordField.value;
-  const inviteCode = inviteCodeField.value.trim();
-
-  if (password !== confirmPassword) {
-    showMessage(errorMsg, "Passwords do not match.");
-    return;
-  }
-
-  try {
-    const response = await fetch("https://nttps-email.vercel.app/api/send-otp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, inviteCode }),
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      showMessage(successMsg, data.message || "OTP sent", false);
-      isVerifyMode = true;
-
-      formTitle.innerHTML = "✉️ Check Your Email";
-      submitButton.textContent = "Verify & Register";
-
-      // lock fields while waiting for OTP
-      emailField.disabled = true;
-      passwordField.disabled = true;
-      confirmPasswordField.disabled = true;
-      inviteCodeField.disabled = true;
-
-      otpField.style.display = "block";
-      otpField.required = true;
-    } else {
-      showMessage(errorMsg, data.message || "Registration failed.");
-    }
-  } catch (err) {
-    console.error("Registration error:", err);
-    showMessage(errorMsg, "Could not connect to server.");
-  }
-}
-
-
-   async function handleVerify() {
-  const email = emailField.value.trim();
-  const otp = otpField.value.trim();
-
-  try {
-    const response = await fetch("https://nttps-email.vercel.app/api/verify-otp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, otp }),
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      showMessage(successMsg, data.message || "Registration complete", false);
-
-      // after successful registration, reset form back to login mode
-      setTimeout(() => {
-        emailField.disabled = false;
-        passwordField.disabled = false;
-        confirmPasswordField.disabled = false;
-        inviteCodeField.disabled = false;
-        otpField.required = false;
-
-        toggleMode(); // switch back to login
-      }, 1500);
-    } else {
-      showMessage(errorMsg, data.message || "Verification failed.");
-    }
-  } catch (err) {
-    console.error("Verification error:", err);
-    showMessage(errorMsg, "Could not connect to server.");
-  }
-}
-
-    async function handleForgotStep1() {
-  const email = emailField.value.trim();
-
-  try {
-    const res = await fetch("https://nttps-email.vercel.app/api/send-forgot-otp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      showMessage(errorMsg, data.message);
-      return;
-    }
-
-    showMessage(successMsg, "OTP sent to your email!", false);
-
-    isVerifyForgot = true;
-
-    otpField.style.display = "block";
-    passwordField.style.display = "block";
-    confirmPasswordField.style.display = "block";
-
-    submitButton.textContent = "Reset Password";
-    submitButton.style.backgroundColor = "#28a745";
-
-  } catch (err) {
-    showMessage(errorMsg, "Server error");
-  }
-}
-async function handleForgotStep2() {
-  const email = emailField.value.trim();
-  const otp = otpField.value.trim();
-  const newPassword = passwordField.value;
-  const confirmPass = confirmPasswordField.value;
-
-  if (newPassword !== confirmPass) {
-    showMessage(errorMsg, "Passwords do not match");
-    return;
-  }
-
-  try {
-    const res = await fetch("https://nttps-email.vercel.app/api/reset-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, otp, newPassword }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      showMessage(errorMsg, data.message);
-      return;
-    }
-
-    showMessage(successMsg, "Password successfully reset!", false);
-
-    setTimeout(() => {
-      // go back to login screen
-      isForgotMode = false;
-      toggleMode();
-    }, 1500);
-
-  } catch (err) {
-    showMessage(errorMsg, "Server error");
-  }
-}
-
-//-------------------------------------------------------
-// REMEMBER ME — Auto fill email + auto-login
-//-------------------------------------------------------
-
+// -------------------------
+// 🔁 AUTO LOGIN FIXED
+// -------------------------
 document.addEventListener("DOMContentLoaded", () => {
-    const savedToken = localStorage.getItem("rememberToken");
-    const loggedOut = sessionStorage.getItem("loggedOut");
+  const savedEmail = localStorage.getItem("savedEmail");
+  const rememberToken = localStorage.getItem("rememberToken");
+  const loggedOut = sessionStorage.getItem("loggedOut");
 
-    // Only auto-login if NOT logged out manually
-    if (savedToken && !loggedOut) {
-        window.location.href = "add-product.html";
-    }
+  // Autofill email if remembered
+  if (savedEmail) {
+    emailField.value = savedEmail;
+    document.getElementById("rememberMe").checked = true;
+  }
 
-    // Clear logout flag once page is loaded
-    sessionStorage.removeItem("loggedOut");
+  // Auto-login ONLY IF not logged out manually
+  if (rememberToken && !loggedOut) {
+    window.location.href = "add-product.html";
+  }
+
+  sessionStorage.removeItem("loggedOut");
 });
 
-//-------------------------------------------------------
-// MODIFY LOGIN FUNCTION TO SUPPORT REMEMBER ME
-//-------------------------------------------------------
-
+// ---------------------------------
+// LOGIN (Single clean function ONLY)
+// ---------------------------------
 async function handleLogin() {
   const email = emailField.value.trim();
   const password = passwordField.value;
@@ -555,32 +277,126 @@ async function handleLogin() {
 
     const data = await response.json();
 
-    if (response.ok) {
-      localStorage.setItem("adminToken", data.token);
-      localStorage.setItem("isAdmin", "true");
+    if (!response.ok) return showMessage(errorMsg, data.message);
 
-      // SAVE EMAIL + TOKEN IF REMEMBER ME ENABLED
-      if (remember) {
-        localStorage.setItem("savedEmail", email);
-        localStorage.setItem("rememberToken", data.token);
-      } else {
-        localStorage.removeItem("savedEmail");
-        localStorage.removeItem("rememberToken");
-      }
+    // Save session token
+    localStorage.setItem("adminToken", data.token);
+    localStorage.setItem("isAdmin", "true");
 
-      window.location.href = "add-product.html";
+    // Remember me storage
+    if (remember) {
+      localStorage.setItem("savedEmail", email);
+      localStorage.setItem("rememberToken", data.token);
     } else {
-      showMessage(errorMsg, data.message || "Invalid email or password");
+      localStorage.removeItem("savedEmail");
+      localStorage.removeItem("rememberToken");
     }
+
+    window.location.href = "add-product.html";
+
   } catch (err) {
-    console.error("Login fetch error:", err);
-    showMessage(errorMsg, "Error connecting to server.");
+    console.error(err);
+    showMessage(errorMsg, "Server error");
   }
 }
+
+// --------------------------
+// REGISTER MODE
+// --------------------------
+toggleLink.addEventListener("click", (e) => {
+  e.preventDefault();
+  isLoginMode = !isLoginMode;
+  isRegisterMode = !isRegisterMode;
+  isVerifyMode = false;
+
+  form.reset();
+  errorMsg.style.display = "none";
+  successMsg.style.display = "none";
+
+  if (isLoginMode) {
+    formTitle.innerHTML = "🔐 Admin Login";
+    submitButton.textContent = "Login";
+    submitButton.style.backgroundColor = "#ff9900";
+    registerFields.style.display = "none";
+  } else {
+    formTitle.innerHTML = "📝 Create Account";
+    submitButton.textContent = "Send Verification Code";
+    submitButton.style.backgroundColor = "#28a745";
+    registerFields.style.display = "block";
+
+    otpField.style.display = "none";
+  }
+});
+
+// --------------------------
+// FORGOT PASSWORD
+// --------------------------
+document.getElementById("forgotPasswordLink").addEventListener("click", (e) => {
+  e.preventDefault();
+
+  isLoginMode = false;
+  isRegisterMode = false;
+  isForgotMode = true;
+  isVerifyForgot = false;
+
+  form.reset();
+
+  formTitle.innerHTML = "🔑 Reset Password";
+
+  emailField.style.display = "block";
+  passwordField.style.display = "none";
+  confirmPasswordField.style.display = "none";
+  otpField.style.display = "none";
+
+  submitButton.textContent = "Send OTP";
+  submitButton.style.backgroundColor = "#007bff";
+
+  document.getElementById("rememberMe").parentElement.style.display = "none";
+  document.getElementById("forgotPasswordLink").style.display = "none";
+  document.getElementById("toggleLink").style.display = "none";
+
+  document.getElementById("loginBackLink").style.display = "block";
+});
+
+// BACK TO LOGIN
+document.getElementById("loginBackLink").addEventListener("click", (e) => {
+  e.preventDefault();
+
+  isForgotMode = false;
+
+  formTitle.innerHTML = "🔐 Admin Login";
+
+  passwordField.style.display = "block";
+  otpField.style.display = "none";
+
+  submitButton.textContent = "Login";
+  submitButton.style.backgroundColor = "#ff9900";
+
+  document.getElementById("rememberMe").parentElement.style.display = "flex";
+  document.getElementById("forgotPasswordLink").style.display = "block";
+  document.getElementById("toggleLink").style.display = "block";
+
+  document.getElementById("loginBackLink").style.display = "none";
+});
+
+// --------------------------
+// FORM SUBMISSION CONTROLLER
+// --------------------------
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  if (isLoginMode) return handleLogin();
+  if (isRegisterMode && !isVerifyMode) return handleRegister();
+  if (isRegisterMode && isVerifyMode) return handleVerify();
+  if (isForgotMode && !isVerifyForgot) return handleForgotStep1();
+  if (isForgotMode && isVerifyForgot) return handleForgotStep2();
+});
+
 
   </script>
 </body>
 </html>
+
 
 
 
