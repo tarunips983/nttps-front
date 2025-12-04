@@ -533,14 +533,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Auto-login if remember token exists
-  const fromLogout = sessionStorage.getItem("fromLogout");
+  const savedToken = localStorage.getItem("rememberToken");
+const loggedOut = sessionStorage.getItem("loggedOut");
 
-if (savedToken && !fromLogout && window.location.pathname.includes("login")) {
-  window.location.href = "add-product.html";
+if (savedToken && !loggedOut && window.location.pathname.includes("login")) {
+    window.location.href = "add-product.html";
 }
 
-// Cleanup flag
-sessionStorage.removeItem("fromLogout");
+// Clear logout flag AFTER page loads
+sessionStorage.removeItem("loggedOut");
 
 });
 
@@ -588,6 +589,7 @@ async function handleLogin() {
   </script>
 </body>
 </html>
+
 
 
 
