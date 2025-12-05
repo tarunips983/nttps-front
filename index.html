@@ -1013,23 +1013,6 @@ main {
           <button id="closeModal" aria-label="Close PDF">❌</button>
         </div>
       </div>
-<!-- ======================================================
-     FULL RECORD DETAILS MODAL (AUTO FILLS ALL DB FIELDS)
-====================================================== -->
-<div id="recordDetailsModal" class="details-modal">
-  <div class="details-box">
-    
-    <button class="close-details" onclick="closeRecordDetails()">❌</button>
-    <h2 class="details-title">Record Details</h2>
-
-    <div id="detailsGrid" class="details-grid">
-      <!-- JS will insert all rows dynamically -->
-    </div>
-
-    <button class="details-print-btn" onclick="printRecordDetails()">🖨️ Print</button>
-
-  </div>
-</div>
 
       <!-- small drag-handle (mobile look) -->
       <div class="drag-handle" style="display:none"></div>
@@ -1052,6 +1035,23 @@ main {
       </div>
     </div>
   </div>
+<!-- ======================================================
+     FULL RECORD DETAILS MODAL (AUTO FILLS ALL DB FIELDS)
+====================================================== -->
+<div id="recordDetailsModal" class="details-modal">
+  <div class="details-box">
+    
+    <button class="close-details" onclick="closeRecordDetails()">❌</button>
+    <h2 class="details-title">Record Details</h2>
+
+    <div id="detailsGrid" class="details-grid">
+      <!-- JS will insert all rows dynamically -->
+    </div>
+
+    <button class="details-print-btn" onclick="printRecordDetails()">🖨️ Print</button>
+
+  </div>
+</div>
 
   <footer>
     <p>🔗 Contact | 🛠️ Help | 🔐 Privacy</p>
@@ -1886,6 +1886,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
