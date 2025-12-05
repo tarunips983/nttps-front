@@ -850,6 +850,66 @@ main {
     transform: rotate(360deg);
   }
 }
+.details-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9000;
+}
+
+.details-modal.active { display: flex; }
+
+.details-box {
+    background: white;
+    width: 90%;
+    max-width: 700px;
+    padding: 25px;
+    border-radius: 14px;
+    position: relative;
+    animation: fadeInScale 0.35s ease;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px 20px;
+}
+
+.details-grid div p {
+    margin-top: 4px;
+    padding: 8px;
+    background: #f4f7fa;
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+
+.close-details {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: #dc3545;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .details-box {
+      width: 100%;
+      height: 100vh;
+      border-radius: 0;
+  }
+  .details-grid {
+      grid-template-columns: 1fr;
+  }
+}
 
 </style>
 
@@ -953,6 +1013,23 @@ main {
           <button id="closeModal" aria-label="Close PDF">❌</button>
         </div>
       </div>
+<!-- ======================================================
+     FULL RECORD DETAILS MODAL (AUTO FILLS ALL DB FIELDS)
+====================================================== -->
+<div id="recordDetailsModal" class="details-modal">
+  <div class="details-box">
+    
+    <button class="close-details" onclick="closeRecordDetails()">❌</button>
+    <h2 class="details-title">Record Details</h2>
+
+    <div id="detailsGrid" class="details-grid">
+      <!-- JS will insert all rows dynamically -->
+    </div>
+
+    <button class="details-print-btn" onclick="printRecordDetails()">🖨️ Print</button>
+
+  </div>
+</div>
 
       <!-- small drag-handle (mobile look) -->
       <div class="drag-handle" style="display:none"></div>
@@ -1102,7 +1179,7 @@ if (!records || records.length === 0) {
 
     listBody.innerHTML = records
     .map((r, i) => `
-        <tr class="list-row" style="border-bottom:1px solid #eee; animation-delay: ${i * 0.05}s">
+        <tr class="list-row" onclick='openRecordDetails(event, ${JSON.stringify(r).replace(/'/g,"&apos;")})' style="border-bottom:1px solid #eee; animation-delay: ${i * 0.05}s">
             <td style="padding:10px;border:1px solid #ddd;text-align:center;">
                 <img src="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg"
                      style="height:40px;border-radius:4px;">
@@ -1161,7 +1238,7 @@ if (!records || records.length === 0) {
 container.innerHTML = records.map((r, i) => {
     const recordData = JSON.stringify(r).replace(/'/g, "&apos;");
     return `
-      <div class="product" role="article" style="animation-delay:${i * 0.05}s">
+      <div class="product" role="article" onclick='openRecordDetails(event, ${recordData})' style="animation-delay:${i * 0.05}s">
         <img src="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg"
              alt="APGENCO logo" />
         <div class="product-info">
@@ -1170,7 +1247,9 @@ container.innerHTML = records.map((r, i) => {
           <p><strong>Sub Div:</strong> ${r.subDivision || 'N/A'}</p>
           <p><strong>Type:</strong> ${r.recordType || 'N/A'}</p>
         </div>
-        <button class="view-btn" onclick='showPDF(${recordData})'>View PDF</button>
+        <button class="view-btn" onclick='event.stopPropagation(); showPDF(${JSON.stringify(r).replace(/'/g,"&apos;")})'>
+    View PDF
+</button>
       </div>
     `;
 }).join("");
@@ -1213,6 +1292,89 @@ container.innerHTML = records.map((r, i) => {
         });
     }
 });
+window.openRecordDetails = function(event, record) {
+    // Prevent clicks on buttons inside card/row
+    if (event.target.tagName === "BUTTON") return;
+
+    showDetails(record);  // ← Already created modal function
+};
+window.showDetails = function(record) {
+
+    const detailsGrid = document.getElementById("detailsGrid");
+    detailsGrid.innerHTML = ""; // clear old content
+
+    const labels = {
+        sno: "S.No",
+        prNo: "PR Number",
+        date: "Date",
+        description: "Description",
+        amount: "Amount",
+        budgetHead: "Budget Head",
+        poNo: "PO Number",
+        date2: "Date 2",
+        firmName: "Firm Name",
+        division: "Division",
+        pgNo: "PG Number",
+        remarks: "Remarks",
+        highValue: "High Value",
+        pdfPath: "PDF File"
+    };
+
+    Object.keys(record).forEach(key => {
+
+        if (key === "pdfPath") {
+            let pdfUI = record.pdfPath
+                ? `<a href="${record.pdfPath}" target="_blank" style="color:#007bff;font-weight:bold">Open PDF</a>`
+                : "No PDF";
+
+            detailsGrid.innerHTML += `
+                <div>
+                    <b>${labels[key] || key}</b>
+                    <p>${pdfUI}</p>
+                </div>
+            `;
+        } else {
+            detailsGrid.innerHTML += `
+                <div>
+                    <b>${labels[key] || key}</b>
+                    <p>${record[key] || "—"}</p>
+                </div>
+            `;
+        }
+    });
+
+    // show modal
+    document.getElementById("recordDetailsModal").classList.add("active");
+};
+function closeRecordDetails() {
+    document.getElementById("recordDetailsModal").classList.remove("active");
+}
+function printRecordDetails() {
+    const modalHTML = document.querySelector(".details-box").innerHTML;
+
+    const win = window.open("", "PRINT", "height=700,width=900");
+
+    win.document.write(`
+      <html>
+      <head>
+        <title>Record Details</title>
+        <style>
+          body { font-family: Arial; padding: 20px; }
+          b { color: #007bff; }
+          p { background: #f4f4f4; padding: 6px; border-radius: 5px; }
+        </style>
+      </head>
+      <body>${modalHTML}</body></html>
+    `);
+
+    win.document.close();
+    win.focus();
+
+    setTimeout(() => {
+        win.print();
+        win.close();
+    }, 300);
+}
 
 function buildDynamicDivisionFilters() {
     const sidebar = document.getElementById("pdf-nav-bar");
@@ -1718,6 +1880,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
