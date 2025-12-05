@@ -1854,10 +1854,8 @@ function applyUserSettings() {
     if (!anim) {
         document.querySelectorAll("*").forEach(e => e.style.animation = "none");
     }
-} // ✅ ← THIS WAS MISSING
-//--------------------------------------------------
-// CLOSING OF applyUserSettings() FIXES ERROR
-//--------------------------------------------------
+}  
+
 document.addEventListener("click", (e) => {
     const row = e.target.closest(".list-row");
     if (row) {
@@ -1886,6 +1884,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
