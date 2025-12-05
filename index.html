@@ -1247,7 +1247,7 @@ container.innerHTML = records.map((r, i) => {
           <p><strong>Sub Div:</strong> ${r.subDivision || 'N/A'}</p>
           <p><strong>Type:</strong> ${r.recordType || 'N/A'}</p>
         </div>
-        <button class="view-btn" onclick='event.stopPropagation(); showPDF(${JSON.stringify(r).replace(/'/g,"&apos;")})'>
+        <button class="view-btn" onclick="handlePDFClick(event, ${recordData})">
     View PDF
 </button>
       </div>
@@ -1294,7 +1294,7 @@ container.innerHTML = records.map((r, i) => {
 });
 window.openRecordDetails = function(event, record) {
     // Prevent clicks on buttons inside card/row
-    if (event.target.tagName === "BUTTON") return;
+    if (event.target.closest("button")) return;
 
     showDetails(record);  // ← Already created modal function
 };
@@ -1349,6 +1349,12 @@ window.showDetails = function(record) {
 function closeRecordDetails() {
     document.getElementById("recordDetailsModal").classList.remove("active");
 }
+
+    window.handlePDFClick = function(event, record) {
+    event.stopPropagation();  // <-- stops card click
+    showPDF(record);          // <-- opens only PDF
+};
+
 function printRecordDetails() {
     const modalHTML = document.querySelector(".details-box").innerHTML;
 
@@ -1880,6 +1886,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
