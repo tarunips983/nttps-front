@@ -1357,30 +1357,106 @@ function closeRecordDetails() {
 };
 
 function printRecordDetails() {
-    const modalHTML = document.querySelector(".details-box").innerHTML;
+  // clone only the inner box so we don't print overlay background/buttons
+  const box = document
+    .querySelector("#recordDetailsModal .details-box")
+    .cloneNode(true);
 
-    const win = window.open("", "PRINT", "height=700,width=900");
+  // remove close & print buttons from print version
+  box.querySelector(".close-details")?.remove();
+  box.querySelector(".details-print-btn")?.remove();
 
-    win.document.write(`
-      <html>
-      <head>
-        <title>Record Details</title>
-        <style>
-          body { font-family: Arial; padding: 20px; }
-          b { color: #007bff; }
-          p { background: #f4f4f4; padding: 6px; border-radius: 5px; }
-        </style>
-      </head>
-      <body>${modalHTML}</body></html>
-    `);
+  const win = window.open("", "PRINT", "height=900,width=700");
 
-    win.document.close();
-    win.focus();
+  win.document.write(`
+    <html>
+    <head>
+      <title>Record Details</title>
+      <style>
+        @page {
+          size: A4;
+          margin: 15mm;
+        }
 
-    setTimeout(() => {
-        win.print();
-        win.close();
-    }, 300);
+        body {
+          font-family: "Segoe UI", Arial, sans-serif;
+          font-size: 13px;
+          color: #222;
+        }
+
+        .details-box {
+          box-shadow: none;
+          border: none;
+          padding: 0;
+          max-width: 100%;
+        }
+
+        h2.details-title {
+          text-align: center;
+          margin: 0 0 16px 0;
+          font-size: 18px;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+        }
+
+        .details-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          grid-column-gap: 18px;
+          grid-row-gap: 10px;
+        }
+
+        .details-grid div {
+          break-inside: avoid;
+        }
+
+        .details-grid div b {
+          display: block;
+          font-size: 11px;
+          color: #555;
+          margin-bottom: 2px;
+        }
+
+        .details-grid div p {
+          margin: 0;
+          padding: 6px 8px;
+          border-radius: 4px;
+          background: #f5f7fb;
+          border: 1px solid #dde2ee;
+          font-size: 12px;
+        }
+
+        a {
+          color: #007bff;
+          text-decoration: none;
+          word-break: break-all;
+        }
+
+        /* Optional: show pdf link URL in brackets after text */
+        a::after {
+          content: " (" attr(href) ")";
+          font-size: 10px;
+        }
+
+        @media print {
+          .no-print {
+            display: none !important;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      ${box.outerHTML}
+    </body>
+    </html>
+  `);
+
+  win.document.close();
+  win.focus();
+  setTimeout(() => {
+    win.print();
+    win.close();
+  }, 200);
 }
 
 function buildDynamicDivisionFilters() {
@@ -1885,6 +1961,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
