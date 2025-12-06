@@ -581,6 +581,106 @@ html, body {
     overflow-x: hidden;
 }
 
+/* ------------------ PAGE TITLE ------------------ */
+#estimatePanel h2 {
+    text-align: center;
+    margin-top: 20px;
+    color: #232f3e;
+}
+
+/* ------------------ TABLE WRAPPER ------------------ */
+.table-wrapper {
+    width: 98%;
+    background: white;
+    margin: 20px auto;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+}
+
+/* ------------------ ESTIMATE TABLE ------------------ */
+#estimateTable {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+#estimateTable th {
+    background: #9BBB59;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+    border: 1px solid #b2d48d;
+}
+
+#estimateTable td {
+    border: 1px solid #ddd;
+    padding: 9px;
+    text-align: center;
+    font-size: 14px;
+}
+
+#estimateTable tr:hover {
+    background: #f1f7e6;
+    transition: 0.2s;
+}
+
+/* ------------------ BUTTONS ------------------ */
+.btn {
+    background: #007bff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.btn:hover {
+    background: #0056b3;
+    transform: scale(1.05);
+}
+
+.delete-btn {
+    background: #dc3545;
+}
+
+.delete-btn:hover {
+    background: #b52a36;
+}
+
+/* ------------------ PRINT BUTTON ------------------ */
+#printEstimateBtn {
+    background: #ff9800;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+#printEstimateBtn:hover {
+    background: #e68900;
+    transform: scale(1.05);
+}
+
+/* ------------------ MOBILE RESPONSIVE ------------------ */
+@media (max-width: 768px) {
+    #estimateTable {
+        font-size: 12px;
+    }
+    #estimateTable th,
+    #estimateTable td {
+        padding: 6px;
+    }
+    .table-wrapper {
+        padding: 5px;
+    }
+}
+        
 /* -------- Mobile / small tablets -------- */
 @media (max-width: 900px) {
 
@@ -903,7 +1003,30 @@ html, body {
     margin-bottom: 6px;
   }
 }
-       
+  #estimateEntryControls, 
+#pdfEntryControls {
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:10px;
+}
+
+#estimateEntryTable thead th {
+    position:sticky;
+    top:0;
+    background:#9BBB59;
+    color:white;
+    z-index:5;
+}
+
+#estimateListTable thead th {
+    position:sticky;
+    top:0;
+    background:#4A7EBB;
+    color:white;
+}
+     
 </style>
 </head>
 <body>
@@ -918,6 +1041,7 @@ html, body {
     <div class="container">
         <div class="tabs">
             <button id="tabPdf" class="tab-btn active" onclick="showPanel('pdf')">PDF Database</button>
+            <button id="tabEst" class="tab-btn" onclick="showPanel('est')">Estimates</button>
             <button id="tabDaily" class="tab-btn" onclick="showPanel('daily')">Daily Work Progress</button>
             <button id="tabCL" class="tab-btn" onclick="showPanel('cl')">CL Bio Data</button>
         </div>
@@ -1006,7 +1130,99 @@ html, body {
             </div>
 
         </div> 
+
         
+       <div id="estimatePanel" class="panel">
+
+    <h2>📘 Estimate Register – Add / Edit (Table View)</h2>
+
+    <div id="estimateEntryWrapper">
+        <div id="estimateEntryControls">
+            <button class="small btn-add" type="button" onclick="addEstimateRow()">➕ Add Row</button>
+
+            <button class="small btn-clear" type="button" onclick="clearEstimateEmptyRows()">🧹 Clear Empty Rows</button>
+
+            <label class="btn-import-label">
+                📥 Import from Excel
+                <input type="file" id="estimateImportFile" onchange="importEstimateFromExcel(event)" accept=".xlsx,.xls" style="display:none;">
+            </label>
+
+            <span class="muted">Fill any row(s) and click <b>Save Row</b>. Each row saves one Estimate record.</span>
+        </div>
+
+        <div class="table-scroll" style="overflow:auto; max-height:420px; border:1px solid #ddd; border-radius:6px;">
+            <table id="estimateEntryTable">
+                <thead>
+                    <tr>
+                        <th>S.No</th>
+                        <th>Division</th>
+                        <th>PR No</th>
+                        <th>Estimate Sanction No</th>
+                        <th>T. Spec No</th>
+                        <th>Firm / Contractor</th>
+                        <th>PO No</th>
+                        <th>Gross Amount</th>
+                        <th>Amount Excluding EPF/ESI/GST</th>
+                        <th>LOA No</th>
+                        <th>SAP Billing Doc</th>
+                        <th>M-Book No</th>
+                        <th>Reg Pg No</th>
+                        <th>Back Charging</th>
+                        <th>Start + Completion Dates</th>
+                        <th>LOA No 2</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody id="estimateEntryBody">
+                    <!-- Rows will be added by JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <hr style="margin:30px 0; border:0; border-top:1px solid #eee;">
+
+    <h2 id="estimateListTitle">All Estimate Records</h2>
+
+    <div class="filter-bar">
+        <input type="text" id="estimateSearchInput" placeholder="🔍 Search..." style="padding:8px; border-radius:5px; border:1px solid #ccc; flex:1; min-width:150px;">
+        
+        <select id="filterEstimateDivision" style="padding:8px;"></select>
+        <select id="filterEstimateType" style="padding:8px;"></select>
+
+        <button class="small btn-clear" onclick="resetEstimateFilters()">Reset</button>
+
+        <button id="estimateTrashToggleBtn" class="small btn-clear" onclick="toggleEstimateTrashView()" style="background-color:#dc3545;">
+            ♻️ View Trash
+        </button>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; flex-wrap:wrap; margin-bottom:10px;">
+        <div style="margin-top:5px;">
+            <button class="pagination-btn" onclick="estimatePrevPage()">⬅ Prev</button>
+            <span id="estimatePageInfo" style="margin:0 10px;">Page 1</span>
+            <button class="pagination-btn" onclick="estimateNextPage()">Next ➡</button>
+        </div>
+    </div>
+
+    <div class="table-scroll" style="border:1px solid #ddd; border-radius:6px;">
+        <table id="estimateListTable">
+            <thead>
+                <tr id="estimateTableHead">
+                    <!-- Filled by JS -->
+                </tr>
+            </thead>
+
+            <tbody id="estimateListBody">
+                <!-- Filled by JS -->
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+
         <div id="dailyPanel" class="panel">
             <h2>🧾 Daily Work Progress - Update/Edit</h2>
            <div class="sheet-controls">
@@ -1253,11 +1469,13 @@ async function authFetch(url, options = {}) {
     onConfirmCallback = null;
             
     document.getElementById('pdfPanel').classList.remove('active');
+    document.getElementById('estimatePanel').classList.remove('active');
     document.getElementById('dailyPanel').classList.remove('active');
     document.getElementById('clPanel').classList.remove('active');
 
     // Reset tab highlights
     document.getElementById('tabPdf').classList.remove('active');
+    document.getElementById('tabEstimate').classList.remove('active');
     document.getElementById('tabDaily').classList.remove('active');
     document.getElementById('tabCL').classList.remove('active');
 
@@ -1266,6 +1484,12 @@ async function authFetch(url, options = {}) {
         document.getElementById('pdfPanel').classList.add('active');
         document.getElementById('tabPdf').classList.add('active');
     }
+
+    else if (name === 'estimate') {
+    document.getElementById('estimatePanel').classList.add('active');
+    document.getElementById('tabEstimate').classList.add('active');
+   }
+
     else if (name === 'daily') {
         document.getElementById('dailyPanel').classList.add('active');
         document.getElementById('tabDaily').classList.add('active');
@@ -1367,7 +1591,224 @@ function getSelectedIds() {
     return ids;
 }
 
-        
+/* ============================================
+      ESTIMATE MODULE – FINAL VERSION
+============================================ */
+
+const API = "https://nttps-backend.onrender.com";
+
+let estimateData = [];
+let trashMode = false;
+let estimatePage = 1;
+const estimateRowsPerPage = 10;
+
+/* ============================================
+   1️⃣ ADD NEW ROW
+============================================ */
+function addEstimateRow(prefill = {}) {
+    const tbody = document.getElementById("estimateEntryBody");
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+        <td>${tbody.rows.length + 1}</td>
+
+        <td contenteditable data-col="division">${prefill.division || ""}</td>
+        <td contenteditable data-col="prNo">${prefill.prNo || ""}</td>
+        <td contenteditable data-col="estimateNo">${prefill.estimateNo || ""}</td>
+        <td contenteditable data-col="tspec">${prefill.tspec || ""}</td>
+        <td contenteditable data-col="contractor">${prefill.contractor || ""}</td>
+        <td contenteditable data-col="poNo">${prefill.poNo || ""}</td>
+        <td contenteditable data-col="grossAmount">${prefill.grossAmount || ""}</td>
+        <td contenteditable data-col="netAmount">${prefill.netAmount || ""}</td>
+        <td contenteditable data-col="loaNo">${prefill.loaNo || ""}</td>
+        <td contenteditable data-col="billingDoc">${prefill.billingDoc || ""}</td>
+        <td contenteditable data-col="mbookNo">${prefill.mbookNo || ""}</td>
+        <td contenteditable data-col="regPg">${prefill.regPg || ""}</td>
+        <td contenteditable data-col="backCharging">${prefill.backCharging || ""}</td>
+        <td contenteditable data-col="dates">${prefill.dates || ""}</td>
+        <td contenteditable data-col="loa2">${prefill.loa2 || ""}</td>
+
+        <td>
+            <button class="btn-add small" onclick="saveEstimateRow(this)">💾 Save</button>
+            <button class="btn-clear small" onclick="deleteEstimateEntryRow(this)">🗑</button>
+        </td>
+    `;
+    tbody.appendChild(row);
+}
+
+/* Delete entry row (not database delete) */
+function deleteEstimateEntryRow(btn) {
+    btn.closest("tr").remove();
+}
+
+/* ============================================
+   2️⃣ SAVE ROW TO SERVER
+============================================ */
+async function saveEstimateRow(btn) {
+    const tr = btn.closest("tr");
+    const fields = tr.querySelectorAll("[data-col]");
+
+    const data = {};
+    fields.forEach(td => data[td.dataset.col] = td.innerText.trim());
+
+    await fetch(`${API}/estimates`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+    });
+
+    alert("Saved!");
+    loadEstimateList();
+}
+
+/* ============================================
+   3️⃣ LOAD ESTIMATE LIST FROM SERVER
+============================================ */
+async function loadEstimateList() {
+    const url = trashMode
+        ? `${API}/estimates/trash`
+        : `${API}/estimates`;
+
+    try {
+        const res = await fetch(url);
+        estimateData = await res.json();
+        renderEstimateList();
+    } catch (e) {
+        console.error("Load Estimates Failed:", e);
+    }
+}
+
+/* ============================================
+   4️⃣ RENDER ESTIMATE TABLE
+============================================ */
+function renderEstimateList() {
+    const search = document
+        .getElementById("estimateSearchInput")
+        .value.toLowerCase();
+
+    let filtered = estimateData.filter(r =>
+        (r.prNo || "").toLowerCase().includes(search) ||
+        (r.division || "").toLowerCase().includes(search) ||
+        (r.contractor || "").toLowerCase().includes(search)
+    );
+
+    const start = (estimatePage - 1) * estimateRowsPerPage;
+    const rows = filtered.slice(start, start + estimateRowsPerPage);
+
+    document.getElementById("estimateListBody").innerHTML = rows.map(r => `
+        <tr>
+            <td>${r.division}</td>
+            <td>${r.prNo}</td>
+            <td>${r.estimateNo}</td>
+            <td>${r.tspec}</td>
+            <td>${r.contractor}</td>
+            <td>${r.poNo}</td>
+            <td>${r.grossAmount}</td>
+            <td>${r.netAmount}</td>
+            <td>${r.loaNo}</td>
+            <td>${r.billingDoc}</td>
+            <td>${r.mbookNo}</td>
+            <td>${r.regPg}</td>
+            <td>${r.backCharging}</td>
+            <td>${r.dates}</td>
+            <td>${r.loa2}</td>
+
+            <td>
+                <button onclick='editEstimate(${JSON.stringify(r).replace(/"/g, '&quot;')})'
+                    class="btn-add small">✏️</button>
+                <button onclick="trashEstimate(${r.id})"
+                    class="btn-clear small">🗑</button>
+            </td>
+        </tr>
+    `).join("");
+
+    updateEstimatePagination(filtered.length);
+}
+
+/* ============================================
+   5️⃣ PAGINATION
+============================================ */
+function updateEstimatePagination(total) {
+    const totalPages = Math.ceil(total / estimateRowsPerPage);
+    document.getElementById("estimatePageInfo").innerText =
+        `Page ${estimatePage} of ${totalPages}`;
+}
+
+function estimatePrevPage() {
+    if (estimatePage > 1) estimatePage--;
+    renderEstimateList();
+}
+
+function estimateNextPage() {
+    const totalPages = Math.ceil(estimateData.length / estimateRowsPerPage);
+    if (estimatePage < totalPages) estimatePage++;
+    renderEstimateList();
+}
+
+/* ============================================
+   6️⃣ EDIT EXISTING RECORD
+============================================ */
+function editEstimate(record) {
+    addEstimateRow(record);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* ============================================
+   7️⃣ MOVE TO TRASH
+============================================ */
+async function trashEstimate(id) {
+    if (!confirm("Move to trash?")) return;
+
+    await fetch(`${API}/estimates/${id}`, { method: "DELETE" });
+    loadEstimateList();
+}
+
+function toggleEstimateTrash() {
+    trashMode = !trashMode;
+
+    document.getElementById("estimateTrashToggle").innerText =
+        trashMode ? "📂 Back to Records" : "♻ View Trash";
+
+    loadEstimateList();
+}
+
+/* ============================================
+   8️⃣ EXCEL IMPORT
+============================================ */
+async function importEstimateExcel(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const rows = await readXlsxFile(file);
+
+    rows.slice(1).forEach(r => {
+        addEstimateRow({
+            division: r[0],
+            prNo: r[1],
+            estimateNo: r[2],
+            tspec: r[3],
+            contractor: r[4],
+            poNo: r[5],
+            grossAmount: r[6],
+            netAmount: r[7],
+            loaNo: r[8],
+            billingDoc: r[9],
+            mbookNo: r[10],
+            regPg: r[11],
+            backCharging: r[12],
+            dates: r[13],
+            loa2: r[14]
+        });
+    });
+
+    alert("Excel Imported Successfully!");
+}
+
+/* ============================================
+   INITIAL LOAD
+============================================ */
+loadEstimateList();
+
         
 async function editSelected() {
     const ids = getSelectedIds();
@@ -3005,6 +3446,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
