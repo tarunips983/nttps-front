@@ -1135,6 +1135,32 @@ html, body {
        <div id="estimatePanel" class="panel">
 
     <h2>📘 Estimate Register – Add / Edit (Table View)</h2>
+           <h2>📊 Estimates Dashboard</h2>
+
+<div id="estimateDashboard" class="pdf-dashboard-grid">
+    <div class="dash-card">
+        <h3>Total Estimates</h3>
+        <p id="estTotalCount">0</p>
+    </div>
+
+    <div class="dash-card">
+        <h3>Total Gross Amount</h3>
+        <p id="estTotalGross">₹0</p>
+    </div>
+
+    <div class="dash-card">
+        <h3>Total Net Amount</h3>
+        <p id="estTotalNet">₹0</p>
+    </div>
+
+    <div class="dash-card">
+        <h3>Divisions</h3>
+        <p id="estDivisions">0</p>
+    </div>
+</div>
+
+<hr style="margin:20px 0;">
+
 
     <div id="estimateEntryWrapper">
         <div id="estimateEntryControls">
@@ -1488,6 +1514,7 @@ async function authFetch(url, options = {}) {
     else if (name === 'estimate') {
     document.getElementById('estimatePanel').classList.add('active');
     document.getElementById('tabEstimate').classList.add('active');
+        loadEstimateDashboard();
    }
 
     else if (name === 'daily') {
@@ -1803,6 +1830,35 @@ async function importEstimateExcel(event) {
     alert("Excel Imported Successfully!");
 }
 
+async function loadEstimateDashboard() {
+    const res = await fetch(`${API}/estimates`);
+    const est = await res.json();
+
+    if (!est || est.length === 0) return;
+
+    let totalCount = est.length;
+    let totalGross = 0;
+    let totalNet = 0;
+
+    est.forEach(e => {
+        totalGross += parseFloat(e.grossAmount || 0);
+        totalNet += parseFloat(e.netAmount || 0);
+    });
+
+    // Unique divisions
+    const divisions = new Set(est.map(e => e.division).filter(x => x));
+
+    // Update UI
+    document.getElementById("estTotalCount").innerText = totalCount;
+    document.getElementById("estTotalGross").innerText =
+        "₹" + totalGross.toLocaleString("en-IN");
+    document.getElementById("estTotalNet").innerText =
+        "₹" + totalNet.toLocaleString("en-IN");
+    document.getElementById("estDivisions").innerText = divisions.size;
+}
+
+
+        
 /* ============================================
    INITIAL LOAD
 ============================================ */
@@ -3445,6 +3501,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
