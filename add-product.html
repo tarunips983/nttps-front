@@ -57,7 +57,26 @@ sessionStorage.removeItem("loggedOut");
         width: 95%;      
         margin: 20px auto; 
     }
-    
+
+#estimateListTable {
+    table-layout: fixed !important;
+    width: 2400px !important;   /* wide full table */
+}
+#estimateListTable th:nth-child(2),
+#estimateListTable td:nth-child(2) {
+    width: 500px !important;     
+    max-width: 500px !important;
+    min-width: 500px !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
+}
+#estimateListTable thead th {
+    white-space: normal !important;
+}
+
+
+
+        
     .tabs { display:flex; gap:8px; margin-bottom:10px; }
     .tab-btn { padding:8px 14px; border-radius:6px; border:1px solid #ccc; cursor:pointer; background:white; }
     .tab-btn.active { background:#007bff; color:white; border-color:#007bff; }
@@ -3786,6 +3805,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
