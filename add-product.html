@@ -1068,7 +1068,7 @@ html, body {
             <span class="muted">Fill any row(s) and click <b>Save Row</b>. Each row saves one PDF record.</span>
         </div>
 
-        <div class="table-scroll" style="overflow:auto; max-height:420px; border:1px solid #ddd; border-radius:6px;">
+        <div class="table-scroll" style="max-height:420px; border:1px solid #ddd; border-radius:6px;">
         <table id="pdfEntryTable">
                 <thead>
                     <tr>
@@ -1162,7 +1162,12 @@ html, body {
 <hr style="margin:20px 0;">
 
 <h2>📘 Estimate Register – Add / Edit (Table View)</h2>
-    <div id="estimateEntryWrapper">
+    <div id="estimateEntryWrapper" style="
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);>
         <div id="estimateEntryControls">
             <button class="small btn-add" type="button" onclick="addEstimateRow()">➕ Add Row</button>
 
@@ -1176,7 +1181,7 @@ html, body {
             <span class="muted">Fill any row(s) and click <b>Save Row</b>. Each row saves one Estimate record.</span>
         </div>
 
-        <div class="table-scroll" style="overflow:auto; max-height:420px; border:1px solid #ddd; border-radius:6px;">
+        <div class="table-scroll" style="max-height:420px; border:1px solid #ddd; border-radius:6px;">
             <table id="estimateEntryTable">
                 <thead>
                     <tr>
@@ -3591,6 +3596,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
