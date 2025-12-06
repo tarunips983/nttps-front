@@ -187,6 +187,99 @@ sessionStorage.removeItem("loggedOut");
     background: #28a745;
     color: #fff;
 }
+
+/* Main table scroll area */
+#estimateListTable {
+    table-layout: fixed;
+    width: 2000px;   /* Expand table width */
+}
+
+/* Column width customisation */
+#estimateListTable th:nth-child(1), 
+#estimateListTable td:nth-child(1) {
+    width: 60px;    /* S.No */
+}
+
+#estimateListTable th:nth-child(2), 
+#estimateListTable td:nth-child(2) {
+    width: 450px;    /* Description of Work – WIDE */
+    white-space: normal; 
+}
+
+#estimateListTable th:nth-child(3),
+#estimateListTable td:nth-child(3),
+#estimateListTable th:nth-child(4),
+#estimateListTable td:nth-child(4) {
+    width: 120px;  /* Division + PR No */
+}
+
+#estimateListTable th:nth-child(5),
+#estimateListTable td:nth-child(5) {
+    width: 200px;  /* Estimate Sanction No */
+}
+
+#estimateListTable th:nth-child(6),
+#estimateListTable td:nth-child(6) {
+    width: 150px; /* T Spec No */
+}
+
+#estimateListTable th:nth-child(7),
+#estimateListTable td:nth-child(7) {
+    width: 180px;  /* Firm / Contractor */
+}
+
+#estimateListTable th:nth-child(8),
+#estimateListTable td:nth-child(8) {
+    width: 130px;  /* PO No */
+}
+
+#estimateListTable th:nth-child(9),
+#estimateListTable td:nth-child(9),
+#estimateListTable th:nth-child(10),
+#estimateListTable td:nth-child(10) {
+    width: 150px; /* Gross + Net Amount */
+}
+
+#estimateListTable th:nth-child(11),
+#estimateListTable td:nth-child(11),
+#estimateListTable th:nth-child(12),
+#estimateListTable td:nth-child(12),
+#estimateListTable th:nth-child(13),
+#estimateListTable td:nth-child(13) {
+    width: 140px;  /* LOA, SAP Billing, M Book */
+}
+
+#estimateListTable th:nth-child(14),
+#estimateListTable td:nth-child(14) {
+    width: 120px; /* Reg Pg No */
+}
+
+#estimateListTable th:nth-child(15),
+#estimateListTable td:nth-child(15) {
+    width: 140px; /* Back Charging */
+}
+
+#estimateListTable th:nth-child(16),
+#estimateListTable td:nth-child(16) {
+    width: 200px; /* Start & Completion Dates */
+}
+
+#estimateListTable th:nth-child(17),
+#estimateListTable td:nth-child(17),
+#estimateListTable th:nth-child(18),
+#estimateListTable td:nth-child(18) {
+    width: 130px; /* LOA No 2 + Actions */
+}
+
+/* Make long text wrap nicely */
+#estimateListTable td {
+    white-space: normal; 
+    word-wrap: break-word;
+}
+
+
+
+        
 .table-scroll {
     width: 100%;
     max-height: 420px;
@@ -3693,6 +3786,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
