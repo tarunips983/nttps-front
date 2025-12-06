@@ -301,14 +301,14 @@ sessionStorage.removeItem("loggedOut");
         
 .table-scroll {
     width: 100%;
-    max-height: 420px;
-
+    /* max-height: 420px; */
     overflow-y: auto !important;
-
+    /* overflow-x: hidden !important; */
     border: 1px solid #ddd;
     border-radius: 6px;
     display: block;
-    padding-bottom: 15px; /* removes scrollbar overlay issue */
+    /* padding-bottom: 15px; */
+    /* overflow: auto; /* removes scrollbar overlay issue */
 }
 
 /* Critical — prevents horizontal overflow */
@@ -3804,6 +3804,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
