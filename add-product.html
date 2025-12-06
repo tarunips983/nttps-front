@@ -1801,34 +1801,108 @@ function toggleEstimateTrash() {
 /* ============================================
    8️⃣ EXCEL IMPORT
 ============================================ */
-async function importEstimateExcel(event) {
+async function importEstimateFromExcel(event) {
     const file = event.target.files[0];
     if (!file) return;
 
-    const rows = await readXlsxFile(file);
+    try {
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-    rows.slice(1).forEach(r => {
-        addEstimateRow({
-            division: r[0],
-            prNo: r[1],
-            estimateNo: r[2],
-            tspec: r[3],
-            contractor: r[4],
-            poNo: r[5],
-            grossAmount: r[6],
-            netAmount: r[7],
-            loaNo: r[8],
-            billingDoc: r[9],
-            mbookNo: r[10],
-            regPg: r[11],
-            backCharging: r[12],
-            dates: r[13],
-            loa2: r[14]
+        // Convert sheet → array of objects (rows)
+        const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+        if (rows.length === 0) {
+            showToast("Excel file is empty!", true);
+            return;
+        }
+
+        // Clear old rows
+        estimateEntryBody.innerHTML = "";
+
+        // Insert imported rows
+        rows.forEach(r => {
+            addEstimateRowFromImport({
+                division: r["Division"] || "",
+                prNo: r["PR No"] || "",
+                estimateNo: r["Estimate Sanction No"] || "",
+                tspec: r["T. Spec No"] || "",
+                contractor: r["Firm / Contractor"] || "",
+                poNo: r["PO No"] || "",
+                grossAmount: r["Gross Amount"] || "",
+                netAmount: r["Amount Excluding EPF/ESI/GST"] || "",
+                loaNo: r["LOA No"] || "",
+                billingDoc: r["SAP Billing Doc"] || "",
+                mbookNo: r["M-Book No"] || "",
+                regPg: r["Reg Pg No"] || "",
+                backCharging: r["Back Charging"] || "",
+                dates: r["Start + Completion Dates"] || "",
+                loa2: r["LOA No 2"] || ""
+            });
         });
-    });
 
-    alert("Excel Imported Successfully!");
+        renumberEstimateRows();
+        showToast(`Imported ${rows.length} estimates from Excel.`);
+
+        // Auto-Save each imported row
+        await bulkSaveEstimateRows();
+
+    } catch (err) {
+        console.error(err);
+        showToast("Estimate Excel import failed", true);
+    }
 }
+function addEstimateRowFromImport(prefill = {}) {
+    const tbody = document.getElementById("estimateEntryBody");
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+        <td>${tbody.rows.length + 1}</td>
+        <td contenteditable>${prefill.division || ""}</td>
+        <td contenteditable>${prefill.prNo || ""}</td>
+        <td contenteditable>${prefill.estimateNo || ""}</td>
+        <td contenteditable>${prefill.tspec || ""}</td>
+        <td contenteditable>${prefill.contractor || ""}</td>
+        <td contenteditable>${prefill.poNo || ""}</td>
+        <td contenteditable>${prefill.grossAmount || ""}</td>
+        <td contenteditable>${prefill.netAmount || ""}</td>
+        <td contenteditable>${prefill.loaNo || ""}</td>
+        <td contenteditable>${prefill.billingDoc || ""}</td>
+        <td contenteditable>${prefill.mbookNo || ""}</td>
+        <td contenteditable>${prefill.regPg || ""}</td>
+        <td contenteditable>${prefill.backCharging || ""}</td>
+        <td contenteditable>${prefill.dates || ""}</td>
+        <td contenteditable>${prefill.loa2 || ""}</td>
+
+        <td>
+            <button class="btn-add small save-estimate-btn" onclick="saveEstimateRow(this)">💾 Save</button>
+            <button class="btn-clear small" onclick="deleteEstimateEntryRow(this)">🗑</button>
+        </td>
+    `;
+
+    tbody.appendChild(tr);
+}
+function renumberEstimateRows() {
+    [...estimateEntryBody.rows].forEach((tr, i) => {
+        tr.children[0].innerText = i + 1;
+    });
+}
+async function bulkSaveEstimateRows() {
+    const rows = [...estimateEntryBody.rows];
+
+    for (let tr of rows) {
+        const saveBtn = tr.querySelector(".save-estimate-btn");
+        if (saveBtn) {
+            await saveEstimateRow(saveBtn);
+        }
+    }
+
+    showToast("All imported Estimate rows saved!");
+    await loadEstimateList(); // Refresh list
+}
+
 
 async function loadEstimateDashboard() {
     const res = await fetch(`${API}/estimates`);
@@ -3501,6 +3575,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
