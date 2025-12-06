@@ -1839,48 +1839,49 @@ function updateEstimateSortArrows() {
    4️⃣ RENDER ESTIMATE TABLE
 ============================================ */
 function renderEstimateList() {
-    const search = document
-        .getElementById("estimateSearchInput")
-        .value.toLowerCase();
+    const search = document.getElementById("estimateSearchInput").value.toLowerCase();
 
     let filtered = estimateData.filter(r =>
         (r.prNo || "").toLowerCase().includes(search) ||
         (r.division || "").toLowerCase().includes(search) ||
-        (r.contractor || "").toLowerCase().includes(search)
+        (r.contractor || "").toLowerCase().includes(search) ||
+        (r.description || "").toLowerCase().includes(search)
     );
 
     const start = (estimatePage - 1) * estimateRowsPerPage;
     const rows = filtered.slice(start, start + estimateRowsPerPage);
 
-   document.getElementById("estimateListBody").innerHTML = rows.map(r => `
-    <tr>
-        <td>${start + index + 1}</td>
-        <td>${r.division}</td>
-        <td>${r.prNo}</td>
-        <td>${r.estimateNo}</td>
-        <td>${r.tspec}</td>
-        <td>${r.contractor}</td>
-        <td>${r.poNo}</td>
-        <td>${r.grossAmount}</td>
-        <td>${r.netAmount}</td>
-        <td>${r.loaNo}</td>
-        <td>${r.billingDoc}</td>
-        <td>${r.mbookNo}</td>
-        <td>${r.regPg}</td>
-        <td>${r.backCharging}</td>
-        <td>${r.dates}</td>
-        <td>${r.loa2}</td>
-        <td>
-            <button onclick='editEstimate(${JSON.stringify(r).replace(/"/g, '&quot;')})' class="small-btn edit-btn">✏️ Edit</button>
-            <button onclick="trashEstimate(${r.id})" class="small-btn delete-btn">🗑 Trash</button>
-        </td>
-    </tr>
-`).join("");
+    document.getElementById("estimateListBody").innerHTML = rows.map((r, index) => `
+        <tr>
+            <td>${start + index + 1}</td>
+            <td>${r.description || ""}</td>
+            <td>${r.division || ""}</td>
+            <td>${r.prNo || ""}</td>
+            <td>${r.estimateNo || ""}</td>
+            <td>${r.tspec || ""}</td>
+            <td>${r.contractor || ""}</td>
+            <td>${r.poNo || ""}</td>
+            <td>${r.grossAmount || ""}</td>
+            <td>${r.netAmount || ""}</td>
+            <td>${r.loaNo || ""}</td>
+            <td>${r.billingDoc || ""}</td>
+            <td>${r.mbookNo || ""}</td>
+            <td>${r.regPg || ""}</td>
+            <td>${r.backCharging || ""}</td>
+            <td>${r.dates || ""}</td>
+            <td>${r.loa2 || ""}</td>
 
+            <td>
+                <button onclick='editEstimate(${JSON.stringify(r).replace(/"/g, '&quot;')})' class="small-btn edit-btn">✏️ Edit</button>
+                <button onclick="trashEstimate(${r.id})" class="small-btn delete-btn">🗑 Trash</button>
+            </td>
+        </tr>
+    `).join("");
 
     updateEstimatePagination(filtered.length);
 }
 
+            
 /* ============================================
    5️⃣ PAGINATION
 ============================================ */
@@ -3689,6 +3690,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
