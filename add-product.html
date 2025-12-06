@@ -1383,18 +1383,17 @@ html, body {
     </div>
 
     <div style="display:flex; justify-content:flex-end; flex-wrap:wrap; margin-bottom:10px;">
-         <div>
         <label>Show 
-            <select id="estimateShowEntries" onchange="changeEstimateRowsPerPage()">
-                <option value="10">10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-                <option value="500">500</option>
-                <option value="1000">1000</option>
-            </select>
-        entries</label>
-    </div>
+    <select id="estimateShowEntries" onchange="changeEstimateRowsPerPage()" style="padding:4px;">
+        <option value="10">10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+        <option value="500">500</option>
+        <option value="1000">1000</option>
+    </select>
+entries</label>
+
         <div style="margin-top:5px;">
             <button class="pagination-btn" onclick="estimatePrevPage()">⬅ Prev</button>
             <span id="estimatePageInfo" style="margin:0 10px;">Page 1</span>
@@ -1796,7 +1795,7 @@ function getSelectedIds() {
 let estimateData = [];
 let trashMode = false;
 let estimatePage = 1;
-const estimateRowsPerPage = 10;
+let estimateRowsPerPage = 10;
 let estSortField = null;
 let estSortAsc = true;
 
@@ -2266,11 +2265,14 @@ async function editSelected() {
 };
 
 function changeEstimateRowsPerPage() {
-    const select = document.getElementById("estimateShowEntries");
-    estimateRowsPerPage = parseInt(select.value);
-    estimatePage = 1;  // reset to first page
-    renderEstimateList();
+    const dropdown = document.getElementById("estimateShowEntries");
+
+    estimateRowsPerPage = parseInt(dropdown.value);  // UPDATE THIS
+    estimatePage = 1;                                // reset page
+
+    renderEstimateList();                            // reload table
 }
+
 
 
         /* =================================================================== */
@@ -3846,6 +3848,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
