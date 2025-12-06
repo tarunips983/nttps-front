@@ -1631,6 +1631,14 @@ const estimateRowsPerPage = 10;
 /* ============================================
    1️⃣ ADD NEW ROW
 ============================================ */
+
+function initEstimateEntryGrid() {
+    estimateEntryBody.innerHTML = "";
+    for (let i = 0; i < 10; i++) addEstimateRow();
+}
+
+
+        
 function addEstimateRow(prefill = {}) {
     const tbody = document.getElementById("estimateEntryBody");
 
@@ -1796,6 +1804,13 @@ function toggleEstimateTrash() {
         trashMode ? "📂 Back to Records" : "♻ View Trash";
 
     loadEstimateList();
+}
+function isEstimateRowEmpty(tr) {
+    const tds = tr.querySelectorAll('td[contenteditable]');
+    for (const td of tds) {
+        if (td.textContent.trim() !== "") return false;
+    }
+    return true;
 }
 
 /* ============================================
@@ -3566,6 +3581,7 @@ function deleteSelected() {
         
         loadRecords();
         initPdfEntryGrid();
+        initEstimateEntryGrid();
         initSheet();
         setDefaultDate(); 
         loadSavedProgress();
@@ -3575,6 +3591,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
