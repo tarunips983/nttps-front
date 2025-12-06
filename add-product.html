@@ -1688,7 +1688,7 @@ function addEstimateRow(prefill = {}) {
         <td contenteditable data-col="loa2">${prefill.loa2 || ""}</td>
 
         <td>
-            <button class="btn-add small" onclick="saveEstimateRow(this)">💾 Save</button>
+            <button class="btn-add small save-row-btn" onclick="saveEstimateRow(this)">💾 Save</button>
             <button class="btn-clear small" onclick="deleteEstimateEntryRow(this)">🗑</button>
         </td>
     `;
@@ -1716,7 +1716,7 @@ async function saveEstimateRow(btn) {
         body: JSON.stringify(data)
     });
 
-    alert("Saved!");
+    showToast("Estimate saved");
     loadEstimateList();
 }
 
@@ -1908,10 +1908,10 @@ async function bulkSaveEstimateRows() {
     showToast("All imported Estimate rows saved ✔️");
     await loadEstimateList();
 }
+        
 function renumberEstimateRows() {
     [...estimateEntryBody.rows].forEach((tr, i) => {
-        const snoCell = tr.querySelector('td[data-col="sno"]');
-        if (snoCell) snoCell.textContent = i + 1;
+        tr.children[0].textContent = i + 1;
     });
 }
 
@@ -3591,6 +3591,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
