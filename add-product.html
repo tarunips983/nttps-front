@@ -1850,7 +1850,7 @@ async function importEstimateFromExcel(event) {
         const workbook = XLSX.read(data, { type: "array" });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-        // Convert sheet → array of objects (rows)
+        // Convert Excel → JSON rows
         const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
         if (rows.length === 0) {
@@ -1858,12 +1858,12 @@ async function importEstimateFromExcel(event) {
             return;
         }
 
-        // Clear old rows
+        // Clear previous rows
         estimateEntryBody.innerHTML = "";
 
-        // Insert imported rows
+        // Add rows from Excel
         rows.forEach(r => {
-            addEstimateRowFromImport({
+            addEstimateRow({
                 division: r["Division"] || "",
                 prNo: r["PR No"] || "",
                 estimateNo: r["Estimate Sanction No"] || "",
@@ -1883,67 +1883,42 @@ async function importEstimateFromExcel(event) {
         });
 
         renumberEstimateRows();
-        showToast(`Imported ${rows.length} estimates from Excel.`);
+        showToast(`Imported ${rows.length} estimate rows from Excel ✔️`);
 
-        // Auto-Save each imported row
+        // Auto-save all rows one by one (same as PR)
         await bulkSaveEstimateRows();
 
     } catch (err) {
         console.error(err);
-        showToast("Estimate Excel import failed", true);
+        showToast("Estimate Excel Import Failed ❌", true);
     }
 }
-function addEstimateRowFromImport(prefill = {}) {
-    const tbody = document.getElementById("estimateEntryBody");
 
-    const tr = document.createElement("tr");
 
-    tr.innerHTML = `
-        <td>${tbody.rows.length + 1}</td>
-        <td contenteditable>${prefill.division || ""}</td>
-        <td contenteditable>${prefill.prNo || ""}</td>
-        <td contenteditable>${prefill.estimateNo || ""}</td>
-        <td contenteditable>${prefill.tspec || ""}</td>
-        <td contenteditable>${prefill.contractor || ""}</td>
-        <td contenteditable>${prefill.poNo || ""}</td>
-        <td contenteditable>${prefill.grossAmount || ""}</td>
-        <td contenteditable>${prefill.netAmount || ""}</td>
-        <td contenteditable>${prefill.loaNo || ""}</td>
-        <td contenteditable>${prefill.billingDoc || ""}</td>
-        <td contenteditable>${prefill.mbookNo || ""}</td>
-        <td contenteditable>${prefill.regPg || ""}</td>
-        <td contenteditable>${prefill.backCharging || ""}</td>
-        <td contenteditable>${prefill.dates || ""}</td>
-        <td contenteditable>${prefill.loa2 || ""}</td>
-
-        <td>
-            <button class="btn-add small save-estimate-btn" onclick="saveEstimateRow(this)">💾 Save</button>
-            <button class="btn-clear small" onclick="deleteEstimateEntryRow(this)">🗑</button>
-        </td>
-    `;
-
-    tbody.appendChild(tr);
-}
-function renumberEstimateRows() {
-    [...estimateEntryBody.rows].forEach((tr, i) => {
-        tr.children[0].innerText = i + 1;
-    });
-}
 async function bulkSaveEstimateRows() {
     const rows = [...estimateEntryBody.rows];
 
     for (let tr of rows) {
-        const saveBtn = tr.querySelector(".save-estimate-btn");
+        const saveBtn = tr.querySelector(".save-row-btn");
         if (saveBtn) {
             await saveEstimateRow(saveBtn);
         }
     }
 
-    showToast("All imported Estimate rows saved!");
-    await loadEstimateList(); // Refresh list
+    showToast("All imported Estimate rows saved ✔️");
+    await loadEstimateList();
+}
+function renumberEstimateRows() {
+    [...estimateEntryBody.rows].forEach((tr, i) => {
+        const snoCell = tr.querySelector('td[data-col="sno"]');
+        if (snoCell) snoCell.textContent = i + 1;
+    });
 }
 
 
+
+
+        
 async function loadEstimateDashboard() {
     const res = await fetch(`${API}/estimates`);
     const est = await res.json();
@@ -3616,6 +3591,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
