@@ -1851,8 +1851,8 @@ function renderEstimateList() {
         <td>${r.dates}</td>
         <td>${r.loa2}</td>
         <td>
-            <button onclick='editEstimate(${JSON.stringify(r).replace(/"/g, '&quot;')})' class="btn-add small">✏️</button>
-            <button onclick="trashEstimate(${r.id})" class="btn-clear small">🗑</button>
+            <button onclick='editEstimate(${JSON.stringify(r).replace(/"/g, '&quot;')})' class="small-btn edit-btn">✏️ Edit</button>
+            <button onclick="trashEstimate(${r.id})" class="small-btn delete-btn">🗑 Trash</button>
         </td>
     </tr>
 `).join("");
@@ -2413,8 +2413,8 @@ function renderRecords(data, isTrash = false) {
         <td class="wrap">
           <div class="actions">
             ${r.pdfPath ? `<button class="small-btn preview-btn" onclick="previewPDF('${r.pdfPath}')">Preview</button>` : ''}
-            <button class="small-btn edit-btn" onclick="editRecord(${r.id})">Edit</button>
-            <button class="small-btn delete-btn" onclick="deleteRecord(${r.id})">Trash</button>
+            <button class="small-btn edit-btn" onclick="editRecord(${r.id})">✏️ Edit</button>
+            <button class="small-btn delete-btn" onclick="deleteRecord(${r.id})">🗑 Trash</button>
             ${r.pdfPath ? `<button class="small-btn download-btn" onclick="downloadPDF('${r.pdfPath}')">Download</button>` : ''}
           </div>
         </td>
@@ -3668,6 +3668,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
