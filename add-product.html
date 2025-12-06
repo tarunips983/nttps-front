@@ -187,6 +187,23 @@ sessionStorage.removeItem("loggedOut");
     background: #28a745;
     color: #fff;
 }
+.table-scroll {
+    width: 100%;
+    max-height: 420px;
+    overflow-y: auto !important;   /* only vertical scrollbar */
+    overflow-x: hidden;            /* hide horizontal scrollbar */
+    padding-bottom: 10px;
+
+    display: block;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+/* Force table to stay within wrapper */
+.table-scroll table {
+    width: 100%;
+    table-layout: fixed;        /* PREVENTS overflow! */
+}
 
 .clear-row-btn {
     background: #6c757d;
@@ -3596,6 +3613,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
