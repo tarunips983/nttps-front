@@ -1661,7 +1661,7 @@ let estimateData = [];
 let trashMode = false;
 let estimatePage = 1;
 const estimateRowsPerPage = 10;
-let estSortField = "";
+let estSortField = null;
 let estSortAsc = true;
 
 
@@ -1812,8 +1812,7 @@ function updateEstimateSortArrows() {
         }
     });
 }
-sortEstimate(field);
-updateEstimateSortArrows();
+
 
 
 /* ============================================
@@ -1833,32 +1832,31 @@ function renderEstimateList() {
     const start = (estimatePage - 1) * estimateRowsPerPage;
     const rows = filtered.slice(start, start + estimateRowsPerPage);
 
-    document.getElementById("estimateListBody").innerHTML = rows.map(r => `
-        <tr>
-            <td>${r.division}</td>
-            <td>${r.prNo}</td>
-            <td>${r.estimateNo}</td>
-            <td>${r.tspec}</td>
-            <td>${r.contractor}</td>
-            <td>${r.poNo}</td>
-            <td>${r.grossAmount}</td>
-            <td>${r.netAmount}</td>
-            <td>${r.loaNo}</td>
-            <td>${r.billingDoc}</td>
-            <td>${r.mbookNo}</td>
-            <td>${r.regPg}</td>
-            <td>${r.backCharging}</td>
-            <td>${r.dates}</td>
-            <td>${r.loa2}</td>
+   document.getElementById("estimateListBody").innerHTML = rows.map(r => `
+    <tr>
+        <td>${r.id}</td>
+        <td>${r.division}</td>
+        <td>${r.prNo}</td>
+        <td>${r.estimateNo}</td>
+        <td>${r.tspec}</td>
+        <td>${r.contractor}</td>
+        <td>${r.poNo}</td>
+        <td>${r.grossAmount}</td>
+        <td>${r.netAmount}</td>
+        <td>${r.loaNo}</td>
+        <td>${r.billingDoc}</td>
+        <td>${r.mbookNo}</td>
+        <td>${r.regPg}</td>
+        <td>${r.backCharging}</td>
+        <td>${r.dates}</td>
+        <td>${r.loa2}</td>
+        <td>
+            <button onclick='editEstimate(${JSON.stringify(r).replace(/"/g, '&quot;')})' class="btn-add small">✏️</button>
+            <button onclick="trashEstimate(${r.id})" class="btn-clear small">🗑</button>
+        </td>
+    </tr>
+`).join("");
 
-            <td>
-                <button onclick='editEstimate(${JSON.stringify(r).replace(/"/g, '&quot;')})'
-                    class="btn-add small">✏️</button>
-                <button onclick="trashEstimate(${r.id})"
-                    class="btn-clear small">🗑</button>
-            </td>
-        </tr>
-    `).join("");
 
     updateEstimatePagination(filtered.length);
 }
@@ -3670,6 +3668,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
