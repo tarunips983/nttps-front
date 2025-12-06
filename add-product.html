@@ -1766,6 +1766,9 @@ async function loadEstimateList() {
     try {
         const res = await fetch(url);
         estimateData = await res.json();
+        
+        estimateData.sort((a, b) => a.id - b.id);
+        
         renderEstimateList();
     } catch (e) {
         console.error("Load Estimates Failed:", e);
@@ -3690,6 +3693,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
