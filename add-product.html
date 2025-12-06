@@ -1252,7 +1252,7 @@ html, body {
                 </div>
 
                 <div style="display:flex; justify-content:flex-end; flex-wrap:wrap; margin-bottom:10px;">
-                      <div>
+                     <div style="margin-top:5px;">
         <label>Show 
             <select id="pdfShowEntries" onchange="changePdfRowsPerPage()" style="padding:4px;">
                 <option value="10">10</option>
@@ -1263,8 +1263,8 @@ html, body {
                 <option value="1000">1000</option>
             </select>
         entries</label>
-    </div>
-                    <div style="margin-top:5px;">
+    
+                    
                         <button class="pagination-btn" onclick="prevPage()">⬅ Prev</button>
                         <span id="pageInfo" style="margin:0 10px;">Page 1</span>
                         <button class="pagination-btn" onclick="nextPage()">Next ➡</button>
@@ -1386,6 +1386,7 @@ html, body {
     </div>
 
     <div style="display:flex; justify-content:flex-end; flex-wrap:wrap; margin-bottom:10px;">
+        <div style="margin-top:5px;">
         <label>Show 
     <select id="estimateShowEntries" onchange="changeEstimateRowsPerPage()" style="padding:4px;">
         <option value="10">10</option>
@@ -1397,7 +1398,7 @@ html, body {
     </select>
 entries</label>
 
-        <div style="margin-top:5px;">
+        
             <button class="pagination-btn" onclick="estimatePrevPage()">⬅ Prev</button>
             <span id="estimatePageInfo" style="margin:0 10px;">Page 1</span>
             <button class="pagination-btn" onclick="estimateNextPage()">Next ➡</button>
@@ -2677,7 +2678,7 @@ function changePdfRowsPerPage() {
     recordsPerPage = parseInt(dropdown.value);   // update existing variable
     currentPage = 1;                             // reset to page 1
 
-    renderTable();                               // re-render PDF records
+    renderRecords();                               // re-render PDF records
 }
 
         function nextPage() {
@@ -3851,6 +3852,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
