@@ -2085,19 +2085,19 @@ async function editSelected() {
 
             document.getElementById('pdfDashboard').innerHTML = `
                 <div class="dash-box">
-                    <h2>Total Records</h2>
+                    <h3>Total Records</h3>
                     <p id="statTotalRecords">${data.length}</p>
                 </div>
                 <div class="dash-box">
-                    <h2>Total Amount</h2>
+                    <h3>Total Amount</h3>
                     <p id="statTotalAmount">₹${totalAmount.toLocaleString('en-IN')}</p>
                 </div>
                 <div class="dash-box">
-                    <h2>PRs</h2>
+                    <h3>PRs</h3>
                     <p id="statPrCount">${prCount}</p>
                 </div>
                 <div class="dash-box">
-                    <h2>Estimates</h2>
+                    <h3>Estimates</h3>
                     <p id="statEstimateCount">${estimateCount}</p>
                 </div>
             `;
@@ -3591,6 +3591,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
