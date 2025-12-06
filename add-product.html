@@ -492,6 +492,15 @@ sessionStorage.removeItem("loggedOut");
         gap: 15px;
         margin-bottom: 20px;
     }
+.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.sortable:hover {
+    background: #e6f0ff;
+}
+
     .dash-box {
         background: #f9f9f9;
         border: 1px solid #eee;
@@ -1652,6 +1661,9 @@ let estimateData = [];
 let trashMode = false;
 let estimatePage = 1;
 const estimateRowsPerPage = 10;
+let estSortField = "";
+let estSortAsc = true;
+
 
 /* ============================================
    1️⃣ ADD NEW ROW
@@ -1662,6 +1674,27 @@ function initEstimateEntryGrid() {
     for (let i = 0; i < 10; i++) addEstimateRow();
 }
 
+function renderEstimateHeadings() {
+    document.getElementById("estimateTableHead").innerHTML = `
+        <th class="sortable" onclick="sortEstimate('id')">ID ↕</th>
+        <th class="sortable" onclick="sortEstimate('division')">Division ↕</th>
+        <th class="sortable" onclick="sortEstimate('prNo')">PR No ↕</th>
+        <th class="sortable" onclick="sortEstimate('estimateNo')">Estimate Sanction No ↕</th>
+        <th class="sortable" onclick="sortEstimate('tspec')">T.Spec No ↕</th>
+        <th class="sortable" onclick="sortEstimate('contractor')">Firm / Contractor ↕</th>
+        <th class="sortable" onclick="sortEstimate('poNo')">PO No ↕</th>
+        <th class="sortable" onclick="sortEstimate('grossAmount')">Gross Amount ↕</th>
+        <th class="sortable" onclick="sortEstimate('netAmount')">Amount Excl. EPF/ESI/GST ↕</th>
+        <th class="sortable" onclick="sortEstimate('loaNo')">LOA No ↕</th>
+        <th class="sortable" onclick="sortEstimate('billingDoc')">SAP Billing Doc ↕</th>
+        <th class="sortable" onclick="sortEstimate('mbookNo')">M-Book No ↕</th>
+        <th class="sortable" onclick="sortEstimate('regPg')">Reg Pg No ↕</th>
+        <th class="sortable" onclick="sortEstimate('backCharging')">Back Charging ↕</th>
+        <th class="sortable" onclick="sortEstimate('dates')">Start + Completion Dates ↕</th>
+        <th class="sortable" onclick="sortEstimate('loa2')">LOA No 2 ↕</th>
+        <th>Actions</th>
+    `;
+}
 
         
 function addEstimateRow(prefill = {}) {
@@ -1736,6 +1769,52 @@ async function loadEstimateList() {
         console.error("Load Estimates Failed:", e);
     }
 }
+
+        renderEstimateHeadings();
+
+        function sortEstimate(field) {
+    if (estSortField === field) {
+        estSortAsc = !estSortAsc; // toggle ASC/DESC
+    } else {
+        estSortAsc = true; // reset to ASC
+        estSortField = field;
+    }
+
+    estimateData.sort((a, b) => {
+        let A = a[field] ?? "";
+        let B = b[field] ?? "";
+
+        // Convert numeric columns
+        if (!isNaN(A) && !isNaN(B)) {
+            A = parseFloat(A);
+            B = parseFloat(B);
+            return estSortAsc ? A - B : B - A;
+        }
+
+        // String compare
+        return estSortAsc
+            ? A.toString().localeCompare(B.toString())
+            : B.toString().localeCompare(A.toString());
+    });
+
+    renderEstimateList();         // Refresh list
+    updateEstimateSortArrows();   // Update arrow icons
+}
+function updateEstimateSortArrows() {
+    const ths = document.querySelectorAll("#estimateTableHead th.sortable");
+
+    ths.forEach(th => {
+        const field = th.getAttribute("onclick").split("'")[1];
+        if (field === estSortField) {
+            th.innerHTML = th.innerHTML.replace(/↕|↑|↓/g, "") + (estSortAsc ? " ↑" : " ↓");
+        } else {
+            th.innerHTML = th.innerHTML.replace(/↕|↑|↓/g, "") + " ↕";
+        }
+    });
+}
+sortEstimate(field);
+updateEstimateSortArrows();
+
 
 /* ============================================
    4️⃣ RENDER ESTIMATE TABLE
@@ -3591,6 +3670,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
