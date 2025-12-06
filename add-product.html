@@ -1249,6 +1249,18 @@ html, body {
                 </div>
 
                 <div style="display:flex; justify-content:flex-end; flex-wrap:wrap; margin-bottom:10px;">
+                      <div>
+        <label>Show 
+            <select id="pdfShowEntries" onchange="changePdfRowsPerPage()" style="padding:4px;">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+            </select>
+        entries</label>
+    </div>
                     <div style="margin-top:5px;">
                         <button class="pagination-btn" onclick="prevPage()">⬅ Prev</button>
                         <span id="pageInfo" style="margin:0 10px;">Page 1</span>
@@ -1371,6 +1383,18 @@ html, body {
     </div>
 
     <div style="display:flex; justify-content:flex-end; flex-wrap:wrap; margin-bottom:10px;">
+         <div>
+        <label>Show 
+            <select id="estimateShowEntries" onchange="changeEstimateRowsPerPage()">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+            </select>
+        entries</label>
+    </div>
         <div style="margin-top:5px;">
             <button class="pagination-btn" onclick="estimatePrevPage()">⬅ Prev</button>
             <span id="estimatePageInfo" style="margin:0 10px;">Page 1</span>
@@ -2241,6 +2265,12 @@ async function editSelected() {
     onConfirmCallback = null; // RESET callback
 };
 
+function changeEstimateRowsPerPage() {
+    const select = document.getElementById("estimateShowEntries");
+    estimateRowsPerPage = parseInt(select.value);
+    estimatePage = 1;  // reset to first page
+    renderEstimateList();
+}
 
 
         /* =================================================================== */
@@ -2250,9 +2280,11 @@ async function editSelected() {
         const editId = document.getElementById('editId');
         let allRecords = [];
         let currentPage = 1;
-        const recordsPerPage = 10;
+        let recordsPerPage = 10;
         let filteredRecords = []; 
         let sortAsc = true;
+    
+
         
         const filterSubDivisionEl = document.getElementById('filterSubDivision');
         const filterRecordTypeEl = document.getElementById('filterRecordType');
@@ -2471,6 +2503,8 @@ function initPdfEntryGrid() {
         filterSubDivisionEl.addEventListener('change', applyAllFilters);
         filterRecordTypeEl.addEventListener('change', applyAllFilters);
 
+
+        
 function renderRecords(data, isTrash = false) {
   const tableHead = document.getElementById('pdfTableHead');
   const cardsContainer = document.getElementById('recordCards');
@@ -2632,6 +2666,14 @@ function renderRecords(data, isTrash = false) {
     `Page ${currentPage} of ${Math.max(1, Math.ceil(data.length / recordsPerPage))}`;
 }
 
+function changePdfRowsPerPage() {
+    const dropdown = document.getElementById("pdfShowEntries");
+
+    recordsPerPage = parseInt(dropdown.value);   // update existing variable
+    currentPage = 1;                             // reset to page 1
+
+    renderTable();                               // re-render PDF records
+}
 
         function nextPage() {
             if (currentPage < Math.ceil(filteredRecords.length / recordsPerPage)) {
@@ -3804,6 +3846,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
