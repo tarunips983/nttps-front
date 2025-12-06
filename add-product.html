@@ -1215,6 +1215,7 @@ html, body {
                 <thead>
                     <tr>
                         <th>S.No</th>
+                        <th>Description of the Work</th>
                         <th>Division</th>
                         <th>PR No</th>
                         <th>Estimate Sanction No</th>
@@ -1676,7 +1677,8 @@ function initEstimateEntryGrid() {
 
 function renderEstimateHeadings() {
     document.getElementById("estimateTableHead").innerHTML = `
-        <th class="sortable" onclick="sortEstimate('id')">ID ↕</th>
+        <th class="sortable" onclick="sortEstimate('sno')">S.No ↕</th>
+        <th class="sortable" onclick="sortEstimate('description')">Description of Work ↕</th>
         <th class="sortable" onclick="sortEstimate('division')">Division ↕</th>
         <th class="sortable" onclick="sortEstimate('prNo')">PR No ↕</th>
         <th class="sortable" onclick="sortEstimate('estimateNo')">Estimate Sanction No ↕</th>
@@ -1703,7 +1705,7 @@ function addEstimateRow(prefill = {}) {
     const row = document.createElement("tr");
     row.innerHTML = `
         <td>${tbody.rows.length + 1}</td>
-
+        <td contenteditable data-col="description">${prefill.description || ""}</td>
         <td contenteditable data-col="division">${prefill.division || ""}</td>
         <td contenteditable data-col="prNo">${prefill.prNo || ""}</td>
         <td contenteditable data-col="estimateNo">${prefill.estimateNo || ""}</td>
@@ -1773,10 +1775,26 @@ async function loadEstimateList() {
         renderEstimateHeadings();
 
         function sortEstimate(field) {
+
+    // special case : S.No sorting
+    if (field === "sno") {
+
+        // toggle ASC/DESC
+        estSortAsc = !estSortAsc;
+
+        // simply reverse the array
+        estimateData.reverse();
+
+        renderEstimateList();
+        updateEstimateSortArrows();
+        return;
+    }
+
+    // normal column sorting...
     if (estSortField === field) {
-        estSortAsc = !estSortAsc; // toggle ASC/DESC
+        estSortAsc = !estSortAsc;
     } else {
-        estSortAsc = true; // reset to ASC
+        estSortAsc = true;
         estSortField = field;
     }
 
@@ -1784,34 +1802,36 @@ async function loadEstimateList() {
         let A = a[field] ?? "";
         let B = b[field] ?? "";
 
-        // Convert numeric columns
         if (!isNaN(A) && !isNaN(B)) {
             A = parseFloat(A);
             B = parseFloat(B);
             return estSortAsc ? A - B : B - A;
         }
 
-        // String compare
         return estSortAsc
             ? A.toString().localeCompare(B.toString())
             : B.toString().localeCompare(A.toString());
     });
 
-    renderEstimateList();         // Refresh list
-    updateEstimateSortArrows();   // Update arrow icons
+    renderEstimateList();
+    updateEstimateSortArrows();
 }
+
 function updateEstimateSortArrows() {
     const ths = document.querySelectorAll("#estimateTableHead th.sortable");
 
     ths.forEach(th => {
         const field = th.getAttribute("onclick").split("'")[1];
-        if (field === estSortField) {
-            th.innerHTML = th.innerHTML.replace(/↕|↑|↓/g, "") + (estSortAsc ? " ↑" : " ↓");
+
+        if (field === estSortField || field === "sno") {
+            th.innerHTML = th.innerHTML.replace(/↕|↑|↓/g, "") +
+                (estSortAsc ? " ↑" : " ↓");
         } else {
             th.innerHTML = th.innerHTML.replace(/↕|↑|↓/g, "") + " ↕";
         }
     });
 }
+
 
 
 
@@ -1834,7 +1854,7 @@ function renderEstimateList() {
 
    document.getElementById("estimateListBody").innerHTML = rows.map(r => `
     <tr>
-        <td>${r.id}</td>
+        <td>${start + index + 1}</td>
         <td>${r.division}</td>
         <td>${r.prNo}</td>
         <td>${r.estimateNo}</td>
@@ -1941,6 +1961,7 @@ async function importEstimateFromExcel(event) {
         // Add rows from Excel
         rows.forEach(r => {
             addEstimateRow({
+                description: r["Description of the Work"] || "",
                 division: r["Division"] || "",
                 prNo: r["PR No"] || "",
                 estimateNo: r["Estimate Sanction No"] || "",
@@ -3668,6 +3689,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
