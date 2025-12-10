@@ -488,6 +488,59 @@ main {
     z-index: 5000 !important;
 }
 
+/* ---- ESTIMATE TABLE MATCH INDENT TABLE ---- */
+.estimate-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.estimate-table thead tr {
+    background: #007bff;
+    color: white;
+}
+
+.estimate-table th {
+    padding: 10px;
+    font-size: 15px;
+    border-right: 1px solid #ddd;
+    text-align: left;
+}
+
+.estimate-table td {
+    padding: 10px;
+    border-bottom: 1px solid #e5e5e5;
+    border-right: 1px solid #f0f0f0;
+    font-size: 14px;
+}
+
+.estimate-table tr:hover {
+    background: #f0f7ff;
+}
+
+.estimate-table td.amount {
+    font-weight: bold;
+    color: green;
+}
+
+.view-btn {
+    background:#007bff;
+    color:white;
+    padding:6px 12px;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.view-btn:hover {
+    background:#0056b3;
+}
+
+    
 .dropdown-menu {
     position: absolute;
     z-index: 5000 !important;
@@ -1500,43 +1553,43 @@ function renderEstimates(data) {
 
     // ---------------- LIST VIEW ----------------
     if (listEnabled) {
-        container.style.display = "block";
+    container.style.display = "block";
 
-        container.innerHTML = `
-        <table class="table-animate" style="width:100%; border-collapse:collapse; background:white;">
-            <thead>
-                <tr style="background:#007bff; color:white;">
-                    <th>S.No</th>
-                    <th>Work Name</th>
-                    <th>Division</th>
-                    <th>PR No</th>
-                    <th>Amount</th>
-                    <th>Send To</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="estListBody"></tbody>
-        </table>`;
-
-        const body = document.getElementById("estListBody");
-
-        body.innerHTML = data.map((r, idx) => `
-            <tr class="list-row" onclick='openRecordDetails(event, ${JSON.stringify(r).replace(/'/g,"&apos;")})'>
-                <td>${idx + 1}</td>
-                <td>${r.workName || ""}</td>
-                <td>${r.division || ""}</td>
-                <td>${r.prNo || ""}</td>
-                <td>₹ ${(parseFloat(r.amount) || 0).toLocaleString('en-IN')}</td>
-                <td>${r.sendTo || "-"}</td>
-
-                <td>
-                    <button class="view-btn" onclick='showPDF(${JSON.stringify(r).replace(/'/g,"&apos;")})'>View</button>
-                </td>
+    container.innerHTML = `
+    <table class="table-animate estimate-table">
+        <thead>
+            <tr>
+                <th>S.No</th>
+                <th>Work Name</th>
+                <th>Division</th>
+                <th>PR No</th>
+                <th>Amount</th>
+                <th>Send To</th>
+                <th>Action</th>
             </tr>
-        `).join("");
+        </thead>
+        <tbody id="estListBody"></tbody>
+    </table>`;
 
-        return;
-    }
+    const body = document.getElementById("estListBody");
+
+    body.innerHTML = data.map((r, idx) => `
+        <tr class="list-row">
+            <td>${idx + 1}</td>
+            <td>${r.workName || ""}</td>
+            <td>${r.division || ""}</td>
+            <td>${r.prNo || ""}</td>
+            <td class="amount">₹ ${(parseFloat(r.amount) || 0).toLocaleString('en-IN')}</td>
+            <td>${r.sendTo || "-"}</td>
+            <td>
+                <button class="view-btn" onclick='showPDF(${JSON.stringify(r).replace(/'/g,"&apos;")})'>View</button>
+            </td>
+        </tr>
+    `).join("");
+
+    return;
+}
+
 
     // ---------------- CARD VIEW ----------------
     container.style.display = "grid";
@@ -2174,6 +2227,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
