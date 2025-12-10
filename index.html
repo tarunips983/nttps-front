@@ -1413,12 +1413,17 @@ function filterEstimates(div) {
 }
 
 if (estimatesContainer.style.display !== "none") {
+    const key = e.target.value.toLowerCase();
+
     const filtered = allEstimates.filter(r =>
         (r.workName || "").toLowerCase().includes(key) ||
-        (r.prNo || "").toLowerCase().includes(key)
+        (r.prNo || "").toLowerCase().includes(key) ||
+        (r.sendTo || "").toLowerCase().includes(key)
     );
+
     renderEstimates(filtered);
 }
+
 toggleSidebar('mobileFilterBtn','estimates-leftbar');
 
       
@@ -2124,6 +2129,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
