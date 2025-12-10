@@ -970,7 +970,7 @@ main {
     </div>
 
 <!-- ESTIMATES VIEW -->
-<div id="estimates-container" class="main-view">
+<div id="estimates-list" class="main-view">
   <aside id="estimates-leftbar" class="left-bar" aria-hidden="true">
       <h3>Filter Estimates</h3>
       <button class="pdf-nav-btn show-all-est active" onclick="showAllEstimates(this)">📂 Show All</button>
@@ -1097,6 +1097,7 @@ main {
     let allRecords = [];
 let allEstimates = [];
 let estimatesEnabled = localStorage.getItem("showEstimates") === "true";
+    
 
     // DOM refs
     const pdfView = document.getElementById("pdf-view-container");
@@ -1105,7 +1106,7 @@ let estimatesEnabled = localStorage.getItem("showEstimates") === "true";
     const viewTabPdf = document.getElementById("viewTabPdf");
     const viewTabProgress = document.getElementById("viewTabProgress");
     const pdfNav = document.getElementById("pdf-nav-bar");
-
+    const estimatesContainer = document.getElementById("estimates-container");
     const mobileFilterBtn = document.getElementById("mobileFilterBtn");
     const mobileDailyFilterBtn = document.getElementById("mobileDailyFilterBtn");
 
@@ -1328,10 +1329,10 @@ function buildEstimateFilters() {
 }
 
 function renderEstimates(data) {
-    const container = document.getElementById("estimatesList");
+    const container = document.getElementById("estimates-list");
     const listEnabled = localStorage.getItem("listView") === "true";
 
-    document.getElementById("estLoader").style.display = "none";
+    document.getElementById("est-loader").style.display = "none";
 
     if (!data || data.length === 0) {
         container.innerHTML = `
@@ -2129,6 +2130,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
