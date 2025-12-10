@@ -1111,7 +1111,7 @@ main {
     const viewTabPdf = document.getElementById("viewTabPdf");
     const viewTabProgress = document.getElementById("viewTabProgress");
     const pdfNav = document.getElementById("pdf-nav-bar");
-    const estimatesContainer = document.getElementById("estimates-container");
+    const estimatesContainer = document.getElementById("estimatesContainer");
     const container = document.getElementById("estimatesGrid");
     const mobileFilterBtn = document.getElementById("mobileFilterBtn");
     const mobileDailyFilterBtn = document.getElementById("mobileDailyFilterBtn");
@@ -1210,7 +1210,7 @@ main {
     if (viewName === "estimates") {
     estimatesContainer.style.display = "flex";
     document.querySelector("#subNavBar button:nth-child(2)").classList.add("active");
-    renderEstimates(allEstimates);
+    loadEstimates();
 }
 
 
@@ -2167,13 +2167,14 @@ window.addEventListener("load", () => {
     applyUserSettings();
     loadDailyProgressDates();
     loadRecords();
-    renderEstimates(allEstimates);
+    loadEstimates();
 
 });
 
   </script>
 </body>
 </html>
+
 
 
 
