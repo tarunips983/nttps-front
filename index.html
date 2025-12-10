@@ -1130,7 +1130,7 @@ main {
       </aside>
 
       <section id="pdf-grid-wrapper" class="right-panel">
-        <div id="loader" class="loader"></div>
+        <div id="pdf-loader" class="loader"></div>
         <div class="product-grid" id="product-list" style="display:none">
           
         </div>
@@ -1147,7 +1147,7 @@ main {
 </aside>
 
         <div id="estimatesGrid" class="products-grid"></div>
-<div id="loader" class="loader"></div>
+<div id="est-loader" class="loader"></div>
 </div>
 </div>   <!-- IMPORTANT: FIXED CLOSING TAG -->
 
@@ -1311,7 +1311,7 @@ main {
         console.error("Failed to load records", e);
         allRecords = []; // fallback
       } finally {
-    document.getElementById("loader").style.display = "none";
+    document.getElementById("pdf-loader").style.display = "none";
     document.getElementById("product-list").style.display = "grid";
 
     renderRecords(allRecords);
@@ -1607,7 +1607,6 @@ container.innerHTML = records.map((r, i) => {
 
 async function loadEstimates() {
     try {
-        document.getElementById("est-loader").style.display = "block";
 
         const res = await fetch(`${SERVER_URL}/estimates`);
         const data = await res.json();
@@ -2340,6 +2339,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
