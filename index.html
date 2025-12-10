@@ -970,19 +970,20 @@ main {
     </div>
 
 <!-- ESTIMATES VIEW -->
-<div id="estimates-container" class="main-view">
-  <aside id="estimates-leftbar" class="left-bar" aria-hidden="true">
-      <h3>Filter Estimates</h3>
-      <button class="pdf-nav-btn show-all-est active" onclick="showAllEstimates(this)">📂 Show All</button>
-  </aside>
+<div id="estimatesPanel" class="panel">
+    <aside id="estimates-leftbar" class="left-bar"></aside>
 
-  <section id="estimates-grid-wrapper" class="right-panel">
-      <div id="est-loader" class="loader"></div>
+    <div style="margin-left: 220px;">
+        <h2>Estimate Records</h2>
 
-      <!-- FIXED: renamed inner container -->
-      <div id="estimatesGrid" class="product-grid" style="display:none"></div>
-  </section>
+        <!-- Loader -->
+        <div id="est-loader" style="padding:20px; font-size:18px;">Loading Estimates...</div>
+
+        <!-- GRID OR LIST WILL RENDER HERE -->
+        <div id="estimatesGrid" class="products-grid"></div>
+    </div>
 </div>
+
 
 
 
@@ -1168,6 +1169,96 @@ main {
     const container = document.getElementById("product-list");
     const listEnabled = localStorage.getItem("listView") === "true";
 
+// Show main view
+   window.showMainView = function(viewName){
+
+  // hide all
+  pdfView.style.display = "none";
+  progressView.style.display = "none";
+  clbiodata.style.display = "none";
+
+  // remove active states
+  document.querySelectorAll(".subnav-btn").forEach(btn => btn.classList.remove("active"));
+
+  // ⭐ MOBILE FILTER BUTTON LOGIC ⭐
+  if (viewName === "pdf") {
+      mobileFilterBtn.style.display = "block";
+      mobileDailyFilterBtn.style.display = "none";
+  }
+
+  if (viewName === "estimates") {
+      mobileFilterBtn.style.display = "none";
+      mobileDailyFilterBtn.style.display = "block";
+  }
+     
+  if (viewName === "progress") {
+      mobileFilterBtn.style.display = "none";
+      mobileDailyFilterBtn.style.display = "block";
+  }
+
+  if (viewName === "clbiodata") {
+      mobileFilterBtn.style.display = "none";
+      mobileDailyFilterBtn.style.display = "none";
+  }
+
+  // show PDF
+  if (viewName === "pdf") {
+    pdfView.style.display = "flex";
+    document.querySelector("#subNavBar button:nth-child(1)").classList.add("active");
+  }
+
+    if (viewName === "estimates") {
+    estimatesContainer.style.display = "flex";
+    document.querySelector("#subNavBar button:nth-child(2)").classList.add("active");
+    renderEstimates(allEstimates);
+}
+
+
+  // show progress
+  if (viewName === "progress") {
+    progressView.style.display = "flex";
+    document.querySelector("#subNavBar button:nth-child(3)").classList.add("active");
+  }
+
+  // show cl biodata
+  if (viewName === "clbiodata") {
+    clbiodata.style.display = "block";
+    document.querySelector("#subNavBar button:nth-child(4)").classList.add("active");
+    renderCLBioData();
+  }
+};
+
+
+    // filtering & accordion
+    function clearPdfNavActive(){
+      pdfNav.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+    }
+    window.filterRecords = function(subDiv, type, btn){
+      clearPdfNavActive();
+      if(btn) btn.classList.add('active');
+      const header = btn?.closest?.('.pdf-nav-section')?.querySelector('.pdf-nav-header');
+      if(header) header.classList.add('active');
+      const filtered = allRecords.filter(r => r.subDivision === subDiv && r.recordType === type);
+      renderRecords(filtered);
+      // if mobile — close sidebar after selecting
+      if(window.innerWidth <= 768){
+        pdfNav.classList.remove('active');
+      }
+    };
+    window.togglePdfNav = function(headerButton){
+      headerButton.classList.toggle('active');
+      const content = headerButton.nextElementSibling;
+      if(content) content.classList.toggle('active');
+    };
+    window.showAllPDFs = function(btn){
+      clearPdfNavActive();
+      if(btn) btn.classList.add('active');
+      renderRecords(allRecords);
+      if(window.innerWidth <= 768) pdfNav.classList.remove('active');
+    };
+
+
+      
     // ========= 🟦 LIST VIEW MODE ========
     // ========= 🟦 LIST VIEW MODE ========
 if (listEnabled) {
@@ -1345,7 +1436,32 @@ container.innerHTML = records.map((r, i) => {
     renderEstimates(filtered);
 }
 });
-      
+
+let allEstimates = [];
+
+async function loadEstimates() {
+    try {
+        document.getElementById("est-loader").style.display = "block";
+
+        const res = await fetch(`${SERVER_URL}/estimates`);
+        const data = await res.json();
+
+        allEstimates = data;
+
+        buildEstimateFilters();
+        renderEstimates(allEstimates);
+
+    } catch (err) {
+        console.error("Estimates Load Error:", err);
+        document.getElementById("estimatesGrid").innerHTML =
+            "<p style='color:red;padding:20px;'>Failed to load estimates</p>";
+    }
+}
+
+
+
+
+    
 function buildEstimateFilters() {
     const bar = document.getElementById("estimates-leftbar");
 
@@ -1675,94 +1791,7 @@ function toggleSearchBar() {
         input.focus();
     }
 }
-    // Show main view
-   window.showMainView = function(viewName){
-
-  // hide all
-  pdfView.style.display = "none";
-  progressView.style.display = "none";
-  clbiodata.style.display = "none";
-
-  // remove active states
-  document.querySelectorAll(".subnav-btn").forEach(btn => btn.classList.remove("active"));
-
-  // ⭐ MOBILE FILTER BUTTON LOGIC ⭐
-  if (viewName === "pdf") {
-      mobileFilterBtn.style.display = "block";
-      mobileDailyFilterBtn.style.display = "none";
-  }
-
-  if (viewName === "estimates") {
-      mobileFilterBtn.style.display = "none";
-      mobileDailyFilterBtn.style.display = "block";
-  }
-     
-  if (viewName === "progress") {
-      mobileFilterBtn.style.display = "none";
-      mobileDailyFilterBtn.style.display = "block";
-  }
-
-  if (viewName === "clbiodata") {
-      mobileFilterBtn.style.display = "none";
-      mobileDailyFilterBtn.style.display = "none";
-  }
-
-  // show PDF
-  if (viewName === "pdf") {
-    pdfView.style.display = "flex";
-    document.querySelector("#subNavBar button:nth-child(1)").classList.add("active");
-  }
-
-    if (viewName === "estimates") {
-    estimatesContainer.style.display = "flex";
-    document.querySelector("#subNavBar button:nth-child(2)").classList.add("active");
-    renderEstimates(allEstimates);
-}
-
-
-  // show progress
-  if (viewName === "progress") {
-    progressView.style.display = "flex";
-    document.querySelector("#subNavBar button:nth-child(3)").classList.add("active");
-  }
-
-  // show cl biodata
-  if (viewName === "clbiodata") {
-    clbiodata.style.display = "block";
-    document.querySelector("#subNavBar button:nth-child(4)").classList.add("active");
-    renderCLBioData();
-  }
-};
-
-
-    // filtering & accordion
-    function clearPdfNavActive(){
-      pdfNav.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
-    }
-    window.filterRecords = function(subDiv, type, btn){
-      clearPdfNavActive();
-      if(btn) btn.classList.add('active');
-      const header = btn?.closest?.('.pdf-nav-section')?.querySelector('.pdf-nav-header');
-      if(header) header.classList.add('active');
-      const filtered = allRecords.filter(r => r.subDivision === subDiv && r.recordType === type);
-      renderRecords(filtered);
-      // if mobile — close sidebar after selecting
-      if(window.innerWidth <= 768){
-        pdfNav.classList.remove('active');
-      }
-    };
-    window.togglePdfNav = function(headerButton){
-      headerButton.classList.toggle('active');
-      const content = headerButton.nextElementSibling;
-      if(content) content.classList.toggle('active');
-    };
-    window.showAllPDFs = function(btn){
-      clearPdfNavActive();
-      if(btn) btn.classList.add('active');
-      renderRecords(allRecords);
-      if(window.innerWidth <= 768) pdfNav.classList.remove('active');
-    };
-
+    
     // PDF modal logic (redesigned close etc)
     const productModal = document.getElementById('productModal');
     const modalName = document.getElementById('modalName');
@@ -2146,6 +2175,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
