@@ -1311,6 +1311,29 @@ container.innerHTML = records.map((r, i) => {
         renderRecords(filtered);
     }
 
+/* ---------------------
+       2️⃣ DAILY PROGRESS SEARCH (DATES)
+    ----------------------*/
+    if (progressView.style.display !== "none") {
+        const allButtons = document.querySelectorAll(".date-list-item");
+        allButtons.forEach(btn => {
+            const txt = btn.textContent.toLowerCase();
+            btn.style.display = txt.includes(key) ? "block" : "none";
+        });
+    }
+
+    /* ---------------------
+       3️⃣ CL BIO SEARCH
+    ----------------------*/
+    if (clbiodata.style.display !== "none") {
+        const cards = document.querySelectorAll("#clBioGrid .cl-card");
+        cards.forEach(card => {
+            const text = card.textContent.toLowerCase();
+            card.style.display = text.includes(key) ? "block" : "none";
+        });
+    }
+});
+      
 function buildEstimateFilters() {
     const bar = document.getElementById("estimates-leftbar");
 
@@ -1348,85 +1371,85 @@ function renderEstimates(data) {
         return;
     }
 
-    /* ----------------- LIST VIEW (like PDF list) ----------------- */
-    /* ----------------- LIST VIEW (Updated as per your fields) ----------------- */
-if (listEnabled) {
-    container.style.display = "block";
+    /* ----------------- LIST VIEW ----------------- */
+    if (listEnabled) {
+        container.style.display = "block";
 
-    container.innerHTML = `
-    <table class="table-animate" style="width:100%; border-collapse:collapse; background:white;">
-        <thead>
-            <tr style="background:#007bff; color:white;">
-                <th>S.No</th>
-                <th>Description</th>
-                <th>Division</th>
-                <th>PR No</th>
-                <th>Estimate No</th>
-                <th>PO No</th>
-                <th>Gross Amount</th>
-                <th>Net Amount</th>
-                <th>Action</th>
+        container.innerHTML = `
+        <table class="table-animate" style="width:100%; border-collapse:collapse; background:white;">
+            <thead>
+                <tr style="background:#007bff; color:white;">
+                    <th>S.No</th>
+                    <th>Description</th>
+                    <th>Division</th>
+                    <th>PR No</th>
+                    <th>Estimate No</th>
+                    <th>PO No</th>
+                    <th>Gross Amount</th>
+                    <th>Net Amount</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="estListBody"></tbody>
+        </table>`;
+
+        const body = document.getElementById("estListBody");
+
+        body.innerHTML = data.map((r, idx) => `
+            <tr class="list-row" onclick='openRecordDetails(event, ${JSON.stringify(r).replace(/'/g,"&apos;")})'>
+                <td>${idx + 1}</td>
+                <td>${r.description || ""}</td>
+                <td>${r.division || ""}</td>
+                <td>${r.prNo || ""}</td>
+                <td>${r.estimateNo || ""}</td>
+                <td>${r.poNo || ""}</td>
+                <td>${r.grossAmount || ""}</td>
+                <td>${r.netAmount || ""}</td>
+                <td>
+                    <button class="view-btn" onclick='showPDF(${JSON.stringify(r).replace(/'/g,"&apos;")})'>View</button>
+                </td>
             </tr>
-        </thead>
-        <tbody id="estListBody"></tbody>
-    </table>`;
+        `).join("");
 
-    const body = document.getElementById("estListBody");
+        return;
+    }
 
-    body.innerHTML = data.map((r, idx) => `
-        <tr class="list-row" onclick='openRecordDetails(event, ${JSON.stringify(r).replace(/'/g,"&apos;")})'>
-            <td>${idx + 1}</td>
-            <td>${r.description || ""}</td>
-            <td>${r.division || ""}</td>
-            <td>${r.prNo || ""}</td>
-            <td>${r.estimateNo || ""}</td>
-            <td>${r.poNo || ""}</td>
-            <td>${r.grossAmount || ""}</td>
-            <td>${r.netAmount || ""}</td>
+    /* ----------------- CARD VIEW ----------------- */
+    container.style.display = "grid";
 
-            <td>
-                <button class="view-btn" onclick='showPDF(${JSON.stringify(r).replace(/'/g,"&apos;")})'>View</button>
-            </td>
-        </tr>
-    `).join("");
+    container.innerHTML = data.map((r, i) => {
+        const rec = JSON.stringify(r).replace(/'/g, "&apos;");
+        return `
+        <div class="product" onclick='openRecordDetails(event, ${rec})' style="animation-delay:${i * 0.05}s">
+            <img src="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg" />
 
-    return;
+            <div class="product-info">
+                <h3>${r.description || "No Title"}</h3>
+                <p><strong>PR No:</strong> ${r.prNo}</p>
+                <p><strong>Estimate No:</strong> ${r.estimateNo}</p>
+                <p><strong>Division:</strong> ${r.division}</p>
+                <p><strong>Gross:</strong> ${r.grossAmount}</p>
+                <p><strong>Net:</strong> ${r.netAmount}</p>
+            </div>
+
+            <button class="view-btn" onclick="handlePDFClick(event, ${rec})">View PDF</button>
+        </div>`;
+    }).join("");
 }
 
-    /* ----------------- CARD VIEW (like PDF cards) ----------------- */
-    /* ----------------- CARD VIEW (Updated) ----------------- */
-container.style.display = "grid";
-
-container.innerHTML = data.map((r, i) => {
-    const rec = JSON.stringify(r).replace(/'/g, "&apos;");
-    return `
-    <div class="product" onclick='openRecordDetails(event, ${rec})' style="animation-delay:${i * 0.05}s">
-        <img src="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg" />
-
-        <div class="product-info">
-            <h3>${r.description || "No Title"}</h3>
-            <p><strong>PR No:</strong> ${r.prNo}</p>
-            <p><strong>Estimate No:</strong> ${r.estimateNo}</p>
-            <p><strong>Division:</strong> ${r.division}</p>
-            <p><strong>Gross:</strong> ${r.grossAmount}</p>
-            <p><strong>Net:</strong> ${r.netAmount}</p>
-        </div>
-
-        <button class="view-btn" onclick="handlePDFClick(event, ${rec})">View PDF</button>
-    </div>`;
-}).join("");
-
-
+/* ---------------- SHOW ALL ESTIMATES ---------------- */
 function showAllEstimates(btn) {
     document.querySelectorAll("#estimates-leftbar button").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     renderEstimates(allEstimates);
 }
 
+/* ---------------- FILTER ESTIMATES ---------------- */
 function filterEstimates(div) {
     const filtered = allEstimates.filter(r => r.subDivision === div);
     renderEstimates(filtered);
 }
+
 
 if (estimatesContainer.style.display !== "none") {
     const key = e.target.value.toLowerCase();
@@ -1443,28 +1466,7 @@ if (estimatesContainer.style.display !== "none") {
 toggleSidebar('mobileFilterBtn','estimates-leftbar');
 
       
-/* ---------------------
-       2️⃣ DAILY PROGRESS SEARCH (DATES)
-    ----------------------*/
-    if (progressView.style.display !== "none") {
-        const allButtons = document.querySelectorAll(".date-list-item");
-        allButtons.forEach(btn => {
-            const txt = btn.textContent.toLowerCase();
-            btn.style.display = txt.includes(key) ? "block" : "none";
-        });
-    }
 
-    /* ---------------------
-       3️⃣ CL BIO SEARCH
-    ----------------------*/
-    if (clbiodata.style.display !== "none") {
-        const cards = document.querySelectorAll("#clBioGrid .cl-card");
-        cards.forEach(card => {
-            const text = card.textContent.toLowerCase();
-            card.style.display = text.includes(key) ? "block" : "none";
-        });
-    }
-});
 window.openRecordDetails = function(event, record) {
     // Prevent clicks on buttons inside card/row
     if (event.target.closest("button")) return;
@@ -2145,6 +2147,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
