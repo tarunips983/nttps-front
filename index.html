@@ -970,7 +970,7 @@ main {
     </div>
 
 <!-- ESTIMATES VIEW -->
-<div id="estimates-list" class="main-view">
+<div id="estimates-container" class="main-view">
   <aside id="estimates-leftbar" class="left-bar" aria-hidden="true">
       <h3>Filter Estimates</h3>
       <button class="pdf-nav-btn show-all-est active" onclick="showAllEstimates(this)">📂 Show All</button>
@@ -978,9 +978,13 @@ main {
 
   <section id="estimates-grid-wrapper" class="right-panel">
       <div id="est-loader" class="loader"></div>
-      <div id="estimates-list" class="product-grid" style="display:none"></div>
+
+      <!-- FIXED: renamed inner container -->
+      <div id="estimatesGrid" class="product-grid" style="display:none"></div>
   </section>
 </div>
+
+
 
 
     
@@ -1095,8 +1099,8 @@ main {
     // Server URL unchanged
     const SERVER_URL = "https://nttps-backend.onrender.com";
     let allRecords = [];
-let allEstimates = [];
-let estimatesEnabled = localStorage.getItem("showEstimates") === "true";
+    let allEstimates = [];
+
     
 
     // DOM refs
@@ -1107,6 +1111,7 @@ let estimatesEnabled = localStorage.getItem("showEstimates") === "true";
     const viewTabProgress = document.getElementById("viewTabProgress");
     const pdfNav = document.getElementById("pdf-nav-bar");
     const estimatesContainer = document.getElementById("estimates-container");
+    const container = document.getElementById("estimatesGrid");
     const mobileFilterBtn = document.getElementById("mobileFilterBtn");
     const mobileDailyFilterBtn = document.getElementById("mobileDailyFilterBtn");
 
@@ -1330,7 +1335,7 @@ function buildEstimateFilters() {
 
 
 function renderEstimates(data) {
-    const container = document.getElementById("estimates-list");
+    const container = document.getElementById("estimatesGrid");
     const listEnabled = localStorage.getItem("listView") === "true";
 
     document.getElementById("est-loader").style.display = "none";
@@ -1344,63 +1349,72 @@ function renderEstimates(data) {
     }
 
     /* ----------------- LIST VIEW (like PDF list) ----------------- */
-    if (listEnabled) {
-        container.style.display = "block";
+    /* ----------------- LIST VIEW (Updated as per your fields) ----------------- */
+if (listEnabled) {
+    container.style.display = "block";
 
-        container.innerHTML = `
-        <table class="table-animate" style="width:100%; border-collapse:collapse; background:white;">
-            <thead>
-                <tr style="background:#007bff; color:white;">
-                    <th>Logo</th>
-                    <th>Name</th>
-                    <th>Est No</th>
-                    <th>Division</th>
-                    <th>Amount</th>
-                    <th>Send To</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="estListBody"></tbody>
-        </table>`;
-
-        const body = document.getElementById("estListBody");
-
-        body.innerHTML = data.map(r => `
-            <tr class="list-row" onclick='openRecordDetails(event, ${JSON.stringify(r).replace(/'/g,"&apos;")})'>
-                <td style="text-align:center;">
-                    <img src="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg" style="height:40px;">
-                </td>
-                <td>${r.workName}</td>
-                <td>${r.prNo}</td>
-                <td>${r.division}</td>
-                <td>₹ ${(parseFloat(r.amount) || 0).toLocaleString('en-IN')}</td>
-                <td>${r.sendTo || "-"}</td>
-                <td>
-                    <button class="view-btn" onclick='showPDF(${JSON.stringify(r).replace(/'/g,"&apos;")})'>View</button>
-                </td>
+    container.innerHTML = `
+    <table class="table-animate" style="width:100%; border-collapse:collapse; background:white;">
+        <thead>
+            <tr style="background:#007bff; color:white;">
+                <th>S.No</th>
+                <th>Description</th>
+                <th>Division</th>
+                <th>PR No</th>
+                <th>Estimate No</th>
+                <th>PO No</th>
+                <th>Gross Amount</th>
+                <th>Net Amount</th>
+                <th>Action</th>
             </tr>
-        `).join("");
+        </thead>
+        <tbody id="estListBody"></tbody>
+    </table>`;
 
-        return;
-    }
+    const body = document.getElementById("estListBody");
+
+    body.innerHTML = data.map((r, idx) => `
+        <tr class="list-row" onclick='openRecordDetails(event, ${JSON.stringify(r).replace(/'/g,"&apos;")})'>
+            <td>${idx + 1}</td>
+            <td>${r.description || ""}</td>
+            <td>${r.division || ""}</td>
+            <td>${r.prNo || ""}</td>
+            <td>${r.estimateNo || ""}</td>
+            <td>${r.poNo || ""}</td>
+            <td>${r.grossAmount || ""}</td>
+            <td>${r.netAmount || ""}</td>
+
+            <td>
+                <button class="view-btn" onclick='showPDF(${JSON.stringify(r).replace(/'/g,"&apos;")})'>View</button>
+            </td>
+        </tr>
+    `).join("");
+
+    return;
+}
 
     /* ----------------- CARD VIEW (like PDF cards) ----------------- */
-    container.style.display = "grid";
+    /* ----------------- CARD VIEW (Updated) ----------------- */
+container.style.display = "grid";
 
-    container.innerHTML = data.map((r, i) => {
-        const rec = JSON.stringify(r).replace(/'/g, "&apos;");
-        return `
-        <div class="product" onclick='openRecordDetails(event, ${rec})' style="animation-delay:${i * 0.05}s">
-            <img src="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg" />
-            <div class="product-info">
-                <h3>${summarize(r.workName)}</h3>
-                <p><strong>Est No:</strong> ${r.prNo}</p>
-                <p><strong>Division:</strong> ${r.subDivision}</p>
-            </div>
-            <button class="view-btn" onclick="handlePDFClick(event, ${rec})">View PDF</button>
-        </div>`;
-    }).join("");
-}
+container.innerHTML = data.map((r, i) => {
+    const rec = JSON.stringify(r).replace(/'/g, "&apos;");
+    return `
+    <div class="product" onclick='openRecordDetails(event, ${rec})' style="animation-delay:${i * 0.05}s">
+        <img src="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg" />
+
+        <div class="product-info">
+            <h3>${r.description || "No Title"}</h3>
+            <p><strong>PR No:</strong> ${r.prNo}</p>
+            <p><strong>Estimate No:</strong> ${r.estimateNo}</p>
+            <p><strong>Division:</strong> ${r.division}</p>
+            <p><strong>Gross:</strong> ${r.grossAmount}</p>
+            <p><strong>Net:</strong> ${r.netAmount}</p>
+        </div>
+
+        <button class="view-btn" onclick="handlePDFClick(event, ${rec})">View PDF</button>
+    </div>`;
+}).join("");
 
 
 function showAllEstimates(btn) {
@@ -2131,6 +2145,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
