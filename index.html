@@ -1314,7 +1314,7 @@ function buildEstimateFilters() {
         <button class="pdf-nav-btn show-all-est active" onclick="showAllEstimates(this)">📂 Show All</button>
     `;
 
-    const divisions = [...new Set(allEstimates.map(x => x.subDivision).filter(Boolean))];
+    const divisions = [...new Set(allEstimates.map(x => x.division).filter(Boolean))];
 
     divisions.forEach(div => {
         bar.innerHTML += `
@@ -1327,6 +1327,7 @@ function buildEstimateFilters() {
         `;
     });
 }
+
 
 function renderEstimates(data) {
     const container = document.getElementById("estimates-list");
@@ -1371,7 +1372,7 @@ function renderEstimates(data) {
                 </td>
                 <td>${r.workName}</td>
                 <td>${r.prNo}</td>
-                <td>${r.subDivision}</td>
+                <td>${r.division}</td>
                 <td>₹ ${(parseFloat(r.amount) || 0).toLocaleString('en-IN')}</td>
                 <td>${r.sendTo || "-"}</td>
                 <td>
@@ -2130,6 +2131,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
