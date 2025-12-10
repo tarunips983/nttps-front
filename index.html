@@ -1344,6 +1344,7 @@ main {
   pdfView.style.display = "none";
   progressView.style.display = "none";
   clbiodata.style.display = "none";
+  estimatesContainer.style.display = "none";
 
   // remove active states
   document.querySelectorAll(".subnav-btn").forEach(btn => btn.classList.remove("active"));
@@ -1376,10 +1377,10 @@ main {
   }
 
     if (viewName === "estimates") {
-    estimatesContainer.style.display = "flex";
-    document.querySelector("#subNavBar button:nth-child(2)").classList.add("active");
-    loadEstimates();
-}
+      estimatesContainer.style.display = "flex";
+      document.querySelector("#subNavBar button:nth-child(2)").classList.add("active");
+      loadEstimates();
+  }
 
 
   // show progress
@@ -2341,6 +2342,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
