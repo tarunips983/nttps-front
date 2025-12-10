@@ -1332,6 +1332,18 @@ container.innerHTML = records.map((r, i) => {
             card.style.display = text.includes(key) ? "block" : "none";
         });
     }
+      if (estimatesContainer.style.display !== "none") {
+    
+
+    const filtered = allEstimates.filter(r =>
+        (r.description || "").toLowerCase().includes(key) ||
+        (r.prNo || "").toLowerCase().includes(key) ||
+        (r.estimateNo || "").toLowerCase().includes(key) ||
+        (r.division || "").toLowerCase().includes(key)
+    );
+
+    renderEstimates(filtered);
+}
 });
       
 function buildEstimateFilters() {
@@ -1451,18 +1463,7 @@ function filterEstimates(div) {
 }
 
 
-if (estimatesContainer.style.display !== "none") {
-    const key = e.target.value.toLowerCase();
 
-    const filtered = allEstimates.filter(r =>
-        (r.description || "").toLowerCase().includes(key) ||
-        (r.prNo || "").toLowerCase().includes(key) ||
-        (r.estimateNo || "").toLowerCase().includes(key) ||
-        (r.division || "").toLowerCase().includes(key)
-    );
-
-    renderEstimates(filtered);
-}
 
 
 toggleSidebar('mobileFilterBtn','estimates-leftbar');
@@ -2149,6 +2150,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
