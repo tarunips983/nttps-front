@@ -1379,7 +1379,6 @@ main {
     if (viewName === "estimates") {
       estimatesContainer.style.display = "flex";
       document.querySelector("#subNavBar button:nth-child(2)").classList.add("active");
-      loadEstimates();
   }
 
 
@@ -2336,12 +2335,13 @@ window.addEventListener("load", () => {
     applyUserSettings();
     loadDailyProgressDates();
     loadRecords();
-
+    loadEstimates();
 });
 
   </script>
 </body>
 </html>
+
 
 
 
