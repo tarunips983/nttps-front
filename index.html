@@ -1063,6 +1063,21 @@ main {
 #estimates-leftbar .pdf-nav-content {
     padding-left: 15px;
 }
+#estimates-leftbar {
+    display: block !important;
+    visibility: visible !important;
+}
+#estimatesContainer {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: auto;
+}
+
+#estimatesGrid {
+    flex: 1;
+    padding: 10px;
+}
 
 </style>
 
@@ -1126,11 +1141,10 @@ main {
 <!-- ESTIMATES VIEW -->
 <div id="estimatesContainer" class="main-view">
 
-    <aside id="estimates-leftbar" class="left-bar"></aside>
-
+    <aside id="estimates-leftbar" class="left-bar">
     <div class="estimates-content">
         <h2>Estimate Records</h2>
-
+</aside>
         <div id="est-loader" style="padding:20px; font-size:18px;">Loading Estimates...</div>
 
         <div id="estimatesGrid" class="products-grid"></div>
@@ -2327,6 +2341,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
