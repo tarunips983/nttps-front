@@ -1006,6 +1006,10 @@ main {
     border: none;
     cursor: pointer;
 }
+.estimates-content {
+    flex: 1;
+    padding: 20px;
+}
 
 @media (max-width: 600px) {
   .details-box {
@@ -1016,6 +1020,48 @@ main {
   .details-grid {
       grid-template-columns: 1fr;
   }
+}
+#estimates-leftbar {
+    width: 220px;
+    padding: 15px;
+    background: #f0f4f8;
+    border-right: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+#estimates-leftbar h3 {
+    margin-bottom: 15px;
+    font-size: 18px;
+    border-bottom: 2px solid #ccc;
+    padding-bottom: 10px;
+    color: #232f3e;
+}
+
+#estimates-leftbar button {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    border: none;
+    border-radius: 5px;
+    background: #ff9900;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+    text-align: left;
+    transition: 0.25s;
+}
+
+#estimates-leftbar button:hover {
+    background: #d98200;
+}
+
+#estimates-leftbar button.active {
+    background: #28a745 !important;
+}
+
+#estimates-leftbar .pdf-nav-content {
+    padding-left: 15px;
 }
 
 </style>
@@ -1080,7 +1126,7 @@ main {
 <div id="estimatesContainer" class="main-view">
     <aside id="estimates-leftbar" class="left-bar"></aside>
 
-    <div style="margin-left: 220px;">
+    <div class="estimates-content">
         <h2>Estimate Records</h2>
 
         <!-- Loader -->
@@ -2280,6 +2326,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
