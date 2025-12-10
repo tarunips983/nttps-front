@@ -1383,7 +1383,7 @@ function renderEstimates(data) {
         return;
     }
 
-    /* ----------------- LIST VIEW ----------------- */
+    // ---------------- LIST VIEW ----------------
     if (listEnabled) {
         container.style.display = "block";
 
@@ -1392,13 +1392,11 @@ function renderEstimates(data) {
             <thead>
                 <tr style="background:#007bff; color:white;">
                     <th>S.No</th>
-                    <th>Description</th>
+                    <th>Work Name</th>
                     <th>Division</th>
                     <th>PR No</th>
-                    <th>Estimate No</th>
-                    <th>PO No</th>
-                    <th>Gross Amount</th>
-                    <th>Net Amount</th>
+                    <th>Amount</th>
+                    <th>Send To</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -1410,13 +1408,12 @@ function renderEstimates(data) {
         body.innerHTML = data.map((r, idx) => `
             <tr class="list-row" onclick='openRecordDetails(event, ${JSON.stringify(r).replace(/'/g,"&apos;")})'>
                 <td>${idx + 1}</td>
-                <td>${r.description || ""}</td>
+                <td>${r.workName || ""}</td>
                 <td>${r.division || ""}</td>
                 <td>${r.prNo || ""}</td>
-                <td>${r.estimateNo || ""}</td>
-                <td>${r.poNo || ""}</td>
-                <td>${r.grossAmount || ""}</td>
-                <td>${r.netAmount || ""}</td>
+                <td>₹ ${(parseFloat(r.amount) || 0).toLocaleString('en-IN')}</td>
+                <td>${r.sendTo || "-"}</td>
+
                 <td>
                     <button class="view-btn" onclick='showPDF(${JSON.stringify(r).replace(/'/g,"&apos;")})'>View</button>
                 </td>
@@ -1426,22 +1423,20 @@ function renderEstimates(data) {
         return;
     }
 
-    /* ----------------- CARD VIEW ----------------- */
+    // ---------------- CARD VIEW ----------------
     container.style.display = "grid";
 
-    container.innerHTML = data.map((r, i) => {
-        const rec = JSON.stringify(r).replace(/'/g, "&apos;");
+    container.innerHTML = data.map((r,i) => {
+        const rec = JSON.stringify(r).replace(/'/g,"&apos;");
         return `
         <div class="product" onclick='openRecordDetails(event, ${rec})' style="animation-delay:${i * 0.05}s">
-            <img src="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg" />
+            <img src="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg"/>
 
             <div class="product-info">
-                <h3>${r.description || "No Title"}</h3>
+                <h3>${r.workName}</h3>
                 <p><strong>PR No:</strong> ${r.prNo}</p>
-                <p><strong>Estimate No:</strong> ${r.estimateNo}</p>
                 <p><strong>Division:</strong> ${r.division}</p>
-                <p><strong>Gross:</strong> ${r.grossAmount}</p>
-                <p><strong>Net:</strong> ${r.netAmount}</p>
+                <p><strong>Amount:</strong> ₹ ${(parseFloat(r.amount) || 0).toLocaleString('en-IN')}</p>
             </div>
 
             <button class="view-btn" onclick="handlePDFClick(event, ${rec})">View PDF</button>
@@ -1458,7 +1453,7 @@ function showAllEstimates(btn) {
 
 /* ---------------- FILTER ESTIMATES ---------------- */
 function filterEstimates(div) {
-    const filtered = allEstimates.filter(r => r.subDivision === div);
+    const filtered = allEstimates.filter(r => r.division === div);
     renderEstimates(filtered);
 }
 
@@ -2150,6 +2145,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
