@@ -1576,7 +1576,7 @@ function renderEstimates(data) {
     body.innerHTML = data.map((r, idx) => `
         <tr class="list-row">
             <td>${idx + 1}</td>
-            <td>${r.workName || ""}</td>
+            <td>${r.description || ""}</td>
             <td>${r.division || ""}</td>
             <td>${r.prNo || ""}</td>
             <td class="amount">₹ ${(parseFloat(r.amount) || 0).toLocaleString('en-IN')}</td>
@@ -1601,7 +1601,7 @@ function renderEstimates(data) {
             <img src="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg"/>
 
             <div class="product-info">
-                <h3>${r.workName}</h3>
+                <h3>${r.description}</h3>
                 <p><strong>PR No:</strong> ${r.prNo}</p>
                 <p><strong>Division:</strong> ${r.division}</p>
                 <p><strong>Amount:</strong> ₹ ${(parseFloat(r.amount) || 0).toLocaleString('en-IN')}</p>
@@ -2227,6 +2227,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
