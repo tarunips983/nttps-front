@@ -1138,22 +1138,19 @@ main {
     </div>
 
 <!-- ESTIMATES VIEW -->
-<!-- ESTIMATES VIEW -->
+
 <div id="estimatesContainer" class="main-view">
 
     <aside id="estimates-leftbar" class="left-bar">
-    <div class="estimates-content">
-        <h2>Estimate Records</h2>
-</aside>
+        <div class="estimates-content">
+            <h2>Estimate Records</h2>
+        </div>
+    </aside>
 
-        <div id="estimatesGrid" class="products-grid"></div>
-<div id="est-loader" class="loader"></div>
-</div>
-</div>   <!-- IMPORTANT: FIXED CLOSING TAG -->
+    <div id="estimatesGrid" class="products-grid"></div>
+    <div id="est-loader" class="loader"></div>
 
-
-
-
+</div>  <!-- Only ONE closing div is correct -->
 
     
     <!-- Daily Progress view -->
@@ -1267,7 +1264,7 @@ main {
     // Server URL unchanged
     const SERVER_URL = "https://nttps-backend.onrender.com";
     let allRecords = [];
-    let allEstimates = [];
+    
 
     
 
@@ -1604,7 +1601,8 @@ container.innerHTML = records.map((r, i) => {
 }
 });
 
-
+let allEstimates = [];
+    
 async function loadEstimates() {
     try {
 
@@ -2339,6 +2337,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
