@@ -943,7 +943,8 @@ main {
   </header>
 
   <div id="subNavBar">
-  <button class="subnav-btn" onclick="showMainView('pdf')">📄 PDF's Records</button>
+  <button class="subnav-btn" onclick="showMainView('pdf')">📄 All Indents</button>
+    <button class="subnav-btn" onclick="showMainView('estimates')">📘 Estimates</button>
   <button class="subnav-btn" onclick="showMainView('progress')">📅 Daily Progress</button>
   <button class="subnav-btn" onclick="showMainView('clbiodata')">👥 CL's Bio Data</button>
 </div>
@@ -968,6 +969,21 @@ main {
       </section>
     </div>
 
+<!-- ESTIMATES VIEW -->
+<div id="estimates-container" class="main-view">
+  <aside id="estimates-leftbar" class="left-bar" aria-hidden="true">
+      <h3>Filter Estimates</h3>
+      <button class="pdf-nav-btn show-all-est active" onclick="showAllEstimates(this)">📂 Show All</button>
+  </aside>
+
+  <section id="estimates-grid-wrapper" class="right-panel">
+      <div id="est-loader" class="loader"></div>
+      <div id="estimates-list" class="product-grid" style="display:none"></div>
+  </section>
+</div>
+
+
+    
     <!-- Daily Progress view -->
     <div id="daily-progress-container" class="main-view">
       <aside id="inlineLeftBar" class="left-bar" aria-hidden="true">
@@ -1079,6 +1095,8 @@ main {
     // Server URL unchanged
     const SERVER_URL = "https://nttps-backend.onrender.com";
     let allRecords = [];
+let allEstimates = [];
+let estimatesEnabled = localStorage.getItem("showEstimates") === "true";
 
     // DOM refs
     const pdfView = document.getElementById("pdf-view-container");
@@ -1112,6 +1130,9 @@ main {
       try{
         const res = await fetch(`${SERVER_URL}/records`);
         allRecords = await res.json();
+        allEstimates = allRecords.filter(r => (r.recordType || "").toLowerCase() === "estimate");
+       
+
       }catch(e){
         console.error("Failed to load records", e);
         allRecords = []; // fallback
@@ -1121,7 +1142,7 @@ main {
 
     renderRecords(allRecords);
     buildDynamicDivisionFilters();   // ⬅️ ADD HERE
-
+    buildEstimateFilters();
     showMainView('pdf');
 }
     }
@@ -1283,6 +1304,78 @@ container.innerHTML = records.map((r, i) => {
         );
         renderRecords(filtered);
     }
+
+function buildEstimateFilters() {
+    const bar = document.getElementById("estimates-leftbar");
+
+    bar.innerHTML = `
+        <h3>Filter Estimates</h3>
+        <button class="pdf-nav-btn show-all-est active" onclick="showAllEstimates(this)">📂 Show All</button>
+    `;
+
+    const divisions = [...new Set(allEstimates.map(x => x.subDivision).filter(Boolean))];
+
+    divisions.forEach(div => {
+        bar.innerHTML += `
+        <div class="pdf-nav-section">
+            <button class="pdf-nav-header" onclick="togglePdfNav(this)">${div}</button>
+            <div class="pdf-nav-content">
+                <button onclick="filterEstimates('${div}')">All in ${div}</button>
+            </div>
+        </div>
+        `;
+    });
+}
+
+function renderEstimates(data) {
+    const container = document.getElementById("estimates-list");
+    const listEnabled = localStorage.getItem("listView") === "true";
+
+    document.getElementById("est-loader").style.display = "none";
+    container.style.display = "grid";
+
+    if (!data || data.length === 0) {
+        container.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;font-size:18px;color:#777">No Estimate Records Found</div>`;
+        return;
+    }
+
+    container.innerHTML = data.map((r, i) => {
+        const rec = JSON.stringify(r).replace(/'/g, "&apos;");
+        return `
+            <div class="product" onclick='openRecordDetails(event, ${rec})' style="animation-delay:${i*0.05}s">
+                <img src="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg" />
+                <div class="product-info">
+                    <h3>${summarize(r.workName)}</h3>
+                    <p><strong>Est No:</strong> ${r.prNo}</p>
+                    <p><strong>Division:</strong> ${r.division}</p>
+                    <p><strong>Type:</strong> Estimate</p>
+                </div>
+                <button class="view-btn" onclick="handlePDFClick(event, ${rec})">View PDF</button>
+            </div>
+        `;
+    }).join('');
+}
+
+      function showAllEstimates(btn) {
+    document.querySelectorAll("#estimates-leftbar button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    renderEstimates(allEstimates);
+}
+
+function filterEstimates(div) {
+    const filtered = allEstimates.filter(r => r.subDivision === div);
+    renderEstimates(filtered);
+}
+if (estimatesContainer.style.display !== "none") {
+    const filtered = allEstimates.filter(r =>
+        (r.workName || "").toLowerCase().includes(key) ||
+        (r.prNo || "").toLowerCase().includes(key)
+    );
+    renderEstimates(filtered);
+}
+toggleSidebar('mobileFilterBtn','estimates-leftbar');
+
+      
 /* ---------------------
        2️⃣ DAILY PROGRESS SEARCH (DATES)
     ----------------------*/
@@ -1548,16 +1641,23 @@ function toggleSearchBar() {
     document.querySelector("#subNavBar button:nth-child(1)").classList.add("active");
   }
 
+     if (viewName === "estimates" && estimatesEnabled) {
+    estimatesContainer.style.display = "flex";
+    document.querySelector("#subNavBar button:nth-child(2)").classList.add("active");
+    renderEstimates(allEstimates);
+}
+
+
   // show progress
   if (viewName === "progress") {
     progressView.style.display = "flex";
-    document.querySelector("#subNavBar button:nth-child(2)").classList.add("active");
+    document.querySelector("#subNavBar button:nth-child(3)").classList.add("active");
   }
 
   // show cl biodata
   if (viewName === "clbiodata") {
     clbiodata.style.display = "block";
-    document.querySelector("#subNavBar button:nth-child(3)").classList.add("active");
+    document.querySelector("#subNavBar button:nth-child(4)").classList.add("active");
     renderCLBioData();
   }
 };
@@ -1973,6 +2073,7 @@ window.addEventListener("load", () => {
   </script>
 </body>
 </html>
+
 
 
 
