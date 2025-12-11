@@ -1338,32 +1338,31 @@ window.showMainView = function(viewName){
   estimatesContainer.style.display = "none";
 
   document.querySelectorAll(".subnav-btn").forEach(btn => btn.classList.remove("active"));
-
+// Hide all mobile filter buttons first
+  mobileFilterBtn.style.display = "none";
+  mobileEstFilterBtn.style.display = "none";
+  mobileDailyFilterBtn.style.display = "none";
+  
   if (viewName === "pdf") {
       pdfView.style.display = "flex";
       mobileFilterBtn.style.display = "block";
-      mobileDailyFilterBtn.style.display = "none";
       document.querySelector("#subNavBar button:nth-child(1)").classList.add("active");
   }
 
   if (viewName === "estimates") {
       estimatesContainer.style.display = "flex";
-      mobileFilterBtn.style.display = "none";
       mobileEstFilterBtn.style.display = "block";
       document.querySelector("#subNavBar button:nth-child(2)").classList.add("active");
   }
 
   if (viewName === "progress") {
       progressView.style.display = "flex";
-      mobileFilterBtn.style.display = "none";
       mobileDailyFilterBtn.style.display = "block";
       document.querySelector("#subNavBar button:nth-child(3)").classList.add("active");
   }
 
   if (viewName === "clbiodata") {
       clbiodata.style.display = "block";
-      mobileFilterBtn.style.display = "none";
-      mobileDailyFilterBtn.style.display = "none";
       document.querySelector("#subNavBar button:nth-child(4)").classList.add("active");
       renderCLBioData();
   }
@@ -2381,6 +2380,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
