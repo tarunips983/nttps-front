@@ -187,6 +187,13 @@ header h1 { margin: 0; font-size: 22px; }
     gap: 20px;
     width: 100%;
 }
+/* FIX: Prevent header row from turning white on hover */
+.estimate-table thead tr:hover,
+.estimate-table thead th:hover {
+    background: #007bff !important;
+    color: white !important;
+}
+
 @media (max-width: 768px) {
     .nav-right {
         justify-content: flex-end;
@@ -2324,6 +2331,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
