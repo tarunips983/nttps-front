@@ -1083,6 +1083,7 @@ main {
 #estimatesGrid {
     flex: 1;
     padding: 10px;
+    gap: 20px;
 }
 
 </style>
@@ -1153,7 +1154,7 @@ main {
         </div>
     </aside>
 
-    <div id="estimatesGrid" class="products-grid"></div>
+    <div id="estimatesGrid" class="products-grid" style="display: grid; grid-template-columns: repeat(4, minmax(240px, 1fr));"></div>
     <div id="est-loader" class="loader"></div>
 
 </div>  <!-- Only ONE closing div is correct -->
@@ -2331,6 +2332,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
