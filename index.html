@@ -1601,8 +1601,7 @@ container.innerHTML = records.map((r, i) => {
 }
 });
 
-let allEstimates = [];
-    
+let allEstimates = [];    
 async function loadEstimates() {
     try {
 
@@ -2331,12 +2330,15 @@ window.addEventListener("load", () => {
     applyUserSettings();
     loadDailyProgressDates();
     loadRecords();
-    loadEstimates();
+    ;
 });
-
+window.addEventListener("DOMContentLoaded", function () {
+    showMainView("pdf");   // Forces All Indents to open first
+});
   </script>
 </body>
 </html>
+
 
 
 
