@@ -1176,7 +1176,7 @@ main {
       </aside>
 
       <section id="pdf-grid-wrapper" class="right-panel">
-         <h1 style="margin: 10px;text-align: center;">📄 All Stage-V Indents</h1>
+         <h1 id="pdfHeader" style="margin: 10px;text-align: center;">📄 All Stage-V Indents</h1>
         <div id="pdf-loader" class="loader"></div>
         <div class="product-grid" id="product-list" style="display:none">
           
@@ -1349,6 +1349,7 @@ window.showMainView = function(viewName){
   if (viewName === "pdf") {
       pdfView.style.display = "flex";
       mobileFilterBtn.style.display = "block";
+      document.getElementById("pdfHeader").textContent = "📄 All Stage-V Indents";  // RESET every time
       document.querySelector("#subNavBar button:nth-child(1)").classList.add("active");
   }
 
@@ -1438,23 +1439,30 @@ window.showMainView = function(viewName){
       pdfNav.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
     }
     window.filterRecords = function(subDiv, type, btn){
-      clearPdfNavActive();
-      if(btn) btn.classList.add('active');
-      const header = btn?.closest?.('.pdf-nav-section')?.querySelector('.pdf-nav-header');
-      if(header) header.classList.add('active');
-      const filtered = allRecords.filter(r => r.subDivision === subDiv && r.recordType === type);
-      renderRecords(filtered);
-      // if mobile — close sidebar after selecting
-      if(window.innerWidth <= 768){
+
+    document.getElementById("pdfHeader").textContent = `📄 All ${subDiv} Indents`;  // <-- NEW
+
+    clearPdfNavActive();
+    if(btn) btn.classList.add('active');
+
+    const header = btn?.closest?.('.pdf-nav-section')?.querySelector('.pdf-nav-header');
+    if(header) header.classList.add('active');
+
+    const filtered = allRecords.filter(r => r.subDivision === subDiv && r.recordType === type);
+    renderRecords(filtered);
+
+    if(window.innerWidth <= 768){
         pdfNav.classList.remove('active');
-      }
-    };
+    }
+};
+
     window.togglePdfNav = function(headerButton){
       headerButton.classList.toggle('active');
       const content = headerButton.nextElementSibling;
       if(content) content.classList.toggle('active');
     };
     window.showAllPDFs = function(btn){
+      document.getElementById("pdfHeader").textContent = "📄 All Stage-V Indents";
       clearPdfNavActive();
       if(btn) btn.classList.add('active');
       renderRecords(allRecords);
@@ -2383,6 +2391,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
