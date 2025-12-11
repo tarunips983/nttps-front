@@ -1068,7 +1068,7 @@ main {
     visibility: visible !important;
 }
 #estimatesContainer {
-    display: flex;
+    display: none !important;
     flex-direction: row;
     width: 100%;
     height: auto;
@@ -1280,6 +1280,50 @@ main {
     const mobileFilterBtn = document.getElementById("mobileFilterBtn");
     const mobileDailyFilterBtn = document.getElementById("mobileDailyFilterBtn");
 
+    
+window.showMainView = function(viewName){
+
+  pdfView.style.display = "none";
+  progressView.style.display = "none";
+  clbiodata.style.display = "none";
+  estimatesContainer.style.display = "none";
+
+  document.querySelectorAll(".subnav-btn").forEach(btn => btn.classList.remove("active"));
+
+  if (viewName === "pdf") {
+      pdfView.style.display = "flex";
+      mobileFilterBtn.style.display = "block";
+      mobileDailyFilterBtn.style.display = "none";
+      document.querySelector("#subNavBar button:nth-child(1)").classList.add("active");
+  }
+
+  if (viewName === "estimates") {
+      estimatesContainer.style.display = "flex";
+      mobileFilterBtn.style.display = "none";
+      mobileDailyFilterBtn.style.display = "block";
+      document.querySelector("#subNavBar button:nth-child(2)").classList.add("active");
+  }
+
+  if (viewName === "progress") {
+      progressView.style.display = "flex";
+      mobileFilterBtn.style.display = "none";
+      mobileDailyFilterBtn.style.display = "block";
+      document.querySelector("#subNavBar button:nth-child(3)").classList.add("active");
+  }
+
+  if (viewName === "clbiodata") {
+      clbiodata.style.display = "block";
+      mobileFilterBtn.style.display = "none";
+      mobileDailyFilterBtn.style.display = "none";
+      document.querySelector("#subNavBar button:nth-child(4)").classList.add("active");
+      renderCLBioData();
+  }
+};
+
+
+
+
+    
     // Set initial mobile buttons visibility depending on width
     function updateMobileButtons(){
       if(window.innerWidth <= 768){
@@ -1333,64 +1377,7 @@ main {
     const container = document.getElementById("product-list");
     const listEnabled = localStorage.getItem("listView") === "true";
 
-// Show main view
-   window.showMainView = function(viewName){
 
-  // hide all
-  pdfView.style.display = "none";
-  progressView.style.display = "none";
-  clbiodata.style.display = "none";
-  estimatesContainer.style.display = "none";
-
-  // remove active states
-  document.querySelectorAll(".subnav-btn").forEach(btn => btn.classList.remove("active"));
-
-  // ⭐ MOBILE FILTER BUTTON LOGIC ⭐
-  if (viewName === "pdf") {
-      mobileFilterBtn.style.display = "block";
-      mobileDailyFilterBtn.style.display = "none";
-  }
-
-  if (viewName === "estimates") {
-      mobileFilterBtn.style.display = "none";
-      mobileDailyFilterBtn.style.display = "block";
-  }
-     
-  if (viewName === "progress") {
-      mobileFilterBtn.style.display = "none";
-      mobileDailyFilterBtn.style.display = "block";
-  }
-
-  if (viewName === "clbiodata") {
-      mobileFilterBtn.style.display = "none";
-      mobileDailyFilterBtn.style.display = "none";
-  }
-
-  // show PDF
-  if (viewName === "pdf") {
-    pdfView.style.display = "flex";
-    document.querySelector("#subNavBar button:nth-child(1)").classList.add("active");
-  }
-
-    if (viewName === "estimates") {
-      estimatesContainer.style.display = "flex";
-      document.querySelector("#subNavBar button:nth-child(2)").classList.add("active");
-  }
-
-
-  // show progress
-  if (viewName === "progress") {
-    progressView.style.display = "flex";
-    document.querySelector("#subNavBar button:nth-child(3)").classList.add("active");
-  }
-
-  // show cl biodata
-  if (viewName === "clbiodata") {
-    clbiodata.style.display = "block";
-    document.querySelector("#subNavBar button:nth-child(4)").classList.add("active");
-    renderCLBioData();
-  }
-};
 
 
     // filtering & accordion
@@ -2338,6 +2325,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
