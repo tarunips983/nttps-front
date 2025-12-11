@@ -1095,12 +1095,18 @@ main {
   /* Mobile Optimization for Subnav Buttons */
 @media (max-width: 768px) {
   .subnav-btn {
-    padding: 6px 10px;        /* Smaller padding */
-    font-size: 0.75rem;       /* Reduce text size */
-    border-radius: 6px;       /* Slightly rounded */
-    margin: 0 4px;            /* Less gap between buttons */
-    height: 36px;             /* Smaller height */
-    min-width: 70px;          /* Keep readable size */
+    padding: 6px 8px;
+    font-size: 0.78rem;       /* Better readability */
+    line-height: 1.1;         /* Fix vertical spacing */
+    border-radius: 6px;
+    margin: 0 4px;
+    height: auto;             /* Let padding decide height */
+    display: flex;
+    align-items: center;      /* Center text vertically */
+    justify-content: center;  /* Center text horizontally */
+    min-height: 34px;
+    min-width: 72px;
+    white-space: nowrap;      /* Prevent broken words */
   }
 
   .subnav-btn img,
@@ -2359,6 +2365,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
