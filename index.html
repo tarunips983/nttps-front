@@ -53,58 +53,6 @@ header h1 { margin: 0; font-size: 22px; }
       opacity: 0 !important;
   }
 
-.pdf-nav-section {
-    margin-bottom: 10px;
-}
-
-.pdf-nav-header {
-    background: #ff9900;
-    padding: 10px 12px;
-    border: none;
-    width: 100%;
-    color: white;
-    font-weight: bold;
-    border-radius: 6px;
-    text-align: left;
-    cursor: pointer;
-    transition: 0.25s;
-}
-
-.pdf-nav-header.active {
-    background: #28a745 !important;
-}
-
-.pdf-nav-content {
-    max-height: 0;
-    overflow: hidden;
-    opacity: 0;
-    transform: translateY(-8px);
-    padding-left: 15px;
-    transition:
-        max-height 0.45s cubic-bezier(0.25, 0.8, 0.25, 1),
-        opacity 0.35s ease-in-out,
-        transform 0.35s ease-out;
-}
-
-.pdf-nav-content.active {
-    max-height: 600px;
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.pdf-nav-content button {
-    display: block;
-    width: 100%;
-    padding: 10px 12px;
-    margin-top: 6px;
-    border: none;
-    border-radius: 6px;
-    background: #007bff;
-    color: white;
-    cursor: pointer;
-    font-weight: 600;
-}
-
 
 }
 #estimates-leftbar h3 {
@@ -1202,8 +1150,11 @@ main {
 </div>
 
   <!-- Mobile toggles (visible on mobile only by CSS) -->
+  
   <button id="mobileFilterBtn" style="display:none;">📂 Filters</button>
-  <button id="mobileDailyFilterBtn" style="display:none;">📂 Daily Filters</button>
+<button id="mobileEstFilterBtn" style="display:none;">📘 Estimate Filters</button>
+<button id="mobileDailyFilterBtn" style="display:none;">📂 Daily Filters</button>
+
 
   <main>
     <!-- PDF View -->
@@ -1366,6 +1317,7 @@ main {
     const container = document.getElementById("estimatesGrid");
     const mobileFilterBtn = document.getElementById("mobileFilterBtn");
     const mobileDailyFilterBtn = document.getElementById("mobileDailyFilterBtn");
+    const mobileEstFilterBtn = document.getElementById("mobileEstFilterBtn");
 
     
 window.showMainView = function(viewName){
@@ -1387,7 +1339,7 @@ window.showMainView = function(viewName){
   if (viewName === "estimates") {
       estimatesContainer.style.display = "flex";
       mobileFilterBtn.style.display = "none";
-      mobileDailyFilterBtn.style.display = "block";
+      mobileEstFilterBtn.style.display = "block";
       document.querySelector("#subNavBar button:nth-child(2)").classList.add("active");
   }
 
@@ -1415,9 +1367,11 @@ window.showMainView = function(viewName){
     function updateMobileButtons(){
       if(window.innerWidth <= 768){
         mobileFilterBtn.style.display = "block";
+        mobileEstFilterBtn.style.display = "block";
         mobileDailyFilterBtn.style.display = "block";
       } else {
         mobileFilterBtn.style.display = "none";
+        mobileEstFilterBtn.style.display = "none";
         mobileDailyFilterBtn.style.display = "none";
         // ensure sidebars visible on desktop
         pdfNav.classList.remove("active");
@@ -1817,7 +1771,7 @@ function filterEstimates(div) {
 
 
 
-toggleSidebar('mobileFilterBtn','estimates-leftbar');
+
 
       
 
@@ -2316,6 +2270,7 @@ async function renderCLBioData() {
     }
     document.addEventListener('DOMContentLoaded', ()=>{
       toggleSidebar('mobileFilterBtn','pdf-nav-bar');
+      toggleSidebar('mobileEstFilterBtn','estimates-leftbar'); // Estimates
       toggleSidebar('mobileDailyFilterBtn','inlineLeftBar');
     });
     
@@ -2416,6 +2371,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
