@@ -1332,12 +1332,14 @@ main {
     
 window.showMainView = function(viewName){
 
+    document.querySelectorAll(".subnav-btn").forEach(btn => btn.classList.remove("active"));
+  
   pdfView.style.display = "none";
   progressView.style.display = "none";
   clbiodata.style.display = "none";
   estimatesContainer.style.display = "none";
 
-  document.querySelectorAll(".subnav-btn").forEach(btn => btn.classList.remove("active"));
+
 // Hide all mobile filter buttons first
   mobileFilterBtn.style.display = "none";
   mobileEstFilterBtn.style.display = "none";
@@ -2380,6 +2382,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
