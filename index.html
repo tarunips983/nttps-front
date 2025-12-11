@@ -1651,23 +1651,27 @@ function buildEstimateFilters() {
     const bar = document.getElementById("estimates-leftbar");
 
     bar.innerHTML = `
-    <h3>Filter Estimates</h3>
-    <button class="show-all active" onclick="showAllEstimates(this)">📂 Show All</button>
-`;
+        <h3>Filter Estimates</h3>
+        <button class="pdf-nav-btn show-all active" onclick="showAllEstimates(this)">📂 Show All</button>
+    `;
 
     const divisions = [...new Set(allEstimates.map(x => x.division).filter(Boolean))];
 
     divisions.forEach(div => {
         bar.innerHTML += `
         <div class="pdf-nav-section">
-            <button class="pdf-nav-header" onclick="togglePdfNav(this)">${div}</button>
-<div class="pdf-nav-content">
-    <button onclick="filterEstimates('${div}')">All in ${div}</button>
-</div>
+            <button class="pdf-nav-header" onclick="togglePdfNav(this)">
+                ${div}
+            </button>
+
+            <div class="pdf-nav-content">
+                <button onclick="filterEstimates('${div}')">All in ${div}</button>
+            </div>
         </div>
         `;
     });
 }
+
 
 
 function renderEstimates(data) {
@@ -2361,6 +2365,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
