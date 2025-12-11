@@ -1110,7 +1110,17 @@ main {
     height: 16px;            /* Reduce icon size if present */
   }
 }
-  
+  @media (max-width: 768px) {
+    #mobileFilterBtn, #mobileEstFilterBtn, #mobileDailyFilterBtn {
+        display: none;
+        width: 95%;
+        margin: 10px auto;
+        padding: 12px;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: bold;
+    }
+}
 </style>
 
 </head>
@@ -2371,6 +2381,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
