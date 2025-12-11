@@ -1194,7 +1194,7 @@ main {
         </div>
     </aside>
 <section id="pdf-grid-wrapper" class="right-panel">
-  <h1 style="margin: 10px;text-align: center;">📄 All Stage-V Estimates</h1>
+  <h1 id="estHeader" style="margin: 10px; text-align: center;">📘 All Stage-V Estimates</h1>
   <div id="est-loader" class="loader"></div>
     <div id="estimatesGrid" class="products-grid" style="display: grid; grid-template-columns: repeat(4, minmax(240px, 1fr));">
     </div>
@@ -1356,6 +1356,7 @@ window.showMainView = function(viewName){
   if (viewName === "estimates") {
       estimatesContainer.style.display = "flex";
       mobileEstFilterBtn.style.display = "block";
+      document.getElementById("estHeader").textContent = "📘 All Stage-V Estimates";
       document.querySelector("#subNavBar button:nth-child(2)").classList.add("active");
   }
 
@@ -1776,6 +1777,7 @@ function renderEstimates(data) {
 
 /* ---------------- SHOW ALL ESTIMATES ---------------- */
 function showAllEstimates(btn) {
+    document.getElementById("estHeader").textContent = "📘 All Stage-V Estimates";
     document.querySelectorAll("#estimates-leftbar button").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     renderEstimates(allEstimates);
@@ -1783,6 +1785,7 @@ function showAllEstimates(btn) {
 
 /* ---------------- FILTER ESTIMATES ---------------- */
 function filterEstimates(div) {
+    document.getElementById("estHeader").textContent = `📘 All ${div} Estimates`;
     const filtered = allEstimates.filter(r => r.division === div);
     renderEstimates(filtered);
 }
@@ -2391,6 +2394,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
