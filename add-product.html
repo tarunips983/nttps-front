@@ -1988,6 +1988,7 @@ function renderEstimateList() {
             (r.prNo || "").toLowerCase().includes(search) ||
             (r.division || "").toLowerCase().includes(search) ||
             (r.contractor || "").toLowerCase().includes(search) ||
+            (r.poNo || "").toLowerCase().includes(search) ||
             (r.description || "").toLowerCase().includes(search);
 
         const matchDiv = divFilter ? r.division === divFilter : true;
@@ -3885,6 +3886,7 @@ async function loadEstimateList() {
     </script></body>
 
 </html>
+
 
 
 
