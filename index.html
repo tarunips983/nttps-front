@@ -1127,6 +1127,31 @@ main {
         font-weight: bold;
     }
 }
+    .floating-btn {
+    position: fixed;
+    right: 16px;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: #232f3e;
+    color: white;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    display: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    z-index: 2000;
+    transition: opacity 0.3s ease, transform 0.25s ease;
+}
+
+#goTopBtn { bottom: 80px; }
+#goBottomBtn { bottom: 20px; }
+
+.floating-btn:hover {
+    transform: scale(1.12);
+    background: #ff9900;
+}
+
 </style>
 
 </head>
@@ -1304,10 +1329,14 @@ main {
 
   </div>
 </div>
+<button id="goBottomBtn" class="floating-btn">⬇️</button>
+<button id="goTopBtn" class="floating-btn">⬆️</button>
 
   <footer>
     <p>🔗 Contact | 🛠️ Help | 🔐 Privacy</p>
     <p>© 2025 MyWeb. Built by Tarun</p>
+    <p id="visitCounter" style="margin-top:8px; font-size:14px; opacity:0.8;"></p>
+
   </footer>
 
 
@@ -2242,6 +2271,37 @@ function toggleSearchBar() {
 // REAL CL BIO DATA FETCH + CARD RENDER
 // =========================================
 
+const goTopBtn = document.getElementById("goTopBtn");
+const goBottomBtn = document.getElementById("goBottomBtn");
+
+window.addEventListener("scroll", () => {
+
+    const scrollY = window.scrollY;
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+
+    // Show Back-to-top when user scrolls down 250px
+    goTopBtn.style.display = scrollY > 250 ? "block" : "none";
+
+    // Show "Go Bottom" only if not near the bottom
+    goBottomBtn.style.display = scrollY < maxScroll - 250 ? "block" : "none";
+});
+
+// Scroll to top
+goTopBtn.onclick = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+// Scroll to bottom
+goBottomBtn.onclick = () => {
+    window.scrollTo({ 
+        top: document.documentElement.scrollHeight, 
+        behavior: "smooth" 
+    });
+};
+
+
+
+    
 async function renderCLBioData() {
   const container = document.getElementById("clBioGrid");
   container.innerHTML = "<p>Loading CL data...</p>";
@@ -2456,6 +2516,19 @@ window.addEventListener('keydown', (e) => {
         document.querySelectorAll('.left-bar.active').forEach(el => el.classList.remove('active'));
     }
 });
+// Visit Counter
+function updateVisitCounter() {
+    let count = localStorage.getItem("siteVisits");
+
+    if (!count) count = 0;
+    count = parseInt(count) + 1;
+
+    localStorage.setItem("siteVisits", count);
+
+    document.getElementById("visitCounter").textContent = `Visits: ${count}`;
+}
+
+updateVisitCounter();
 
 // PAGE LOAD INIT
 window.addEventListener("load", () => {
@@ -2470,6 +2543,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
