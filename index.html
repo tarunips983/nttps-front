@@ -513,6 +513,10 @@ main {
     border-bottom:2px solid #ccc;
     padding-bottom:10px;
 }
+.left-bar {
+    transition: transform 0.35s ease, opacity 0.25s ease-in-out !important;
+    will-change: transform, opacity;
+}
 
 /* Right panel */
 .right-panel {
@@ -1193,7 +1197,7 @@ main {
             <h2>Estimate Records</h2>
         </div>
     </aside>
-<section id="pdf-grid-wrapper" class="right-panel">
+<section id="estimates-right-panel" class="right-panel">
   <h1 id="estHeader" style="margin: 10px; text-align: center;">📘 All Stage-V Estimates</h1>
   <div id="est-loader" class="loader"></div>
     <div id="estimatesGrid" class="products-grid" style="display: grid; grid-template-columns: repeat(4, minmax(240px, 1fr));">
@@ -1329,6 +1333,8 @@ main {
     const mobileFilterBtn = document.getElementById("mobileFilterBtn");
     const mobileDailyFilterBtn = document.getElementById("mobileDailyFilterBtn");
     const mobileEstFilterBtn = document.getElementById("mobileEstFilterBtn");
+    const estRightPanel = document.getElementById("estimates-right-panel");
+
 
     
 window.showMainView = function(viewName){
@@ -1354,6 +1360,13 @@ window.showMainView = function(viewName){
       document.querySelector("#subNavBar button:nth-child(1)").classList.add("active");
   }
 
+// Always close modal when switching views
+if (productModal.classList.contains("active")) {
+    closeModal();
+}
+
+
+  
   if (viewName === "estimates") {
       estimatesContainer.style.display = "flex";
       mobileEstFilterBtn.style.display = "block";
@@ -1440,9 +1453,14 @@ function collapseAllDropdowns(sidebarId) {
       if(clean.length > 100) clean = clean.substring(0,100) + "...";
       return clean;
     }
-
+    
+let lastRenderedCount = null;
     // render records
     function renderRecords(records) {
+
+      if (records.length === lastRenderedCount) return;
+    lastRenderedCount = records.length;
+      
     const container = document.getElementById("product-list");
     const listEnabled = localStorage.getItem("listView") === "true";
 
@@ -1471,7 +1489,9 @@ function collapseAllDropdowns(sidebarId) {
     }
 };
 
-    window.togglePdfNav = function(headerButton) {
+    window.togglePdfNav = function(headerButton, event) {
+    if (event && event.target !== headerButton) return; // prevent accidental opens
+
 
     const sidebar = headerButton.closest(".left-bar");
 
@@ -1663,13 +1683,15 @@ container.innerHTML = records.map((r, i) => {
     /* ---------------------
        3️⃣ CL BIO SEARCH
     ----------------------*/
-    if (clbiodata.style.display !== "none") {
-        const cards = document.querySelectorAll("#clBioGrid .cl-card");
-        cards.forEach(card => {
-            const text = card.textContent.toLowerCase();
-            card.style.display = text.includes(key) ? "block" : "none";
-        });
-    }
+  if (clbiodata.style.display !== "none") {
+    const cards = document.querySelectorAll("#clBioGrid .cl-card");
+
+    cards.forEach(card => {
+        const info = card.innerText.toLowerCase();  // better than textContent
+        card.style.display = info.includes(key) ? "block" : "none";
+    });
+}
+
       if (estimatesContainer.style.display !== "none") {
     
 
@@ -1720,7 +1742,7 @@ function buildEstimateFilters() {
     divisions.forEach(div => {
         bar.innerHTML += `
         <div class="pdf-nav-section">
-            <button class="pdf-nav-header" onclick="togglePdfNav(this)">
+            <button class="pdf-nav-header" onclick="togglePdfNav(this, event)">
                 ${div}
             </button>
 
@@ -1824,10 +1846,16 @@ function showAllEstimates(btn) {
 
 /* ---------------- FILTER ESTIMATES ---------------- */
 function filterEstimates(div) {
-    document.getElementById("estHeader").textContent = `📘 All ${div} Estimates`;
     const filtered = allEstimates.filter(r => r.division === div);
+
+    // Set header FIRST before rendering happens
+    setTimeout(() => {
+        document.getElementById("estHeader").textContent = `📘 All ${div} Estimates`;
+    }, 10);
+
     renderEstimates(filtered);
 }
+
 
 
 
@@ -2024,7 +2052,7 @@ function buildDynamicDivisionFilters() {
         section.classList.add("pdf-nav-section");
 
         section.innerHTML = `
-            <button class="pdf-nav-header" onclick="togglePdfNav(this)">${div}</button>
+            <button class="pdf-nav-header" onclick="togglePdfNav(this, event)">${div}</button>
 
             <div class="pdf-nav-content">
                 <button onclick="filterRecords('${div}', 'PR', this)">PRs</button>
@@ -2411,8 +2439,14 @@ document.addEventListener("click", (e) => {
     }
 });
 function scrollToTop() {
-    window.scrollTo({ top: 0, behavior: "instant" });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+
+    document.querySelectorAll('.right-panel').forEach(panel => {
+        panel.scrollTo({ top: 0 });
+    });
 }
+
 
 // ESC KEY → close modal + sidebars
 window.addEventListener('keydown', (e) => {
@@ -2435,6 +2469,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
