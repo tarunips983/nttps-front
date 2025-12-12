@@ -1378,7 +1378,17 @@ window.showMainView = function(viewName){
 };
 
 
+function collapseAllDropdowns(sidebarId) {
+    const sidebar = document.getElementById(sidebarId);
+    if (!sidebar) return;
 
+    // Collapse every section
+    sidebar.querySelectorAll(".pdf-nav-header").forEach(h => h.classList.remove("active"));
+    sidebar.querySelectorAll(".pdf-nav-content").forEach(c => c.classList.remove("active"));
+
+    // Remove button active states
+    sidebar.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+}
 
     
     // Set initial mobile buttons visibility depending on width
@@ -1461,18 +1471,38 @@ window.showMainView = function(viewName){
     }
 };
 
-    window.togglePdfNav = function(headerButton){
-      headerButton.classList.toggle('active');
-      const content = headerButton.nextElementSibling;
-      if(content) content.classList.toggle('active');
-    };
-    window.showAllPDFs = function(btn){
-      document.getElementById("pdfHeader").textContent = "📄 All Stage-V Indents";
-      clearPdfNavActive();
-      if(btn) btn.classList.add('active');
-      renderRecords(allRecords);
-      if(window.innerWidth <= 768) pdfNav.classList.remove('active');
-    };
+    window.togglePdfNav = function(headerButton) {
+
+    const sidebar = headerButton.closest(".left-bar");
+
+    // Close all
+    sidebar.querySelectorAll(".pdf-nav-header").forEach(h => {
+        if (h !== headerButton) h.classList.remove("active");
+    });
+    sidebar.querySelectorAll(".pdf-nav-content").forEach(c => {
+        if (c !== headerButton.nextElementSibling) c.classList.remove("active");
+    });
+
+    // Toggle only this section
+    headerButton.classList.toggle("active");
+    const content = headerButton.nextElementSibling;
+    if (content) content.classList.toggle("active");
+};
+
+    window.showAllPDFs = function (btn) {
+    document.getElementById("pdfHeader").textContent = "📄 All Stage-V Indents";
+
+    collapseAllDropdowns("pdf-nav-bar");   // NEW
+
+    if (btn) btn.classList.add("active");
+
+    renderRecords(allRecords);
+
+    if (window.innerWidth <= 768) {
+        pdfNav.classList.remove("active");
+    }
+};
+
 
 
       
@@ -1781,11 +1811,16 @@ function renderEstimates(data) {
 
 /* ---------------- SHOW ALL ESTIMATES ---------------- */
 function showAllEstimates(btn) {
+
     document.getElementById("estHeader").textContent = "📘 All Stage-V Estimates";
-    document.querySelectorAll("#estimates-leftbar button").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
+
+    collapseAllDropdowns("estimates-leftbar");   // NEW
+
+    if (btn) btn.classList.add("active");
+
     renderEstimates(allEstimates);
 }
+
 
 /* ---------------- FILTER ESTIMATES ---------------- */
 function filterEstimates(div) {
@@ -2400,6 +2435,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
