@@ -2056,10 +2056,32 @@ function estimateNextPage() {
 /* ============================================
    6️⃣ EDIT EXISTING RECORD
 ============================================ */
-function editEstimate(record) {
-    addEstimateRow(record);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+let editingEstimateId = null;
+
+function editEstimate(r) {
+
+    editingEstimateId = r.id; // store row ID
+
+    document.getElementById("description").value = r.description || "";
+    document.getElementById("division").value = r.division || "";
+    document.getElementById("prNo").value = r.prNo || "";
+    document.getElementById("estimateNo").value = r.estimateNo || "";
+    document.getElementById("tspec").value = r.tspec || "";
+    document.getElementById("contractor").value = r.contractor || "";
+    document.getElementById("poNo").value = r.poNo || "";
+    document.getElementById("grossAmount").value = r.grossAmount || "";
+    document.getElementById("netAmount").value = r.netAmount || "";
+    document.getElementById("loaNo").value = r.loaNo || "";
+    document.getElementById("billingDoc").value = r.billingDoc || "";
+    document.getElementById("mbookNo").value = r.mbookNo || "";
+    document.getElementById("regPg").value = r.regPg || "";
+    document.getElementById("backCharging").value = r.backCharging || "";
+    document.getElementById("dates").value = r.dates || "";
+    document.getElementById("loa2").value = r.loa2 || "";
+
+    window.scrollTo(0, 0);
 }
+
 
 /* ============================================
    7️⃣ MOVE TO TRASH
@@ -3886,6 +3908,7 @@ async function loadEstimateList() {
     </script></body>
 
 </html>
+
 
 
 
