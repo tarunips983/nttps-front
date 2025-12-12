@@ -1349,6 +1349,7 @@ window.showMainView = function(viewName){
   if (viewName === "pdf") {
       pdfView.style.display = "flex";
       mobileFilterBtn.style.display = "block";
+       scrollToTop();
       document.getElementById("pdfHeader").textContent = "📄 All Stage-V Indents";  // RESET every time
       document.querySelector("#subNavBar button:nth-child(1)").classList.add("active");
   }
@@ -1356,6 +1357,7 @@ window.showMainView = function(viewName){
   if (viewName === "estimates") {
       estimatesContainer.style.display = "flex";
       mobileEstFilterBtn.style.display = "block";
+    scrollToTop();
       document.getElementById("estHeader").textContent = "📘 All Stage-V Estimates";
       document.querySelector("#subNavBar button:nth-child(2)").classList.add("active");
   }
@@ -1363,11 +1365,13 @@ window.showMainView = function(viewName){
   if (viewName === "progress") {
       progressView.style.display = "flex";
       mobileDailyFilterBtn.style.display = "block";
+    scrollToTop();
       document.querySelector("#subNavBar button:nth-child(3)").classList.add("active");
   }
 
   if (viewName === "clbiodata") {
       clbiodata.style.display = "block";
+    scrollToTop();
       document.querySelector("#subNavBar button:nth-child(4)").classList.add("active");
       renderCLBioData();
   }
@@ -2372,6 +2376,9 @@ document.addEventListener("click", (e) => {
         row.classList.add("row-clicked");
     }
 });
+function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: "instant" });
+}
 
 // ESC KEY → close modal + sidebars
 window.addEventListener('keydown', (e) => {
@@ -2394,75 +2401,6 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
