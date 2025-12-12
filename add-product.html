@@ -1983,17 +1983,20 @@ function renderEstimateList() {
     const search = document.getElementById("estimateSearchInput").value.toLowerCase();
     const divFilter = document.getElementById("filterEstimateDivision").value;
 
-    let filtered = estimateData.filter(r =>
-        (r.prNo || "").toLowerCase().includes(search) ||
-        (r.division || "").toLowerCase().includes(search) ||
-        (r.contractor || "").toLowerCase().includes(search) ||
-        (r.description || "").toLowerCase().includes(search);
+    let filtered = estimateData.filter(r => {
+        const matchText =
+            (r.prNo || "").toLowerCase().includes(search) ||
+            (r.division || "").toLowerCase().includes(search) ||
+            (r.contractor || "").toLowerCase().includes(search) ||
+            (r.description || "").toLowerCase().includes(search);
 
-             const matchDiv = divFilter ? r.division === divFilter : true;
+        const matchDiv = divFilter ? r.division === divFilter : true;
 
         return matchText && matchDiv;
     });
-    
+
+    // Same pagination + rendering...
+ 
 
     const start = (estimatePage - 1) * estimateRowsPerPage;
     const rows = filtered.slice(start, start + estimateRowsPerPage);
@@ -3882,6 +3885,7 @@ async function loadEstimateList() {
     </script></body>
 
 </html>
+
 
 
 
