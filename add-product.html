@@ -1883,14 +1883,30 @@ async function saveEstimateRow(btn) {
     const data = {};
     fields.forEach(td => data[td.dataset.col] = td.innerText.trim());
 
-    await fetch(`${API}/estimates`, {
-        method: "POST",
+    let url = `${API}/estimates`;
+    let method = "POST";
+
+    // IF EDITING → update instead of create
+    if (editingEstimateId) {
+        url = `${API}/estimates/${editingEstimateId}`;
+        method = "PUT";
+        data.id = editingEstimateId; // include ID
+    }
+
+    const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
     });
 
-    showToast("Estimate saved");
-    loadEstimateList();
+    if (res.ok) {
+        showToast(editingEstimateId ? "Estimate updated" : "Estimate saved");
+        editingEstimateId = null; // clear editing mode
+        loadEstimateList(); // refresh table
+        window.scrollTo(0, 0);
+    } else {
+        showToast("Failed to save", true);
+    }
 }
 
 /* ============================================
@@ -3908,6 +3924,7 @@ async function loadEstimateList() {
     </script></body>
 
 </html>
+
 
 
 
