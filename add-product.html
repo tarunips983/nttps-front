@@ -1981,13 +1981,19 @@ function updateEstimateSortArrows() {
 ============================================ */
 function renderEstimateList() {
     const search = document.getElementById("estimateSearchInput").value.toLowerCase();
+    const divFilter = document.getElementById("filterEstimateDivision").value;
 
     let filtered = estimateData.filter(r =>
         (r.prNo || "").toLowerCase().includes(search) ||
         (r.division || "").toLowerCase().includes(search) ||
         (r.contractor || "").toLowerCase().includes(search) ||
-        (r.description || "").toLowerCase().includes(search)
-    );
+        (r.description || "").toLowerCase().includes(search);
+
+             const matchDiv = divFilter ? r.division === divFilter : true;
+
+        return matchText && matchDiv;
+    });
+    
 
     const start = (estimatePage - 1) * estimateRowsPerPage;
     const rows = filtered.slice(start, start + estimateRowsPerPage);
@@ -2833,6 +2839,10 @@ function clearPdfRow(btn) {
     delete tr.dataset.recordId;
     delete tr.dataset.pdfPath;
 }
+document.getElementById("estimateSearchInput").addEventListener("input", () => {
+    estimatePage = 1;
+    renderEstimateList();
+});
 
 function clearPdfGrid() {
     showConfirm('Remove all completely empty rows and reset S.No?', () => {
@@ -3835,6 +3845,25 @@ function deleteSelected() {
             updateRowNumbers();
             draggedRow = null;
         });
+function populateEstimateFilters() {
+    const divisions = [...new Set(estimateData.map(r => r.division).filter(Boolean))].sort();
+
+    const select = document.getElementById("filterEstimateDivision");
+    select.innerHTML = `<option value="">All Divisions</option>` +
+        divisions.map(d => `<option value="${d}">${d}</option>`).join("");
+}
+
+async function loadEstimateList() {
+    const url = trashMode ? `${API}/estimates/trash` : `${API}/estimates`;
+    const res = await fetch(url);
+    estimateData = await res.json();
+
+    estimateData.sort((a, b) => a.id - b.id);
+
+    populateEstimateFilters();  // <-- IMPORTANT
+
+    renderEstimateList();
+}
 
 
         /* =================================================================== */
@@ -3853,6 +3882,7 @@ function deleteSelected() {
     </script></body>
 
 </html>
+
 
 
 
