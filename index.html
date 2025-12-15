@@ -151,6 +151,15 @@ header h1 { margin: 0; font-size: 22px; }
     padding: 20px;
     box-sizing: border-box;
 }
+/* Record Details Modal */
+.details-modal {
+    z-index: 9000;
+}
+
+/* Password Modal — MUST be higher */
+#passwordModal {
+    z-index: 10000 !important;
+}
 
 .product-grid {
     display:grid;
@@ -1392,7 +1401,10 @@ main {
 
     <div style="display:flex;justify-content:space-between;margin-top:18px">
       <button class="view-btn" onclick="printRecordDetails()">🖨️ Print</button>
-      <a class="view-btn" onclick="openPasswordModal()">➕ Add Record</a>
+      <button class="view-btn" onclick="openAddRecordFromDetails()">
+    ➕ Add Record
+</button>
+
     </div>
   </div>
 </div>
@@ -2162,14 +2174,15 @@ function buildDynamicDivisionFilters() {
 }
 
 function openAddRecordFromDetails() {
-    // Close record details modal
+    // 1️⃣ Close record details modal
     document.getElementById("recordDetailsModal").classList.remove("active");
 
-    // Small delay so animation finishes cleanly
+    // 2️⃣ Small delay for smooth transition
     setTimeout(() => {
         openPasswordModal();
     }, 150);
 }
+
 
     
 function toggleSearchBar() {
@@ -2619,6 +2632,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
