@@ -2009,11 +2009,11 @@ window.showDetails = function (record) {
 
         if (label === "PDF File" && record.pdfPath) {
             display = `
-                <a href="javascript:void(0)"
-                   style="color:#007bff;font-weight:bold"
-                   onclick='openPdfFromDetails(${JSON.stringify(record).replace(/'/g, "&apos;")})'
-                   View PDF
-                </a>`;
+    <a href="javascript:void(0)"
+       style="color:#007bff;font-weight:bold"
+       onclick='openPdfFromDetails(${JSON.stringify(record).replace(/'/g, "&apos;")})'>
+       View PDF
+    </a>`;
         }
 
         grid.innerHTML += `
@@ -2642,6 +2642,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
