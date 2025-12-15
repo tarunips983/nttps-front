@@ -1965,7 +1965,7 @@ window.openRecordDetails = function(event, record) {
 
     showDetails(record);  // ← Already created modal function
 };
-window.showDetails = function(record) {
+window.showDetails = function (record) {
 
     const grid = document.getElementById("detailsGrid");
     grid.innerHTML = "";
@@ -1991,7 +1991,7 @@ window.showDetails = function(record) {
             display = `
                 <a href="javascript:void(0)"
                    style="color:#007bff;font-weight:bold"
-                   onclick='showPDF(${JSON.stringify(record).replace(/'/g,"&apos;")})'>
+                   onclick='showPDF(${JSON.stringify(record).replace(/'/g, "&apos;")})'>
                    View PDF
                 </a>`;
         }
@@ -2004,12 +2004,11 @@ window.showDetails = function(record) {
         `;
     });
 
+    // show modal (ONLY ONCE, INSIDE FUNCTION)
     document.getElementById("recordDetailsModal").classList.add("active");
 };
 
-    // show modal
-    document.getElementById("recordDetailsModal").classList.add("active");
-};
+
 function closeRecordDetails() {
     document.getElementById("recordDetailsModal").classList.remove("active");
 }
@@ -2604,6 +2603,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
