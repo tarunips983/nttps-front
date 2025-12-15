@@ -1378,18 +1378,7 @@ main {
     </div>
   </div>
 
-  <!-- Password modal (unchanged) -->
-  <div id="passwordModal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:1400">
-    <div id="passwordBox" style="background:#fff;padding:20px;border-radius:12px;min-width:280px;max-width:360px">
-      <h3 style="margin-top: 0px;margin-bottom: 25px;text-align: center;">🔐 Enter Admin Credentials</h3>
-      <input id="usernameInput" placeholder="Username" style="width:100%;padding:8px;margin-bottom: 15px;border-radius: 10px;">
-      <input id="passwordInput" type="password" placeholder="Password" style="width:100%;padding:8px;margin-bottom: 15px;border-radius: 10px;">
-      <div style="display:flex;gap:8px;justify-content:flex-end">
-        <button onclick="verifyPassword()" style="padding:8px 12px;border:0;border-radius:6px;color: #ffffff;background-color: #378cdd;cursor: pointer;">Submit</button>
-        <button onclick="closePasswordModal()" style="background:#dc3545;color:#fff;padding:8px 12px;border:0;border-radius:6px;cursor: pointer;">Cancel</button>
-      </div>
-    </div>
-  </div>
+  
 <!-- ======================================================
      FULL RECORD DETAILS MODAL (AUTO FILLS ALL DB FIELDS)
 ====================================================== -->
@@ -1408,7 +1397,18 @@ main {
   </div>
 </div>
 
-
+<!-- Password modal (unchanged) -->
+  <div id="passwordModal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:1400">
+    <div id="passwordBox" style="background:#fff;padding:20px;border-radius:12px;min-width:280px;max-width:360px">
+      <h3 style="margin-top: 0px;margin-bottom: 25px;text-align: center;">🔐 Enter Admin Credentials</h3>
+      <input id="usernameInput" placeholder="Username" style="width:100%;padding:8px;margin-bottom: 15px;border-radius: 10px;">
+      <input id="passwordInput" type="password" placeholder="Password" style="width:100%;padding:8px;margin-bottom: 15px;border-radius: 10px;">
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button onclick="verifyPassword()" style="padding:8px 12px;border:0;border-radius:6px;color: #ffffff;background-color: #378cdd;cursor: pointer;">Submit</button>
+        <button onclick="closePasswordModal()" style="background:#dc3545;color:#fff;padding:8px 12px;border:0;border-radius:6px;cursor: pointer;">Cancel</button>
+      </div>
+    </div>
+  </div>
 <button id="goBottomBtn" class="floating-btn">⬇️</button>
 <button id="goTopBtn" class="floating-btn">⬆️</button>
 
@@ -2619,6 +2619,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
