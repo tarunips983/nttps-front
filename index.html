@@ -38,6 +38,9 @@ header h1 { margin: 0; font-size: 22px; }
     border: none;
     width: 360px;
 }
+#passwordModal {
+    z-index: 10000; /* higher than recordDetailsModal */
+}
 
 .nav-right a {
     color:white;
@@ -469,6 +472,9 @@ header.dark-mode input::placeholder { color:#bbb !important; }
     z-index:999;
 }
 #scrollTopBtn:hover { transform:scale(1.15); background:#ff9900; }
+#passwordModal {
+    backdrop-filter: blur(4px);
+}
 
 footer {
     background:#232f3e;
@@ -1397,7 +1403,7 @@ main {
 
     <div style="display:flex;justify-content:space-between;margin-top:18px">
       <button class="view-btn" onclick="printRecordDetails()">🖨️ Print</button>
-      <a class="view-btn" href="javascript:void(0)" onclick="openPasswordModal()">➕ Add Record</a>
+      <a class="view-btn" onclick="openPasswordModal()">➕ Add Record</a>
     </div>
   </div>
 </div>
@@ -2155,6 +2161,15 @@ function buildDynamicDivisionFilters() {
     });
 }
 
+function openAddRecordFromDetails() {
+    // Close record details modal
+    document.getElementById("recordDetailsModal").classList.remove("active");
+
+    // Small delay so animation finishes cleanly
+    setTimeout(() => {
+        openPasswordModal();
+    }, 150);
+}
 
     
 function toggleSearchBar() {
@@ -2604,6 +2619,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
