@@ -969,70 +969,155 @@ main {
     transform: rotate(360deg);
   }
 }
+/* ================================
+   RECORD DETAILS MODAL – CLEAN UI
+================================ */
+
+/* Overlay */
 .details-modal {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.55);
+    background: rgba(0, 0, 0, 0.55);
     display: none;
     justify-content: center;
     align-items: center;
     z-index: 9000;
 }
 
-.details-modal.active { display: flex; }
+.details-modal.active {
+    display: flex;
+}
 
+/* Modal box */
 .details-box {
-    background: white;
+    background: #ffffff;
     width: 90%;
-    max-width: 700px;
-    padding: 25px;
+    max-width: 720px;
     border-radius: 14px;
-    position: relative;
-    animation: fadeInScale 0.35s ease;
+    padding: 22px 26px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+    animation: scaleFadeIn 0.35s ease;
     max-height: 90vh;
     overflow-y: auto;
 }
 
+/* Title */
+.details-title {
+    margin: 0 0 18px;
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    color: #232f3e;
+    border-bottom: 2px solid #e5e5e5;
+    padding-bottom: 10px;
+}
+
+/* Grid layout */
 .details-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 14px 20px;
+    gap: 14px 22px;
 }
 
-.details-grid div p {
-    margin-top: 4px;
-    padding: 8px;
-    background: #f4f7fa;
+/* Label */
+.details-grid b {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* Value box */
+.details-grid p {
+    margin: 0;
+    padding: 9px 12px;
+    background: #f4f7fb;
+    border-radius: 8px;
+    border: 1px solid #dde2ee;
+    font-size: 14px;
+    color: #222;
+    word-break: break-word;
+}
+
+/* Highlight amount */
+.details-grid p:has(:is(.amount)) {
+    font-weight: bold;
+    color: #1a7f37;
+}
+
+/* Buttons row */
+.details-box .view-btn {
+    min-width: 120px;
+    padding: 8px 14px;
+    font-size: 14px;
     border-radius: 6px;
-    font-size: 0.95rem;
+    cursor: pointer;
 }
 
+/* Close button */
 .close-details {
     position: absolute;
-    top: 12px;
-    right: 12px;
+    top: 14px;
+    right: 14px;
     background: #dc3545;
     color: white;
     padding: 6px 12px;
     border-radius: 6px;
     border: none;
     cursor: pointer;
-}
-.estimates-content {
-    flex: 1;
-    padding: 20px;
+    font-weight: bold;
 }
 
-@media (max-width: 600px) {
-  .details-box {
-      width: 100%;
-      height: 100vh;
-      border-radius: 0;
-  }
-  .details-grid {
-      grid-template-columns: 1fr;
-  }
+.close-details:hover {
+    background: #b02a37;
 }
+
+/* Entry animation */
+@keyframes scaleFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* ================================
+   MOBILE OPTIMIZATION
+================================ */
+@media (max-width: 600px) {
+
+    .details-box {
+        width: 100%;
+        height: 100vh;
+        border-radius: 0;
+        padding: 18px;
+    }
+
+    .details-title {
+        font-size: 18px;
+    }
+
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .details-grid p {
+        font-size: 13px;
+        padding: 8px 10px;
+    }
+
+    .details-box .view-btn {
+        width: 100%;
+        margin-top: 10px;
+    }
+}
+
 #estimates-leftbar {
     width: 220px;
     padding: 15px;
@@ -1302,33 +1387,21 @@ main {
 <!-- ======================================================
      FULL RECORD DETAILS MODAL (AUTO FILLS ALL DB FIELDS)
 ====================================================== -->
-<div id="recordDetailsModal" class="details-modal">
-  <div class="details-box">
-    
-    <button class="close-details" onclick="closeRecordDetails()">❌</button>
-    <h2 class="details-title">Record Details</h2>
+<h2 class="details-title">Record Details</h2>
 
-    <div id="detailsGrid" class="details-grid">
-      <!-- JS will insert all rows dynamically -->
-    </div>
+<div id="detailsGrid" class="details-grid"></div>
 
-    <button class="details-print-btn" onclick="printRecordDetails()" style="
-    padding: 6px;
-    margin: 10px;
-    margin-left: 256px;
-    border-radius: 10px;
-    background: deepskyblue;
-">🖨️ Print</button>
-    <a href="javascript:void(0)" onclick="openPasswordModal()" title="Add New Record" style="
-    border: 1px solid black;
-    padding: 5px;
-    border-radius: 10px;
-    text-decoration: none;
-    background: deepskyblue;
-">➕ Add Record</a>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px">
+    <button class="view-btn" onclick="printRecordDetails()">🖨️ Print</button>
 
-  </div>
+    <a href="javascript:void(0)"
+       onclick="openPasswordModal()"
+       class="view-btn"
+       style="text-decoration:none;">
+       ➕ Add Record
+    </a>
 </div>
+
 <button id="goBottomBtn" class="floating-btn">⬇️</button>
 <button id="goTopBtn" class="floating-btn">⬆️</button>
 
@@ -1886,15 +1959,6 @@ function filterEstimates(div) {
     renderEstimates(filtered);
 }
 
-
-
-
-
-
-
-
-      
-
 window.openRecordDetails = function(event, record) {
     // Prevent clicks on buttons inside card/row
     if (event.target.closest("button")) return;
@@ -1903,48 +1967,45 @@ window.openRecordDetails = function(event, record) {
 };
 window.showDetails = function(record) {
 
-    const detailsGrid = document.getElementById("detailsGrid");
-    detailsGrid.innerHTML = ""; // clear old content
+    const grid = document.getElementById("detailsGrid");
+    grid.innerHTML = "";
 
-    const labels = {
-        sno: "S.No",
-        prNo: "PR Number",
-        date: "Date",
-        description: "Description",
-        amount: "Amount",
-        budgetHead: "Budget Head",
-        poNo: "PO Number",
-        date2: "Date 2",
-        firmName: "Firm Name",
-        division: "Division",
-        pgNo: "PG Number",
-        remarks: "Remarks",
-        highValue: "High Value",
-        pdfPath: "PDF File"
-    };
+    const fields = [
+        ["ID", record.id],
+        ["Work Name", record.workName || record.description],
+        ["PR Number", record.prNo],
+        ["Sub Division", record.subDivision || record.division],
+        ["Record Type", record.recordType],
+        ["Amount", record.amount ? `₹ ${parseFloat(record.amount).toLocaleString("en-IN")}` : "—"],
+        ["Send To", record.sendTo],
+        ["PDF File", record.pdfPath ? "View PDF" : "No PDF"],
+        ["PR Date", record.prDate],
+        ["Budget Head", record.budgetHead],
+        ["PO Number", record.poNo]
+    ];
 
-    Object.keys(record).forEach(key => {
+    fields.forEach(([label, value]) => {
+        let display = value ?? "—";
 
-        if (key === "pdfPath") {
-            let pdfUI = record.pdfPath
-                ? `<a href="${record.pdfPath}" target="_blank" style="color:#007bff;font-weight:bold">Open PDF</a>`
-                : "No PDF";
-
-            detailsGrid.innerHTML += `
-                <div>
-                    <b>${labels[key] || key}</b>
-                    <p>${pdfUI}</p>
-                </div>
-            `;
-        } else {
-            detailsGrid.innerHTML += `
-                <div>
-                    <b>${labels[key] || key}</b>
-                    <p>${record[key] || "—"}</p>
-                </div>
-            `;
+        if (label === "PDF File" && record.pdfPath) {
+            display = `
+                <a href="javascript:void(0)"
+                   style="color:#007bff;font-weight:bold"
+                   onclick='showPDF(${JSON.stringify(record).replace(/'/g,"&apos;")})'>
+                   View PDF
+                </a>`;
         }
+
+        grid.innerHTML += `
+            <div>
+                <b>${label}</b>
+                <p>${display}</p>
+            </div>
+        `;
     });
+
+    document.getElementById("recordDetailsModal").classList.add("active");
+};
 
     // show modal
     document.getElementById("recordDetailsModal").classList.add("active");
@@ -2543,6 +2604,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
