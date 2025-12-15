@@ -1387,20 +1387,21 @@ main {
 <!-- ======================================================
      FULL RECORD DETAILS MODAL (AUTO FILLS ALL DB FIELDS)
 ====================================================== -->
-<h2 class="details-title">Record Details</h2>
+<div id="recordDetailsModal" class="details-modal">
+  <div class="details-box">
+    <button class="close-details" onclick="closeRecordDetails()">✖</button>
 
-<div id="detailsGrid" class="details-grid"></div>
+    <h2 class="details-title">Record Details</h2>
 
-<div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px">
-    <button class="view-btn" onclick="printRecordDetails()">🖨️ Print</button>
+    <div id="detailsGrid" class="details-grid"></div>
 
-    <a href="javascript:void(0)"
-       onclick="openPasswordModal()"
-       class="view-btn"
-       style="text-decoration:none;">
-       ➕ Add Record
-    </a>
+    <div style="display:flex;justify-content:space-between;margin-top:18px">
+      <button class="view-btn" onclick="printRecordDetails()">🖨️ Print</button>
+      <a class="view-btn" href="javascript:void(0)" onclick="openPasswordModal()">➕ Add Record</a>
+    </div>
+  </div>
 </div>
+
 
 <button id="goBottomBtn" class="floating-btn">⬇️</button>
 <button id="goTopBtn" class="floating-btn">⬆️</button>
@@ -2603,6 +2604,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
