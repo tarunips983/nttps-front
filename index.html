@@ -1388,7 +1388,16 @@ main {
     </div>
   </div>
 
-  
+  <div id="remarksModal" style="display:none;position:fixed;top:10%;left:50%;transform:translateX(-50%);background:white;padding:20px;width:90%;max-width:500px;z-index:999;">
+  <h3>PR Remarks</h3>
+  <div id="remarksList" style="max-height:200px;overflow:auto;"></div>
+
+  <textarea id="newRemark" placeholder="Enter remark" style="width:100%;margin-top:10px;"></textarea>
+
+  <button onclick="saveRemark()">Save</button>
+  <button onclick="closeRemarks()">Close</button>
+</div>
+
 <!-- ======================================================
      FULL RECORD DETAILS MODAL (AUTO FILLS ALL DB FIELDS)
 ====================================================== -->
@@ -1440,7 +1449,7 @@ main {
     // Server URL unchanged
     const SERVER_URL = "https://nttps-backend.onrender.com";
     let allRecords = [];
-    
+    const userRole = localStorage.getItem("role") || "viewer";
 
     
 
@@ -1670,7 +1679,8 @@ if (listEnabled) {
                     <th style="padding:10px;border:1px solid #ddd;background:#007bff;color:white;">Type</th>
                     <th style="padding:10px;border:1px solid #ddd;background:#007bff;color:white;">Amount</th>
                     <th style="padding:10px;border:1px solid #ddd;background:#007bff;color:white;">Send To</th>
-                    <th style="padding:10px;border:1px solid #ddd;background:#007bff;color:white;">Action</th>
+                    <th style="padding:10px;border:1px solid #ddd;background:#007bff;color:white;">Status</th>
+                    <th style="padding:10px;border:1px solid #ddd;background:#007bff;color:white;">Action</th>        
                 </tr>
             </thead>
             <tbody id="listBody"></tbody>
@@ -1713,6 +1723,10 @@ if (!records || records.length === 0) {
                 ₹ ${(parseFloat(r.amount) || 0).toLocaleString('en-IN')}
             </td>
             <td style="padding:10px;border:1px solid #ddd;text-align:center;">${r.sendTo}</td>
+       <td style="padding:10px;border:1px solid #ddd;text-align:center;">
+  ${statusBadge(r.pr_status)}
+</td>
+
 
             <!-- ⭐ VIEW PDF BUTTON ⭐ -->
             <td style="padding:10px;text-align:center;">
@@ -1775,7 +1789,17 @@ container.innerHTML = records.map((r, i) => {
     `;
 }).join("");
     }
-    
+    function statusBadge(status) {
+  const colors = {
+    "PR Created": "#6c757d",
+    "Sent to Dy.EE": "#fd7e14",
+    "Approved by Dy.EE": "#0d6efd",
+    "Approved by EE": "#198754",
+    "Returned": "#dc3545"
+  };
+  return `<span style="color:white;padding:4px 8px;border-radius:6px;background:${colors[status] || '#6c757d'}">${status}</span>`;
+}
+
 //search function
     document.getElementById("searchInput").addEventListener("input", (e) => {
     const key = e.target.value.toLowerCase();
@@ -1948,7 +1972,9 @@ function renderEstimates(data) {
                 <p><strong>Division:</strong> ${r.division}</p>
                 <p><strong>Amount:</strong> ₹ ${(parseFloat(r.amount) || 0).toLocaleString('en-IN')}</p>
             </div>
-
+${userRole !== "viewer" ? `
+<button onclick='openRemarks("${r.prNo}")'>📝</button>
+` : ""}
             <button class="view-btn" onclick="handlePDFClick(event, ${rec})">View PDF</button>
         </div>`;
     }).join("");
@@ -2264,6 +2290,30 @@ function toggleSearchBar() {
   }
 };
 
+let activePR = "";
+
+function openRemarks(prNo) {
+  activePR = prNo;
+  fetch(`${SERVER_URL}/api/remarks/${prNo}`)
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById("remarksList").innerHTML =
+        data.map(r => `<p><b>${r.by}</b>: ${r.text}</p>`).join("");
+      document.getElementById("remarksModal").style.display = "block";
+    });
+}
+
+function closeRemarks() {
+  document.getElementById("remarksModal").style.display = "none";
+}
+
+function saveRemark() {
+fetch(`${SERVER_URL}/api/remarks`, {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ pr_no: activePR, text: document.getElementById("newRemark").value })
+  }).then(() => openRemarks(activePR));
+}
 
     function closeModal(){
       productModal.classList.remove('active');
@@ -2484,7 +2534,7 @@ async function renderCLBioData() {
       localStorage.setItem('isAdmin', 'true');  // <-- FIXED LINE
 
       closePasswordModal();
-      window.location.href = 'add-product.html';
+      window.location.reload();
     } else {
       const err = await res.json();
       alert('❌ ' + (err.message || 'Incorrect email or password!'));
@@ -2642,6 +2692,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
