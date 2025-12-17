@@ -1226,6 +1226,7 @@ html, body {
                         <th>Division</th>
                         <th>Pg No</th>
                         <th>Remarks</th>
+                        <th>Status</th>
                         <th>High Value Spares</th>
                         <th>PDF File</th>
                         <th>Actions</th>
@@ -2512,6 +2513,15 @@ function addPdfRow(prefill = {}) {
         <td contenteditable="true" data-col="division">${prefill.division || ''}</td>
         <td contenteditable="true" data-col="pgNo">${prefill.pgNo || ''}</td>
         <td contenteditable="true" data-col="remarks">${prefill.remarks || ''}</td>
+        <td data-col="status">
+  <select class="status-select">
+    <option value="Pending">Pending</option>
+    <option value="In Progress">In Progress</option>
+    <option value="Completed">Completed</option>
+    <option value="Hold">Hold</option>
+  </select>
+</td>
+
         <td contenteditable="true" data-col="highValue">${prefill.highValue || ''}</td>
         <td data-col="pdf">
             <input type="file" class="pdf-file-input" accept="application/pdf">
@@ -2590,6 +2600,7 @@ function renderRecords(data, isTrash = false) {
       <th class="wrap" onclick="sortRecords('recordType')">Type ↕️</th>
       <th class="wrap" onclick="sortRecords('amount')">Amount ↕️</th>
       <th class="wrap" onclick="sortRecords('sendTo')">Send To ↕️</th>
+      <th class="wrap" onclick="sortRecords('status')">Status</th>
       <th class="wrap">Actions</th>
     `;
   }
@@ -2643,6 +2654,12 @@ function renderRecords(data, isTrash = false) {
         <td class="wrap">${r.recordType || ''}</td>
         <td class="wrap">₹${r.amount ? parseFloat(r.amount).toLocaleString('en-IN') : '0'}</td>
         <td class="wrap">${r.sendTo || ''}</td>
+        <td class="wrap">
+  <span class="status-badge status-${r.status || 'Pending'}">
+    ${r.status || 'Pending'}
+  </span>
+</td>
+
         <td class="wrap">
           <div class="actions">
             ${r.pdfPath ? `<button class="small-btn preview-btn" onclick="previewPDF('${r.pdfPath}')">Preview</button>` : ''}
@@ -2777,6 +2794,8 @@ function changePdfRowsPerPage() {
 async function savePdfRow(btn) {
     const tr = btn.closest('tr');
     if (!tr) return;
+    
+
 
     const get = col => (tr.querySelector(`td[data-col="${col}"]`)?.textContent || '').trim();
 
@@ -2792,7 +2811,7 @@ async function savePdfRow(btn) {
     const pgNo       = get('pgNo');
     const remarks    = get('remarks');
     const highValue  = get('highValue');
-
+    const status = tr.querySelector('.status-select')?.value || 'Pending';
     const fileInput = tr.querySelector('.pdf-file-input');
     const file = fileInput?.files[0] || null;
 
@@ -2839,6 +2858,7 @@ async function savePdfRow(btn) {
     formData.append('divisionLabel', division);
     formData.append('pageNo', pgNo);
     formData.append('remarks', remarks);
+    formData.append("status", status);
     formData.append('highValueSpares', highValue);
 
     if (recordId) {
@@ -3933,6 +3953,7 @@ async function loadEstimateList() {
     </script></body>
 
 </html>
+
 
 
 
