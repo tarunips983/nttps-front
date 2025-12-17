@@ -1707,7 +1707,7 @@ if (!records || records.length === 0) {
     `;
     return;
 }
-
+console.log("Index records[0]:", records[0]);
     listBody.innerHTML = records
     .map((r, i) => `
         <tr class="list-row" onclick='openRecordDetails(event, ${JSON.stringify(r).replace(/'/g,"&apos;")})' style="border-bottom:1px solid #eee; animation-delay: ${i * 0.05}s">
@@ -1724,7 +1724,7 @@ if (!records || records.length === 0) {
             </td>
             <td style="padding:10px;border:1px solid #ddd;text-align:center;">${r.sendTo}</td>
        <td style="padding:10px;border:1px solid #ddd;text-align:center;">
-  ${statusBadge(r.pr_status)}
+  ${statusBadge(r.status)}
 </td>
 
 
@@ -1789,7 +1789,7 @@ container.innerHTML = records.map((r, i) => {
     `;
 }).join("");
     }
-    function statusBadge(status) {
+   function statusBadge(status) {
   const colors = {
     "PR Created": "#6c757d",
     "Sent to Dy.EE": "#fd7e14",
@@ -1797,7 +1797,20 @@ container.innerHTML = records.map((r, i) => {
     "Approved by EE": "#198754",
     "Returned": "#dc3545"
   };
-  return `<span style="color:white;padding:4px 8px;border-radius:6px;background:${colors[status] || '#6c757d'}">${status}</span>`;
+
+  const safeStatus = status || "Pending";
+
+  return `
+    <span style="
+      color:white;
+      padding:4px 8px;
+      border-radius:6px;
+      font-size:12px;
+      background:${colors[safeStatus] || '#6c757d'};
+    ">
+      ${safeStatus}
+    </span>
+  `;
 }
 
 //search function
@@ -2692,6 +2705,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
