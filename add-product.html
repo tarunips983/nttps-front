@@ -1369,6 +1369,7 @@ html, body {
                         <th>Reg Pg No</th>
                         <th>Back Charging</th>
                         <th>Start + Completion Dates</th>
+                        <th>Status</th>
                         <th>LOA No 2</th>
                         <th>Actions</th>
                     </tr>
@@ -1845,6 +1846,7 @@ function renderEstimateHeadings() {
         <th class="sortable" onclick="sortEstimate('backCharging')">Back Charging ↕</th>
         <th class="sortable" onclick="sortEstimate('dates')">Start + Completion Dates ↕</th>
         <th class="sortable" onclick="sortEstimate('loa2')">LOA No 2 ↕</th>
+        <th class="sortable" onclick="sortEstimate('status')">Status ↕</th>
         <th>Actions</th>
     `;
 }
@@ -1871,6 +1873,15 @@ function addEstimateRow(prefill = {}) {
         <td contenteditable data-col="regPg">${prefill.regPg || ""}</td>
         <td contenteditable data-col="backCharging">${prefill.backCharging || ""}</td>
         <td contenteditable data-col="dates">${prefill.dates || ""}</td>
+        <td data-col="status">
+  <select class="status-select">
+    <option value="Pending">Pending</option>
+    <option value="In Progress">In Progress</option>
+    <option value="Approved">Approved</option>
+    <option value="Completed">Completed</option>
+    <option value="Hold">Hold</option>
+  </select>
+</td>
         <td contenteditable data-col="loa2">${prefill.loa2 || ""}</td>
 
         <td>
@@ -1879,6 +1890,9 @@ function addEstimateRow(prefill = {}) {
         </td>
     `;
     tbody.appendChild(row);
+    if (prefill.status) {
+    row.querySelector(".status-select").value = prefill.status;
+}
 }
 
 /* Delete entry row (not database delete) */
@@ -1895,7 +1909,10 @@ async function saveEstimateRow(btn) {
 
     const data = {};
     fields.forEach(td => data[td.dataset.col] = td.innerText.trim());
+const status =
+  tr.querySelector(".status-select")?.value || "Pending";
 
+data.status = status;
     let url = `${API}/estimates`;
     let method = "POST";
 
@@ -2049,6 +2066,11 @@ function renderEstimateList() {
             <td>${r.regPg || ""}</td>
             <td>${r.backCharging || ""}</td>
             <td>${r.dates || ""}</td>
+            <td>
+  <span class="status-badge status-${(r.status || 'Pending').replace(/\s/g,'-')}">
+    ${r.status || 'Pending'}
+  </span>
+</td>
             <td>${r.loa2 || ""}</td>
 
             <td>
@@ -2112,6 +2134,7 @@ function editEstimate(r) {
         regPg: r.regPg,
         backCharging: r.backCharging,
         dates: r.dates,
+        status: r.status
         loa2: r.loa2
     });
 
@@ -3942,11 +3965,10 @@ async function loadEstimateList() {
     estimateData = await res.json();
 
     estimateData.sort((a, b) => a.id - b.id);
-
-    populateEstimateFilters();  // <-- IMPORTANT
-
+    populateEstimateFilters();
     renderEstimateList();
 }
+
 
 
         /* =================================================================== */
@@ -3965,6 +3987,7 @@ async function loadEstimateList() {
     </script></body>
 
 </html>
+
 
 
 
