@@ -2059,7 +2059,7 @@ async function uploadFile() {
   const fd = new FormData();
   fd.append("file", file);
 
-  await fetch(`${API}/file-transfer/upload`, {
+  await fetch(`${SERVER_URL}/file-transfer/upload`, {
     method: "POST",
     body: fd
   });
@@ -2109,21 +2109,7 @@ async function loadFiles() {
     </tr>
   `).join("");
 }
-if (res.ok) {
-  const data = await res.json();
 
-  localStorage.setItem("adminToken", data.token);
-  localStorage.setItem("isAdmin", "true");
-
-  closePasswordModal();
-
-  if (pendingDownloadUrl) {
-    triggerDownload(pendingDownloadUrl);
-    pendingDownloadUrl = null;
-  }
-
-  updateFileLoginStatus();
-}
 function updateFileLoginStatus() {
   const el = document.getElementById("fileLoginStatus");
   const token = localStorage.getItem("adminToken");
@@ -2837,3 +2823,4 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
