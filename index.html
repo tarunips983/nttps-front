@@ -978,7 +978,7 @@ main {
   border: 5px solid #ddd;
   border-top-color: #007bff;
   border-radius: 50%;
-
+animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
   margin: 30px auto;
 }
 
@@ -1885,12 +1885,10 @@ async function loadEstimates() {
         console.error("Estimates Load Error:", err);
         document.getElementById("estimatesGrid").innerHTML =
             "<p style='color:red;padding:20px;'>Failed to load estimates</p>";
+  } finally {
+        document.getElementById("est-loader").style.display = "none"; // ✅ FIX
     }
 }
-
-
-
-
     
 function buildEstimateFilters() {
     const bar = document.getElementById("estimates-leftbar");
@@ -2709,6 +2707,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
