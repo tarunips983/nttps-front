@@ -1292,7 +1292,7 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
     <button class="subnav-btn" onclick="showMainView('estimates')">📘 Estimates</button>
   <button class="subnav-btn" onclick="showMainView('progress')">📅 Daily Progress</button>
   <button class="subnav-btn" onclick="showMainView('clbiodata')">👥 CL's Bio Data</button>
-    <button id="tabFiles" class="tab-btn" onclick="showPanel('files')"> 📁 File Transfer</button>
+   <button class="subnav-btn" onclick="showMainView('files')">📁 File Transfer</button>
 
 </div>
 
@@ -1363,25 +1363,36 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
     <div id="clBioGrid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:20px; margin-top:20px;"></div>
   </div>
 </div>
-<div id="filesPanel" class="panel">
-  <h2>📁 File Transfer</h2>
+<!-- FILE TRANSFER VIEW -->
+<div id="file-transfer-container" class="main-view">
+  <section class="right-panel">
 
-  <input type="file" id="fileInput">
-  <button class="primary" onclick="uploadFile()">⬆ Upload</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <h1>📁 File Transfer</h1>
+      <div id="fileLoginStatus" style="font-weight:600;color:#198754;"></div>
+    </div>
 
-  <table style="margin-top:15px;">
-    <thead>
-      <tr>
-        <th>File</th>
-        <th>Size</th>
-        <th>Uploaded</th>
-        <th>Expires</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody id="fileList"></tbody>
-  </table>
+    <div style="margin:15px 0;">
+      <input type="file" id="fileInput">
+      <button class="view-btn" onclick="uploadFile()">⬆ Upload</button>
+    </div>
+
+    <table class="estimate-table">
+      <thead>
+        <tr>
+          <th>File</th>
+          <th>Size</th>
+          <th>Uploaded</th>
+          <th>Expires</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="fileList"></tbody>
+    </table>
+
+  </section>
 </div>
+
 
   </main>
 
@@ -1496,7 +1507,8 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
 window.showMainView = function(viewName){
 
     document.querySelectorAll(".subnav-btn").forEach(btn => btn.classList.remove("active"));
-  
+  document.getElementById("file-transfer-container").style.display = "none";
+
   pdfView.style.display = "none";
   progressView.style.display = "none";
   clbiodata.style.display = "none";
@@ -1544,6 +1556,13 @@ if (productModal.classList.contains("active")) {
       document.querySelector("#subNavBar button:nth-child(4)").classList.add("active");
       renderCLBioData();
   }
+  if (viewName === "files") {
+  document.getElementById("file-transfer-container").style.display = "flex";
+  document.querySelector("#subNavBar button:nth-child(5)").classList.add("active");
+  scrollToTop();
+  loadFiles();
+}
+
 };
 
 
@@ -2047,9 +2066,31 @@ async function uploadFile() {
 
   loadFiles();
 }
+function isLoggedIn() {
+  return !!localStorage.getItem("adminToken");
+}
+let pendingDownloadUrl = null;
+
+function handleFileDownload(url) {
+  if (!isLoggedIn()) {
+    pendingDownloadUrl = url;
+    openPasswordModal();
+    return;
+  }
+  triggerDownload(url);
+}
+
+function triggerDownload(url) {
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
 
 async function loadFiles() {
-  const res = await fetch(`${API}/file-transfer`);
+  const res = await fetch(`${SERVER_URL}/file-transfer`);
   const files = await res.json();
 
   document.getElementById("fileList").innerHTML = files.map(f => `
@@ -2059,10 +2100,40 @@ async function loadFiles() {
       <td>${new Date(f.uploaded_at).toLocaleString()}</td>
       <td>${new Date(f.expires_at).toLocaleString()}</td>
       <td>
-        <a href="${f.file_url}" download>⬇ Download</a>
+        <button class="view-btn"
+  onclick="handleFileDownload('${f.file_url}')">
+  ⬇ Download
+</button>
+
       </td>
     </tr>
   `).join("");
+}
+if (res.ok) {
+  const data = await res.json();
+
+  localStorage.setItem("adminToken", data.token);
+  localStorage.setItem("isAdmin", "true");
+
+  closePasswordModal();
+
+  if (pendingDownloadUrl) {
+    triggerDownload(pendingDownloadUrl);
+    pendingDownloadUrl = null;
+  }
+
+  updateFileLoginStatus();
+}
+function updateFileLoginStatus() {
+  const el = document.getElementById("fileLoginStatus");
+  const token = localStorage.getItem("adminToken");
+
+  if (token) {
+    el.innerHTML = "🟢 Logged in";
+  } else {
+    el.innerHTML = "🔒 Login required for download";
+    el.style.color = "#dc3545";
+  }
 }
 
 /* ---------------- FILTER ESTIMATES ---------------- */
@@ -2758,6 +2829,7 @@ window.addEventListener("load", () => {
     loadDailyProgressDates();
     loadRecords();
   loadEstimates();
+  loadFiles();
 });
 window.addEventListener("DOMContentLoaded", function () {
     showMainView("pdf");   // Forces All Indents to open first
@@ -2765,28 +2837,3 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
