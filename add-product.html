@@ -1942,22 +1942,7 @@ data.status = status;
 /* ============================================
    3️⃣ LOAD ESTIMATE LIST FROM SERVER
 ============================================ */
-async function loadEstimateList() {
-    const url = trashMode
-        ? `${API}/estimates/trash`
-        : `${API}/estimates`;
 
-    try {
-        const res = await fetch(url);
-        estimateData = await res.json();
-        
-        estimateData.sort((a, b) => a.id - b.id);
-        
-        renderEstimateList();
-    } catch (e) {
-        console.error("Load Estimates Failed:", e);
-    }
-}
 
         renderEstimateHeadings();
 
@@ -2134,7 +2119,7 @@ function editEstimate(r) {
         regPg: r.regPg,
         backCharging: r.backCharging,
         dates: r.dates,
-        status: r.status
+        status: r.status,
         loa2: r.loa2
     });
 
@@ -3987,6 +3972,7 @@ async function loadEstimateList() {
     </script></body>
 
 </html>
+
 
 
 
