@@ -90,7 +90,14 @@ sessionStorage.removeItem("loggedOut");
 
         
     .tabs { display:flex; gap:8px; margin-bottom:10px; }
-    .tab-btn { padding:8px 14px; border-radius:6px; border:1px solid #ccc; cursor:pointer; background:white; }
+    .tab-btn {
+    padding: 10px 25px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    background: white;
+    font-size: 17px;
+}
     .tab-btn.active { background:#007bff; color:white; border-color:#007bff; }
     .panel { background:white; padding:20px; border-radius:10px; box-shadow:0 5px 15px rgba(0,0,0,0.06); display:none; }
     .panel.active { display:block; }
@@ -3971,6 +3978,7 @@ async function loadEstimateList() {
     </script></body>
 
 </html>
+
 
 
 
