@@ -41,6 +41,9 @@ header h1 { margin: 0; font-size: 22px; }
 #passwordModal {
     z-index: 10000; /* higher than recordDetailsModal */
 }
+.estimate-table tbody tr {
+    cursor: pointer;
+}
 
 .nav-right a {
     color:white;
@@ -1953,7 +1956,8 @@ function renderEstimates(data) {
     const body = document.getElementById("estListBody");
 
     body.innerHTML = data.map((r, idx) => `
-        <tr class="list-row">
+        <tr class="list-row"
+    onclick='openRecordDetails(event, ${JSON.stringify(r).replace(/'/g,"&apos;")})'>
             <td>${idx + 1}</td>
             <td>${r.description || ""}</td>
             <td>${r.division || ""}</td>
@@ -2705,6 +2709,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
