@@ -1292,6 +1292,8 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
     <button class="subnav-btn" onclick="showMainView('estimates')">📘 Estimates</button>
   <button class="subnav-btn" onclick="showMainView('progress')">📅 Daily Progress</button>
   <button class="subnav-btn" onclick="showMainView('clbiodata')">👥 CL's Bio Data</button>
+    <button id="tabFiles" class="tab-btn" onclick="showPanel('files')"> 📁 File Transfer</button>
+
 </div>
 
   <!-- Mobile toggles (visible on mobile only by CSS) -->
@@ -1360,6 +1362,25 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
 
     <div id="clBioGrid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:20px; margin-top:20px;"></div>
   </div>
+</div>
+<div id="filesPanel" class="panel">
+  <h2>📁 File Transfer</h2>
+
+  <input type="file" id="fileInput">
+  <button class="primary" onclick="uploadFile()">⬆ Upload</button>
+
+  <table style="margin-top:15px;">
+    <thead>
+      <tr>
+        <th>File</th>
+        <th>Size</th>
+        <th>Uploaded</th>
+        <th>Expires</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="fileList"></tbody>
+  </table>
 </div>
 
   </main>
@@ -2012,6 +2033,37 @@ function showAllEstimates(btn) {
     renderEstimates(allEstimates);
 }
 
+async function uploadFile() {
+  const file = document.getElementById("fileInput").files[0];
+  if (!file) return alert("Select a file");
+
+  const fd = new FormData();
+  fd.append("file", file);
+
+  await fetch(`${API}/file-transfer/upload`, {
+    method: "POST",
+    body: fd
+  });
+
+  loadFiles();
+}
+
+async function loadFiles() {
+  const res = await fetch(`${API}/file-transfer`);
+  const files = await res.json();
+
+  document.getElementById("fileList").innerHTML = files.map(f => `
+    <tr>
+      <td>${f.file_name}</td>
+      <td>${(f.file_size / 1024).toFixed(1)} KB</td>
+      <td>${new Date(f.uploaded_at).toLocaleString()}</td>
+      <td>${new Date(f.expires_at).toLocaleString()}</td>
+      <td>
+        <a href="${f.file_url}" download>⬇ Download</a>
+      </td>
+    </tr>
+  `).join("");
+}
 
 /* ---------------- FILTER ESTIMATES ---------------- */
 function filterEstimates(div) {
@@ -2713,6 +2765,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
