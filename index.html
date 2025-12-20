@@ -1945,6 +1945,7 @@ function renderEstimates(data) {
                 <th>PR No</th>
                 <th>Amount</th>
                 <th>Send To</th>
+                <th>Status</th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -1962,8 +1963,11 @@ function renderEstimates(data) {
             <td>${r.prNo || ""}</td>
             <td class="amount">₹ ${(parseFloat(r.amount) || 0).toLocaleString('en-IN')}</td>
             <td>${r.sendTo || "-"}</td>
+            <td style="text-align:center;">
+  ${statusBadge(r.status)}
+</td>
             <td>
-                <button class="view-btn" onclick='showPDF(${JSON.stringify(r).replace(/'/g,"&apos;")})'>View</button>
+                <button class="view-btn" onclick='showPDF(${JSON.stringify(r).replace(/'/g,"&apos;")})'>View PDF</button>
             </td>
         </tr>
     `).join("");
@@ -1986,6 +1990,7 @@ function renderEstimates(data) {
                 <p><strong>PR No:</strong> ${r.prNo}</p>
                 <p><strong>Division:</strong> ${r.division}</p>
                 <p><strong>Amount:</strong> ₹ ${(parseFloat(r.amount) || 0).toLocaleString('en-IN')}</p>
+                <p><strong>Status:</strong> ${statusBadge(r.status)}</p>
             </div>
 ${userRole !== "viewer" ? `
 <button onclick='openRemarks("${r.prNo}")'>📝</button>
@@ -2037,6 +2042,7 @@ window.showDetails = function (record) {
         ["PR Number", record.prNo],
         ["Sub Division", record.subDivision || record.division],
         ["Record Type", record.recordType],
+        ["Status", record.status],
         ["Amount", record.amount ? `₹ ${parseFloat(record.amount).toLocaleString("en-IN")}` : "—"],
         ["Send To", record.sendTo],
         ["PDF File", record.pdfPath ? "View PDF" : "No PDF"],
@@ -2707,6 +2713,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
