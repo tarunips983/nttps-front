@@ -2090,24 +2090,33 @@ function triggerDownload(url) {
 }
 
 async function loadFiles() {
-  const res = await fetch(`${SERVER_URL}/file-transfer`);
-  const files = await res.json();
+  try {
+    const res = await fetch(`${SERVER_URL}/file-transfer`);
 
-  document.getElementById("fileList").innerHTML = files.map(f => `
-    <tr>
-      <td>${f.file_name}</td>
-      <td>${(f.file_size / 1024).toFixed(1)} KB</td>
-      <td>${new Date(f.uploaded_at).toLocaleString()}</td>
-      <td>${new Date(f.expires_at).toLocaleString()}</td>
-      <td>
-        <button class="view-btn"
-  onclick="handleFileDownload('${f.file_url}')">
-  ⬇ Download
-</button>
+    if (!res.ok) {
+      console.error("File-transfer API failed:", res.status);
+      return;
+    }
 
-      </td>
-    </tr>
-  `).join("");
+    const files = await res.json();
+
+    document.getElementById("fileList").innerHTML = files.map(f => `
+      <tr>
+        <td>${f.file_name}</td>
+        <td>${(f.file_size / 1024).toFixed(1)} KB</td>
+        <td>${new Date(f.uploaded_at).toLocaleString()}</td>
+        <td>${new Date(f.expires_at).toLocaleString()}</td>
+        <td>
+          <button class="view-btn" onclick="handleFileDownload('${f.file_url}')">
+            ⬇ Download
+          </button>
+        </td>
+      </tr>
+    `).join("");
+
+  } catch (err) {
+    console.error("loadFiles failed:", err);
+  }
 }
 
 function updateFileLoginStatus() {
@@ -2823,4 +2832,5 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
