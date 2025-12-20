@@ -2059,13 +2059,19 @@ async function uploadFile() {
   const fd = new FormData();
   fd.append("file", file);
 
-  await fetch(`${SERVER_URL}/file-transfer/upload`, {
+  const res = await fetch(`${SERVER_URL}/file-transfer/upload`, {
     method: "POST",
     body: fd
   });
 
+  if (!res.ok) {
+    alert("Upload failed");
+    return;
+  }
+
   loadFiles();
 }
+
 function isLoggedIn() {
   return !!localStorage.getItem("adminToken");
 }
@@ -2832,5 +2838,6 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
