@@ -1502,6 +1502,7 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
     const mobileEstFilterBtn = document.getElementById("mobileEstFilterBtn");
     const estRightPanel = document.getElementById("estimates-right-panel");
 
+let pendingUpload = false;
 
     
 window.showMainView = function(viewName){
@@ -2054,47 +2055,44 @@ function showAllEstimates(btn) {
 }
 
 async function uploadFile() {
-  const file = document.getElementById("fileInput").files[0];
+  const fileInput = document.getElementById("fileInput");
+  const file = fileInput.files[0];
+
   if (!file) {
-    alert("Please select a file");
+    alert("Select a file first");
     return;
   }
 
   const token = localStorage.getItem("adminToken");
+
+  // ❌ Not logged in → open password modal
   if (!token) {
-    alert("Login required to upload");
+    pendingUpload = true;          // remember intent
+    openPasswordModal();           // reuse existing modal
     return;
   }
 
+  // ✅ Logged in → upload
   const fd = new FormData();
-  fd.append("file", file); // ✅ MUST MATCH backend multer.single("file")
+  fd.append("file", file);
 
-  try {
-    const res = await fetch(`${SERVER_URL}/file-transfer/upload`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-      body: fd
-    });
+  const res = await fetch(`${SERVER_URL}/file-transfer/upload`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`
+    },
+    body: fd
+  });
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data.error || "Upload failed");
-      return;
-    }
-
-    alert("✅ File uploaded successfully");
-    document.getElementById("fileInput").value = "";
-
-    loadFiles(); // refresh list
-
-  } catch (err) {
-    console.error("Upload error:", err);
-    alert("Server error during upload");
+  if (!res.ok) {
+    alert("Upload failed");
+    return;
   }
+
+  fileInput.value = "";   // reset input
+  loadFiles();
 }
+
 
 
 function isLoggedIn() {
@@ -2727,16 +2725,21 @@ async function renderCLBioData() {
       body: JSON.stringify({ email: username, password: pass })
     });
 
-    if(res.ok){
-      const data = await res.json();
+    if (res.ok) {
+  const data = await res.json();
 
-      // MUST SAVE BOTH
-      localStorage.setItem('adminToken', data.token);
-      localStorage.setItem('isAdmin', 'true');  // <-- FIXED LINE
+  localStorage.setItem("adminToken", data.token);
+  localStorage.setItem("isAdmin", "true");
 
-      closePasswordModal();
-      window.location.reload();
-    } else {
+  closePasswordModal();
+
+  // ✅ If upload was pending, continue upload
+  if (pendingUpload) {
+    pendingUpload = false;
+    uploadFile();
+  }
+}
+ else {
       const err = await res.json();
       alert('❌ ' + (err.message || 'Incorrect email or password!'));
     }
@@ -2893,6 +2896,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
