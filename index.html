@@ -1560,6 +1560,8 @@ if (productModal.classList.contains("active")) {
   document.getElementById("file-transfer-container").style.display = "flex";
   document.querySelector("#subNavBar button:nth-child(5)").classList.add("active");
   scrollToTop();
+    loadFiles();               // ✅ REQUIRED
+  updateFileLoginStatus();
 }
 
 };
@@ -2060,24 +2062,18 @@ async function uploadFile() {
 
   const token = localStorage.getItem("adminToken");
   if (!token) {
-    alert("Please login as admin to upload");
+    alert("Login required to upload");
     return;
   }
 
   const fd = new FormData();
-
-  // ✅ MUST match backend
-  fd.append("pdfs", file);
-
-  // minimal required fields
-  fd.append("workName", file.name);
-  fd.append("recordType", "Other Record");
+  fd.append("file", file); // ✅ MUST MATCH backend multer.single("file")
 
   try {
-    const res = await fetch(`${SERVER_URL}/upload`, {
+    const res = await fetch(`${SERVER_URL}/file-transfer/upload`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${token}`   // ✅ REQUIRED
+        Authorization: `Bearer ${token}`
       },
       body: fd
     });
@@ -2092,14 +2088,14 @@ async function uploadFile() {
     alert("✅ File uploaded successfully");
     document.getElementById("fileInput").value = "";
 
-    // refresh records (optional)
-    loadRecords();
+    loadFiles(); // refresh list
 
   } catch (err) {
     console.error("Upload error:", err);
     alert("Server error during upload");
   }
 }
+
 
 function isLoggedIn() {
   return !!localStorage.getItem("adminToken");
@@ -2146,6 +2142,18 @@ async function loadFiles() {
             ⬇ Download
           </button>
         </td>
+        <td>
+  <button class="view-btn" onclick="handleFileDownload('${f.file_url}')">
+    ⬇ Download
+  </button>
+
+  ${localStorage.getItem("adminToken") ? `
+    <button class="view-btn" style="background:#dc3545"
+      onclick="deleteFile(${f.id})">
+      🗑 Delete
+    </button>` : ""}
+</td>
+
       </tr>
     `).join("");
 
@@ -2163,6 +2171,25 @@ function updateFileLoginStatus() {
   } else {
     el.innerHTML = "🔒 Login required for download";
     el.style.color = "#dc3545";
+  }
+}
+async function deleteFile(id) {
+  if (!confirm("Delete this file permanently?")) return;
+
+  const token = localStorage.getItem("adminToken");
+
+  const res = await fetch(`${SERVER_URL}/file-transfer/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  if (res.ok) {
+    alert("File deleted");
+    loadFiles();
+  } else {
+    alert("Delete failed");
   }
 }
 
@@ -2866,6 +2893,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
