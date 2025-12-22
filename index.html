@@ -2056,20 +2056,34 @@ async function uploadFile() {
   const file = document.getElementById("fileInput").files[0];
   if (!file) return alert("Select a file");
 
-  const fd = new FormData();
-  fd.append("file", file);
-
-  const res = await fetch(`${SERVER_URL}/file-transfer/upload`, {
-    method: "POST",
-    body: fd
-  });
-
-  if (!res.ok) {
-    alert("Upload failed");
+  const token = localStorage.getItem("adminToken");
+  if (!token) {
+    alert("Please login to upload files");
     return;
   }
 
-  loadFiles();
+  const fd = new FormData();
+  fd.append("pdfs", file);             // ✅ REQUIRED
+  fd.append("workName", file.name);    // minimal required fields
+  fd.append("recordType", "Other Record");
+
+  const res = await fetch(`${SERVER_URL}/upload`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}` // ✅ REQUIRED
+    },
+    body: fd
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    alert(data.error || "Upload failed");
+    return;
+  }
+
+  alert("File uploaded successfully");
+  loadRecords(); // refresh list
 }
 
 function isLoggedIn() {
@@ -2830,7 +2844,6 @@ window.addEventListener("load", () => {
     loadDailyProgressDates();
     loadRecords();
   loadEstimates();
-  loadFiles();
 });
 window.addEventListener("DOMContentLoaded", function () {
     showMainView("pdf");   // Forces All Indents to open first
@@ -2838,6 +2851,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
