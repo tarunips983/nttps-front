@@ -1369,6 +1369,10 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
 
    <div style="display:flex;justify-content:space-between;align-items:center;">
   <h1>📁 File Transfer</h1>
+<div id="fileUploadSection" style="margin:15px 0; display:none;">
+  <input type="file" id="fileInput">
+  <button class="view-btn" onclick="uploadFile()">⬆ Upload</button>
+</div>
 
   <div style="display:flex;align-items:center;gap:10px;">
     <span id="fileLoginStatus"
@@ -2164,6 +2168,7 @@ async function loadFiles() {
 function updateFileLoginStatus() {
   const statusEl = document.getElementById("fileLoginStatus");
   const btn = document.getElementById("fileAuthBtn");
+  const uploadSection = document.getElementById("fileUploadSection");
   const token = localStorage.getItem("adminToken");
 
   if (token) {
@@ -2172,14 +2177,19 @@ function updateFileLoginStatus() {
 
     btn.innerHTML = "🚪 Logout";
     btn.style.background = "#dc3545";
+
+    uploadSection.style.display = "block"; // ✅ SHOW UPLOAD
   } else {
     statusEl.innerHTML = "🔒 Login required";
     statusEl.style.color = "#dc3545";
 
     btn.innerHTML = "🔐 Login";
     btn.style.background = "#007bff";
+
+    uploadSection.style.display = "none"; // ❌ HIDE UPLOAD
   }
 }
+
 
 async function deleteFile(id) {
   if (!confirm("Delete this file permanently?")) return;
@@ -2923,6 +2933,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
