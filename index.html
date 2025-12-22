@@ -2383,19 +2383,17 @@ function handleFileAuthClick() {
   const token = localStorage.getItem("adminToken");
 
   if (token) {
-    // LOGOUT
     if (!confirm("Logout from File Transfer?")) return;
 
     localStorage.removeItem("adminToken");
     localStorage.removeItem("isAdmin");
 
     updateFileLoginStatus();
+    loadFiles(); // ✅ FORCE immediate refresh
   } else {
-    // LOGIN
     openPasswordModal();
   }
 }
-
 
 function closeRecordDetails() {
     document.getElementById("recordDetailsModal").classList.remove("active");
@@ -2866,7 +2864,8 @@ async function renderCLBioData() {
   localStorage.setItem("isAdmin", "true");
 
   closePasswordModal();
-  updateFileLoginStatus(); 
+  updateFileLoginStatus();
+      loadFiles();
 
   // ✅ If upload was pending, continue upload
   if (pendingUpload) {
@@ -3078,6 +3077,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
