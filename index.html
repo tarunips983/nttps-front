@@ -1560,7 +1560,6 @@ if (productModal.classList.contains("active")) {
   document.getElementById("file-transfer-container").style.display = "flex";
   document.querySelector("#subNavBar button:nth-child(5)").classList.add("active");
   scrollToTop();
-  loadFiles();
 }
 
 };
@@ -2054,36 +2053,52 @@ function showAllEstimates(btn) {
 
 async function uploadFile() {
   const file = document.getElementById("fileInput").files[0];
-  if (!file) return alert("Select a file");
+  if (!file) {
+    alert("Please select a file");
+    return;
+  }
 
   const token = localStorage.getItem("adminToken");
   if (!token) {
-    alert("Please login to upload files");
+    alert("Please login as admin to upload");
     return;
   }
 
   const fd = new FormData();
-  fd.append("pdfs", file);             // ✅ REQUIRED
-  fd.append("workName", file.name);    // minimal required fields
+
+  // ✅ MUST match backend
+  fd.append("pdfs", file);
+
+  // minimal required fields
+  fd.append("workName", file.name);
   fd.append("recordType", "Other Record");
 
-  const res = await fetch(`${SERVER_URL}/upload`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}` // ✅ REQUIRED
-    },
-    body: fd
-  });
+  try {
+    const res = await fetch(`${SERVER_URL}/upload`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`   // ✅ REQUIRED
+      },
+      body: fd
+    });
 
-  const data = await res.json();
+    const data = await res.json();
 
-  if (!res.ok) {
-    alert(data.error || "Upload failed");
-    return;
+    if (!res.ok) {
+      alert(data.error || "Upload failed");
+      return;
+    }
+
+    alert("✅ File uploaded successfully");
+    document.getElementById("fileInput").value = "";
+
+    // refresh records (optional)
+    loadRecords();
+
+  } catch (err) {
+    console.error("Upload error:", err);
+    alert("Server error during upload");
   }
-
-  alert("File uploaded successfully");
-  loadRecords(); // refresh list
 }
 
 function isLoggedIn() {
@@ -2851,6 +2866,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
