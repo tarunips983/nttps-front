@@ -2139,19 +2139,12 @@ async function loadFiles() {
           <button class="view-btn" onclick="handleFileDownload('${f.file_url}')">
             ⬇ Download
           </button>
-        </td>
-        <td>
-  <button class="view-btn" onclick="handleFileDownload('${f.file_url}')">
-    ⬇ Download
-  </button>
-
-  ${localStorage.getItem("adminToken") ? `
+           ${localStorage.getItem("adminToken") ? `
     <button class="view-btn" style="background:#dc3545"
       onclick="deleteFile(${f.id})">
       🗑 Delete
     </button>` : ""}
-</td>
-
+        </td>
       </tr>
     `).join("");
 
@@ -2896,6 +2889,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
