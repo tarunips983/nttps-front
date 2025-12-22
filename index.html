@@ -1333,6 +1333,11 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
   background: linear-gradient(90deg, #0d6efd, #198754);
   transition: width 0.3s;
 }
+.upload-preview {
+  background: #f1f5f9;
+  border-radius: 10px;
+  padding: 12px;
+}
 
 </style>
 
@@ -1473,7 +1478,14 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
     <input type="file" id="fileInput" hidden multiple>
   </div>
 
-  <div id="uploadPreview" class="upload-preview" style="display:none;">
+  <div id="uploadPreview" class="upload-preview" style="display:none; flex-direction:column; gap:8px;">
+  <div id="previewList"></div>
+
+  <div style="display:flex; justify-content:flex-end; margin-top:10px;">
+    <button class="upload-btn" onclick="uploadFile()">⬆ Upload All</button>
+  </div>
+</div>
+
     <span id="fileName"></span>
     <span id="fileSize"></span>
     <button class="upload-btn" onclick="uploadFile()">⬆ Upload</button>
@@ -3026,19 +3038,30 @@ dropZone.addEventListener("drop", e => {
 // File select
 fileInput.addEventListener("change", showPreview);
 
+const previewList = document.getElementById("previewList");
+
 function showPreview() {
   const files = [...fileInput.files];
   if (!files.length) return;
 
-  preview.innerHTML = files.map(f => `
-    <div style="display:flex;justify-content:space-between;width:100%">
+  previewList.innerHTML = files.map(f => `
+    <div style="
+      display:flex;
+      justify-content:space-between;
+      padding:6px 10px;
+      background:#e9f1ff;
+      border-radius:6px;
+      font-size:14px;
+      font-weight:600;
+    ">
       <span>${f.name}</span>
       <span>${(f.size / 1024).toFixed(1)} KB</span>
     </div>
   `).join("");
 
-  preview.style.display = "block";
+  preview.style.display = "flex";
 }
+
 
 
 
@@ -3087,6 +3110,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
