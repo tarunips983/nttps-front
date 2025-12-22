@@ -2232,25 +2232,33 @@ async function loadFiles() {
 
     const files = await res.json();
 
-    document.getElementById("fileList").innerHTML = files.map(f => `
-      <tr>
-        <td>${f.file_name}</td>
-        <td>${(f.file_size / 1024).toFixed(1)} KB</td>
-        <td>${new Date(f.uploaded_at).toLocaleString()}</td>
-        <td>${new Date(f.expires_at).toLocaleString()}</td>
-        <td>
-          <button class="view-btn" onclick="handleFileDownload('${f.file_url}')">
-            ⬇ Download
-          </button>
-           ${localStorage.getItem("adminToken") ? `
-    <button class="view-btn" style="background:#dc3545"
-      onclick="deleteFile(${f.id})">
-      🗑 Delete
-    </button>` : ""}
-        </td>
-      </tr>
-    `).join("");
+    const loggedIn = isFileUserLoggedIn();
 
+document.getElementById("fileList").innerHTML = files.map(f => `
+  <tr>
+    <td>${f.file_name}</td>
+    <td>${(f.file_size / 1024).toFixed(1)} KB</td>
+    <td>${new Date(f.uploaded_at).toLocaleString()}</td>
+    <td>${new Date(f.expires_at).toLocaleString()}</td>
+    <td>
+      ${loggedIn ? `
+        <button class="view-btn" onclick="handleFileDownload('${f.file_url}')">
+          ⬇ Download
+        </button>
+        <button class="view-btn" style="background:#dc3545"
+          onclick="deleteFile(${f.id})">
+          🗑 Delete
+        </button>
+      ` : `
+        <span style="color:#dc3545;font-weight:600;">🔒 Login required</span>
+        <button class="view-btn" style="margin-left:8px"
+          onclick="openPasswordModal()">
+          🔑 Login
+        </button>
+      `}
+    </td>
+  </tr>
+`).join("");
   } catch (err) {
     console.error("loadFiles failed:", err);
   }
@@ -2300,6 +2308,9 @@ async function deleteFile(id) {
   } else {
     alert("Delete failed");
   }
+}
+function isFileUserLoggedIn() {
+  return !!localStorage.getItem("adminToken");
 }
 
 /* ---------------- FILTER ESTIMATES ---------------- */
@@ -3071,6 +3082,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
