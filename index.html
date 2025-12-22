@@ -1367,15 +1367,23 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
 <div id="file-transfer-container" class="main-view">
   <section class="right-panel">
 
-    <div style="display:flex;justify-content:space-between;align-items:center;">
-      <h1>📁 File Transfer</h1>
-      <div id="fileLoginStatus" style="font-weight:600;color:#198754;"></div>
-    </div>
+   <div style="display:flex;justify-content:space-between;align-items:center;">
+  <h1>📁 File Transfer</h1>
 
-    <div style="margin:15px 0;">
-      <input type="file" id="fileInput">
-      <button class="view-btn" onclick="uploadFile()">⬆ Upload</button>
-    </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span id="fileLoginStatus"
+          style="font-weight:600;color:#dc3545;">
+      🔒 Login required
+    </span>
+
+    <button id="fileAuthBtn"
+            class="view-btn"
+            onclick="handleFileAuthClick()">
+      🔐 Login
+    </button>
+  </div>
+</div>
+
 
     <table class="estimate-table">
       <thead>
@@ -2154,16 +2162,25 @@ async function loadFiles() {
 }
 
 function updateFileLoginStatus() {
-  const el = document.getElementById("fileLoginStatus");
+  const statusEl = document.getElementById("fileLoginStatus");
+  const btn = document.getElementById("fileAuthBtn");
   const token = localStorage.getItem("adminToken");
 
   if (token) {
-    el.innerHTML = "🟢 Logged in";
+    statusEl.innerHTML = "🟢 Logged in";
+    statusEl.style.color = "#198754";
+
+    btn.innerHTML = "🚪 Logout";
+    btn.style.background = "#dc3545";
   } else {
-    el.innerHTML = "🔒 Login required for download";
-    el.style.color = "#dc3545";
+    statusEl.innerHTML = "🔒 Login required";
+    statusEl.style.color = "#dc3545";
+
+    btn.innerHTML = "🔐 Login";
+    btn.style.background = "#007bff";
   }
 }
+
 async function deleteFile(id) {
   if (!confirm("Delete this file permanently?")) return;
 
@@ -2253,6 +2270,22 @@ function openPdfFromDetails(record) {
     setTimeout(() => {
         showPDF(record);
     }, 120);
+}
+function handleFileAuthClick() {
+  const token = localStorage.getItem("adminToken");
+
+  if (token) {
+    // LOGOUT
+    if (!confirm("Logout from File Transfer?")) return;
+
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("isAdmin");
+
+    updateFileLoginStatus();
+  } else {
+    // LOGIN
+    openPasswordModal();
+  }
 }
 
 
@@ -2725,6 +2758,7 @@ async function renderCLBioData() {
   localStorage.setItem("isAdmin", "true");
 
   closePasswordModal();
+  updateFileLoginStatus(); 
 
   // ✅ If upload was pending, continue upload
   if (pendingUpload) {
@@ -2889,6 +2923,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
