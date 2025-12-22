@@ -1470,7 +1470,7 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
       Drag & drop files here <br>
       <span>or click to browse</span>
     </p>
-    <input type="file" id="fileInput" hidden>
+    <input type="file" id="fileInput" hidden multiple>
   </div>
 
   <div id="uploadPreview" class="upload-preview" style="display:none;">
@@ -2162,17 +2162,21 @@ function showAllEstimates(btn) {
 }
 
 async function uploadFile() {
-  const file = fileInput.files[0];
-  if (!file) return alert("Select a file");
+  const files = [...fileInput.files];
+  if (!files.length) return alert("Select files");
 
   const token = localStorage.getItem("adminToken");
-  if (!token) return openPasswordModal();
+  if (!token) {
+    pendingUpload = true;
+    openPasswordModal();
+    return;
+  }
 
   const fd = new FormData();
-  fd.append("file", file);
+  files.forEach(f => fd.append("files", f));
 
   progressBox.style.display = "block";
-  progressBar.style.width = "10%";
+  progressBar.style.width = "5%";
 
   const xhr = new XMLHttpRequest();
   xhr.open("POST", `${SERVER_URL}/file-transfer/upload`);
@@ -2180,8 +2184,7 @@ async function uploadFile() {
 
   xhr.upload.onprogress = (e) => {
     if (e.lengthComputable) {
-      const percent = (e.loaded / e.total) * 100;
-      progressBar.style.width = percent + "%";
+      progressBar.style.width = (e.loaded / e.total) * 100 + "%";
     }
   };
 
@@ -2191,12 +2194,13 @@ async function uploadFile() {
       progressBox.style.display = "none";
       preview.style.display = "none";
       fileInput.value = "";
-      loadFiles();
+      loadFiles(); // ✅ refresh list instantly
     }, 500);
   };
 
   xhr.send(fd);
 }
+
 
 function isLoggedIn() {
   return !!localStorage.getItem("adminToken");
@@ -3023,13 +3027,19 @@ dropZone.addEventListener("drop", e => {
 fileInput.addEventListener("change", showPreview);
 
 function showPreview() {
-  const file = fileInput.files[0];
-  if (!file) return;
+  const files = [...fileInput.files];
+  if (!files.length) return;
 
-  fileNameEl.textContent = file.name;
-  fileSizeEl.textContent = (file.size / 1024).toFixed(1) + " KB";
-  preview.style.display = "flex";
+  preview.innerHTML = files.map(f => `
+    <div style="display:flex;justify-content:space-between;width:100%">
+      <span>${f.name}</span>
+      <span>${(f.size / 1024).toFixed(1)} KB</span>
+    </div>
+  `).join("");
+
+  preview.style.display = "block";
 }
+
 
 
     
@@ -3077,6 +3087,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
