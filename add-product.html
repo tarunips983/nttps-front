@@ -4005,32 +4005,23 @@ async function loadEstimateList() {
         restoreDraft();
         loadCLData();
         
-document.addEventListener("DOMContentLoaded", async () => {
+(async () => {
   const API = "https://nttps-backend.onrender.com";
-  const visitEl = document.getElementById("visitCount");
+  const el = document.getElementById("visitCount");
 
-  try {
-    // increment ONCE per session
-    if (!sessionStorage.getItem("addProductVisited")) {
-      await fetch(`${API}/page-visit/add-product`, { method: "POST" });
-      sessionStorage.setItem("addProductVisited", "true");
-    }
-
-    // fetch count AFTER increment
-    const res = await fetch(`${API}/page-visit/add-product`);
-    const data = await res.json();
-
-    console.log("Visit API response:", data);
-    visitEl.textContent = data.count ?? 0;
-
-  } catch (err) {
-    console.error("Visit counter failed:", err);
-    visitEl.textContent = "—";
+  if (!sessionStorage.getItem("addProductVisited")) {
+    await fetch(`${API}/page-visit/add-product`, { method: "POST" });
+    sessionStorage.setItem("addProductVisited", "true");
   }
-});
+
+  const res = await fetch(`${API}/page-visit/add-product`);
+  const data = await res.json();
+  el.textContent = data.count ?? 0;
+})();
 
 
         
     </script></body>
 
 </html>
+
