@@ -51,6 +51,14 @@ header h1 { margin: 0; font-size: 22px; }
     font-weight:600;
     transition:0.2s;
 }
+    .details-modal {
+  display: none;
+}
+
+.details-modal.active {
+  display: flex;
+}
+
 /* Prevent sidebar flash on load (mobile only) */
 @media (max-width: 768px) {
   .left-bar {
@@ -2193,6 +2201,13 @@ function showAllEstimates(btn) {
 
     renderEstimates(allEstimates);
 }
+function requireFileLogin(action) {
+  if (!isFileUserLoggedIn()) {
+    openPasswordModal();
+    return false;
+  }
+  return true;
+}
 
 async function uploadFile() {
   const files = [...fileInput.files];
@@ -2250,14 +2265,21 @@ function handleFileDownload(url, filename) {
 }
 
 async function triggerDownload(url, filename = "file") {
+
+  // 🔒 BLOCK DOWNLOAD IF NOT LOGGED IN
+  if (!isFileUserLoggedIn()) {
+    pendingDownloadUrl = { url, filename };
+    openPasswordModal();
+    return;
+  }
+
   const token = localStorage.getItem("adminToken");
 
   const res = await fetch(url, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {}
+    headers: { Authorization: `Bearer ${token}` }
   });
 
   const blob = await res.blob();
-
   const blobUrl = window.URL.createObjectURL(blob);
 
   const a = document.createElement("a");
@@ -2294,9 +2316,8 @@ async function loadFiles() {
 </tr>
 `;
 document.getElementById("fileList").innerHTML = files.map(f => `
-  <tr>
-    <td style="cursor:pointer;color:#0d6efd;font-weight:600"
-    onclick='openFilePreview(${JSON.stringify(f)})'>
+ <td style="cursor:pointer;color:#0d6efd;font-weight:600"
+    onclick="requireFileLogin() && openFilePreview(${JSON.stringify(f)})">
   ${f.file_name}
 </td>
     <td>${(f.file_size / 1024).toFixed(1)} KB</td>
@@ -2372,6 +2393,10 @@ function isFileUserLoggedIn() {
   return !!localStorage.getItem("adminToken");
 }
 function openFilePreview(file) {
+
+  // 🚫 BLOCK PREVIEW IF LOGGED OUT
+  if (!requireFileLogin()) return;
+
   const modal = document.getElementById("filePreviewModal");
   const content = document.getElementById("filePreviewContent");
   const title = document.getElementById("previewTitle");
@@ -3219,6 +3244,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
