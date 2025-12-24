@@ -3949,15 +3949,22 @@ function deleteSelected() {
             draggedRow = null;
         });
 
-// increment visit
-fetch(`${API}/page-visit/add-product`, { method: "POST" });
 
-// get visit count
+
+if (!sessionStorage.getItem("addProductVisited")) {
+  fetch(`${API}/page-visit/add-product`, { method: "POST" })
+    .catch(err => console.error("Visit error:", err));
+
+  sessionStorage.setItem("addProductVisited", "true");
+}
+// fetch count
 fetch(`${API}/page-visit/add-product`)
   .then(res => res.json())
   .then(data => {
     document.getElementById("visitCount").innerText = data.count;
-  });
+  })
+  .catch(err => console.error("Fetch error:", err));
+
         
 function populateEstimateFilters() {
     const divisions = [...new Set(estimateData.map(r => r.division).filter(Boolean))].sort();
@@ -3995,6 +4002,7 @@ async function loadEstimateList() {
     </script></body>
 
 </html>
+
 
 
 
