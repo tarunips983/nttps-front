@@ -1640,6 +1640,16 @@ html, body {
 
     <div id="toastContainer"></div>
 
+<div style="
+  background:#f9f9f9;
+  padding:10px 15px;
+  border-radius:8px;
+  font-weight:bold;
+  display:inline-block;
+  margin-bottom:10px;
+">
+  👁 Total Visits: <span id="visitCount">—</span>
+</div>
 
     <script>
         
@@ -2010,9 +2020,6 @@ function updateEstimateSortArrows() {
     });
 }
 
-
-
-
 /* ============================================
    4️⃣ RENDER ESTIMATE TABLE
 ============================================ */
@@ -2073,8 +2080,7 @@ function renderEstimateList() {
 
     updateEstimatePagination(filtered.length);
 }
-
-            
+           
 /* ============================================
    5️⃣ PAGINATION
 ============================================ */
@@ -3942,6 +3948,20 @@ function deleteSelected() {
             updateRowNumbers();
             draggedRow = null;
         });
+
+
+        const API = "https://nttps-backend.onrender.com";
+
+// increment visit
+fetch(`${API}/page-visit/add-product`, { method: "POST" });
+
+// get visit count
+fetch(`${API}/page-visit/add-product`)
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById("visitCount").innerText = data.count;
+  });
+        
 function populateEstimateFilters() {
     const divisions = [...new Set(estimateData.map(r => r.division).filter(Boolean))].sort();
 
@@ -3978,6 +3998,7 @@ async function loadEstimateList() {
     </script></body>
 
 </html>
+
 
 
 
