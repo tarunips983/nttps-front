@@ -1599,7 +1599,8 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
     let allRecords = [];
     const userRole = localStorage.getItem("role") || "viewer";
 
-    
+    let fileAutoRefreshTimer = null;
+
 
     // DOM refs
     const pdfView = document.getElementById("pdf-view-container");
@@ -1617,7 +1618,12 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
 
 let pendingUpload = false;
 
-    
+    // Stop file auto refresh when leaving File Transfer
+if (fileAutoRefreshTimer && viewName !== "files") {
+  clearInterval(fileAutoRefreshTimer);
+  fileAutoRefreshTimer = null;
+}
+
 window.showMainView = function(viewName){
 
     document.querySelectorAll(".subnav-btn").forEach(btn => btn.classList.remove("active"));
@@ -1670,13 +1676,21 @@ if (productModal.classList.contains("active")) {
       document.querySelector("#subNavBar button:nth-child(4)").classList.add("active");
       renderCLBioData();
   }
+  
   if (viewName === "files") {
   document.getElementById("file-transfer-container").style.display = "flex";
   document.querySelector("#subNavBar button:nth-child(5)").classList.add("active");
   scrollToTop();
-    loadFiles();               // ✅ REQUIRED
+
+  loadFiles();                 // immediate load
   updateFileLoginStatus();
+
+  // ✅ Start auto refresh every 4 seconds
+  if (!fileAutoRefreshTimer) {
+    fileAutoRefreshTimer = setInterval(loadFiles, 4000);
+  }
 }
+
 
 };
 
@@ -2213,25 +2227,40 @@ function isLoggedIn() {
 }
 let pendingDownloadUrl = null;
 
-function handleFileDownload(url) {
+function handleFileDownload(url, filename) {
   if (!isLoggedIn()) {
-    pendingDownloadUrl = url;
+    pendingDownloadUrl = { url, filename };
     openPasswordModal();
     return;
   }
-  triggerDownload(url);
+  triggerDownload(url, filename);
 }
 
-function triggerDownload(url) {
+async function triggerDownload(url, filename = "file") {
+  const token = localStorage.getItem("adminToken");
+
+  const res = await fetch(url, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {}
+  });
+
+  const blob = await res.blob();
+
+  const blobUrl = window.URL.createObjectURL(blob);
+
   const a = document.createElement("a");
-  a.href = url;
-  a.download = "";
+  a.href = blobUrl;
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
-  a.remove();
+
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(blobUrl);
 }
 
+
 async function loadFiles() {
+ 
+
   try {
     const res = await fetch(`${SERVER_URL}/file-transfer`);
 
@@ -2243,7 +2272,14 @@ async function loadFiles() {
     const files = await res.json();
 
     const loggedIn = isFileUserLoggedIn();
-
+    
+ document.getElementById("fileList").innerHTML = `
+<tr>
+  <td colspan="5" style="text-align:center;padding:20px;">
+    🔄 Syncing files…
+  </td>
+</tr>
+`;
 document.getElementById("fileList").innerHTML = files.map(f => `
   <tr>
     <td>${f.file_name}</td>
@@ -2252,9 +2288,10 @@ document.getElementById("fileList").innerHTML = files.map(f => `
     <td>${new Date(f.expires_at).toLocaleString()}</td>
     <td>
       ${loggedIn ? `
-        <button class="view-btn" onclick="handleFileDownload('${f.file_url}')">
-          ⬇ Download
-        </button>
+        <button class="view-btn"
+  onclick="handleFileDownload('${f.file_url}', '${f.file_name}')">
+  ⬇ Download
+</button>
         <button class="view-btn" style="background:#dc3545"
           onclick="deleteFile(${f.id})">
           🗑 Delete
@@ -2877,6 +2914,17 @@ async function renderCLBioData() {
   updateFileLoginStatus();
       loadFiles();
 
+// ✅ Resume pending download after login
+if (pendingDownloadUrl) {
+  triggerDownload(
+    pendingDownloadUrl.url,
+    pendingDownloadUrl.filename
+  );
+  pendingDownloadUrl = null;
+}
+
+
+      
   // ✅ If upload was pending, continue upload
   if (pendingUpload) {
     pendingUpload = false;
@@ -3104,6 +3152,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
