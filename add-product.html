@@ -3950,20 +3950,26 @@ function deleteSelected() {
         });
 
 
-
+// increment ONCE per session
 if (!sessionStorage.getItem("addProductVisited")) {
-  fetch(`${API}/page-visit/add-product`, { method: "POST" })
-    .catch(err => console.error("Visit error:", err));
+  authFetch(`${API}/page-visit/add-product`, {
+    method: "POST"
+  })
+  .then(r => r.json())
+  .then(d => console.log("Visit incremented:", d))
+  .catch(err => console.error("Visit error:", err));
 
   sessionStorage.setItem("addProductVisited", "true");
 }
-// fetch count
-fetch(`${API}/page-visit/add-product`)
+
+// fetch visit count
+authFetch(`${API}/page-visit/add-product`)
   .then(res => res.json())
   .then(data => {
     document.getElementById("visitCount").innerText = data.count;
   })
   .catch(err => console.error("Fetch error:", err));
+
 
         
 function populateEstimateFilters() {
@@ -4002,6 +4008,7 @@ async function loadEstimateList() {
     </script></body>
 
 </html>
+
 
 
 
