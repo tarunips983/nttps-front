@@ -1427,6 +1427,43 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
     overflow-x: hidden;
   }
 }
+@media (max-width: 768px) {
+  .main-view,
+  #modalContent,
+  .details-box {
+    height: calc(var(--vh, 1vh) * 100) !important;
+  }
+}
+@media (max-width: 768px) {
+  .right-panel {
+    overflow: visible !important;
+  }
+
+  body {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+@media (max-width: 768px) {
+  #subNavBar {
+    position: relative !important;
+    top: auto !important;
+  }
+}
+@media (max-width: 768px) {
+  #mobileFilterBtn,
+  #mobileEstFilterBtn,
+  #mobileDailyFilterBtn {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+}
+@media (max-width: 768px) {
+  body.modal-open {
+    position: fixed;
+    width: 100%;
+  }
+}
 
 </style>
 
@@ -2829,6 +2866,7 @@ function toggleSearchBar() {
   pdfFrame.src = finalUrl;
 
   productModal.classList.add('active');
+  document.body.classList.add("modal-open");
   productModal.setAttribute('aria-hidden','false');
   document.body.style.overflow = 'hidden';
 
@@ -2880,6 +2918,7 @@ fetch(`${SERVER_URL}/api/remarks`, {
 
     function closeModal(){
       productModal.classList.remove('active');
+      document.body.classList.remove("modal-open");
       productModal.setAttribute('aria-hidden','true');
       pdfFrame.src = 'about:blank';
       document.body.style.overflow = 'auto';
@@ -3265,6 +3304,7 @@ dropZone.addEventListener("drop", e => {
 // File select
 fileInput.addEventListener("change", showPreview);
 
+    
 const previewList = document.getElementById("previewList");
 
 function showPreview() {
@@ -3289,8 +3329,19 @@ function showPreview() {
   preview.style.display = "flex";
 }
 
+function stopIOS(e) {
+  e.preventDefault();
+  e.stopPropagation();
+}
 
 
+function fixIOSViewport() {
+  const vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', `${vh}px`);
+}
+window.addEventListener('resize', fixIOSViewport);
+window.addEventListener('orientationchange', fixIOSViewport);
+fixIOSViewport();
 
     
 function scrollToTop() {
@@ -3337,6 +3388,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
