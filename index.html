@@ -1464,6 +1464,70 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
     width: 100%;
   }
 }
+/* ===============================
+   FILE TRANSFER – MOBILE FIX
+================================ */
+@media (max-width: 768px) {
+
+  /* Kill sideways scroll */
+  body,
+  main,
+  .right-panel {
+    overflow-x: hidden !important;
+  }
+
+  /* Allow table to scroll horizontally instead */
+  .estimate-table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+@media (max-width: 768px) {
+
+  .drop-zone {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 14px;
+  }
+
+  .drop-text {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+}
+@media (max-width: 768px) {
+
+  #file-transfer-container > section > div:first-child {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  #fileLoginStatus {
+    font-size: 14px;
+  }
+}
+@media (max-width: 768px) {
+
+  .estimate-table td:last-child {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .estimate-table .view-btn {
+    width: 100%;
+    font-size: 14px;
+    padding: 8px;
+  }
+}
+@media (max-width: 768px) {
+  .floating-btn {
+    bottom: 90px !important;
+  }
+}
 
 </style>
 
@@ -3388,6 +3452,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
