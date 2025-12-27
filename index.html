@@ -61,13 +61,713 @@ header h1 { margin: 0; font-size: 22px; }
 
 /* Prevent sidebar flash on load (mobile only) */
 @media (max-width: 768px) {
-  .left-bar {
-      visibility: hidden;
-      transform: translateX(-120%) !important;
-      opacity: 0 !important;
+  
+  /* ===== GENERAL RESETS ===== */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  html {
+    font-size: 14px;
+    -webkit-text-size-adjust: 100%;
+  }
+  
+  body {
+    padding: 0 !important;
+    margin: 0;
+    overflow-x: hidden;
+    background: #f8f9fa;
   }
 
+  /* ===== HEADER OPTIMIZATION ===== */
+  header {
+    padding: 10px 12px !important;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
 
+  header h1 {
+    font-size: 15px !important;
+    line-height: 1.3;
+    flex: 1;
+    margin: 0;
+  }
+
+  header img {
+    height: 36px !important;
+    margin-right: 8px;
+  }
+
+  /* ===== NAVIGATION ===== */
+  .nav-right {
+    width: 100%;
+    margin-top: 8px;
+    gap: 8px !important;
+    justify-content: space-between;
+  }
+
+  .nav-right a {
+    font-size: 12px;
+    padding: 6px 10px;
+    white-space: nowrap;
+  }
+
+  .search-wrapper {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .search-field {
+    width: 100%;
+    font-size: 14px !important;
+    padding: 8px 10px !important;
+  }
+
+  .search-btn {
+    padding: 8px 12px;
+    font-size: 16px;
+  }
+
+  /* ===== BURGER MENU ===== */
+  .burger-menu {
+    font-size: 22px;
+    padding: 6px 8px;
+  }
+
+  .dropdown-menu {
+    position: fixed !important;
+    top: 70px !important;
+    right: 0;
+    left: auto;
+    width: 75vw;
+    max-width: 280px;
+    height: calc(100vh - 70px);
+    border-radius: 0;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+    overflow-y: auto;
+  }
+
+  .dropdown-menu.active {
+    transform: translateX(0);
+  }
+
+  .dropdown-menu a {
+    padding: 14px 20px;
+    font-size: 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .menu-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+  }
+
+  .menu-overlay.active {
+    display: block;
+  }
+
+  /* ===== SUB NAVIGATION ===== */
+  #subNavBar {
+    padding: 8px 6px;
+    gap: 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    position: relative !important;
+  }
+
+  #subNavBar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .subnav-btn {
+    font-size: 12px;
+    padding: 8px 14px;
+    border-radius: 20px;
+    flex-shrink: 0;
+    min-width: fit-content;
+  }
+
+  /* ===== MOBILE FILTER BUTTONS ===== */
+  #mobileFilterBtn,
+  #mobileEstFilterBtn,
+  #mobileDailyFilterBtn {
+    display: block !important;
+    width: calc(100% - 20px);
+    margin: 10px auto;
+    padding: 12px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    position: relative;
+    z-index: 10;
+  }
+
+  /* ===== LEFT SIDEBAR (Mobile Slide-in) ===== */
+  .left-bar {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    background: #ffffff;
+    z-index: 1500;
+    padding: 15px;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+    transform: translateX(-100%);
+    transition: transform 0.35s ease-in-out;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .left-bar.active {
+    transform: translateX(0);
+  }
+
+  .left-bar h3 {
+    font-size: 17px;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #007bff;
+  }
+
+  .left-bar button {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+
+  /* ===== RIGHT PANEL ===== */
+  .right-panel {
+    width: 100%;
+    padding: 12px 10px !important;
+    overflow-x: hidden;
+  }
+
+  .right-panel h1 {
+    font-size: 18px !important;
+    margin: 10px 0 15px !important;
+    text-align: center;
+  }
+
+  /* ===== DASHBOARD CARDS ===== */
+  .pdf-dashboard-grid,
+  #estimateDashboard {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+
+  .dash-box {
+    padding: 12px;
+    border-radius: 10px;
+  }
+
+  .dash-box h4,
+  .dash-box h3 {
+    font-size: 11px;
+    margin-bottom: 6px;
+  }
+
+  .dash-box p {
+    font-size: 16px;
+  }
+
+  /* ===== PRODUCT/ESTIMATE GRID ===== */
+  .product-grid,
+  #estimatesGrid {
+    grid-template-columns: 1fr !important;
+    gap: 15px;
+    padding: 10px;
+  }
+
+  .product,
+  .cl-card {
+    margin-bottom: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .product img {
+    height: 120px !important;
+  }
+
+  .product-info h3 {
+    font-size: 15px;
+  }
+
+  .product-info p {
+    font-size: 13px;
+  }
+
+  .view-btn,
+  .product .view-btn {
+    font-size: 14px;
+    padding: 10px 14px;
+  }
+
+  /* ===== TABLES - HORIZONTAL SCROLL ===== */
+  .table-scroll {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
+  }
+
+  .estimate-table,
+  #pdfListTable,
+  #estimateListTable,
+  #clTable {
+    min-width: 800px;
+    font-size: 13px;
+  }
+
+  .estimate-table th,
+  .estimate-table td {
+    padding: 8px 6px;
+    font-size: 12px;
+  }
+
+  /* ===== FILTER BAR ===== */
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .filter-bar input,
+  .filter-bar select {
+    width: 100%;
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .filter-bar button {
+    width: 100%;
+    padding: 10px;
+  }
+
+  /* ===== PAGINATION ===== */
+  #pageInfo,
+  #estimatePageInfo,
+  #savedPageInfo {
+    font-size: 13px;
+    margin: 0 8px;
+  }
+
+  .pagination-btn {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  /* ===== MODALS ===== */
+  #productModal,
+  #recordDetailsModal,
+  #filePreviewModal,
+  #snapshotPreviewModal {
+    padding: 0;
+  }
+
+  #modalContent,
+  .details-box {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    margin: 0;
+    padding: 0;
+  }
+
+  #modalContent iframe,
+  #pdfFrame {
+    width: 100%;
+    height: calc(100vh - 60px) !important;
+    border-radius: 0;
+  }
+
+  #closeModal,
+  .close-details {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #dc3545;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    z-index: 10000;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  /* ===== RECORD DETAILS MODAL ===== */
+  .details-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+    padding: 10px;
+  }
+
+  .details-title {
+    font-size: 18px;
+    padding: 15px 10px;
+  }
+
+  .details-grid p {
+    font-size: 13px;
+    padding: 10px;
+  }
+
+  /* ===== CL BIO CARDS ===== */
+  #clBioGrid {
+    grid-template-columns: 1fr !important;
+    gap: 15px;
+    padding: 10px;
+  }
+
+  .cl-card {
+    padding: 15px;
+  }
+
+  .cl-photo {
+    width: 90px;
+    height: 90px;
+  }
+
+  .cl-name {
+    font-size: 17px;
+  }
+
+  .cl-info-box p {
+    font-size: 13px;
+  }
+
+  /* ===== FILE TRANSFER ===== */
+  #file-transfer-container .right-panel {
+    padding: 15px 10px;
+  }
+
+  .drop-zone {
+    padding: 20px 15px;
+  }
+
+  .drop-text {
+    font-size: 15px;
+  }
+
+  .drop-icon {
+    font-size: 40px;
+  }
+
+  /* ===== FLOATING BUTTONS ===== */
+  .floating-btn,
+  #goTopBtn,
+  #goBottomBtn,
+  #scrollTopBtn {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+    right: 15px;
+  }
+
+  #goTopBtn {
+    bottom: 90px;
+  }
+
+  #goBottomBtn {
+    bottom: 25px;
+  }
+
+  /* ===== FOOTER ===== */
+  footer {
+    padding: 20px 15px;
+    font-size: 12px;
+  }
+
+  footer p {
+    margin: 5px 0;
+  }
+
+  /* ===== LOADER ===== */
+  .loader {
+    width: 40px;
+    height: 40px;
+    border-width: 4px;
+  }
+
+  /* ===== ESTIMATE/DAILY PROGRESS CONTROLS ===== */
+  .sheet-controls,
+  #pdfEntryControls,
+  #estimateEntryControls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .control-group {
+    flex-direction: column;
+    border-left: none;
+    border-top: 1px solid #ddd;
+    padding: 10px 0 0 0;
+    gap: 8px;
+  }
+
+  .control-group:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .control-group input[type="date"] {
+    width: 100%;
+  }
+
+  .small,
+  .btn-add,
+  .btn-save,
+  .btn-clear,
+  .btn-export,
+  .btn-import-label {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    text-align: center;
+  }
+
+  /* ===== DAILY PROGRESS TABLE ===== */
+  #progressTable,
+  #savedProgressTable {
+    min-width: 900px;
+    font-size: 12px;
+  }
+
+  #progressTable th,
+  #progressTable td {
+    padding: 6px 4px;
+  }
+
+  /* ===== STATUS BADGES ===== */
+  .status-badge {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+
+  /* ===== SEARCH ICON BUTTON ===== */
+  .search-btn {
+    display: block;
+  }
+
+  /* ===== HIDE DESKTOP-ONLY ELEMENTS ===== */
+  @media (max-width: 768px) {
+    .nav-right a[href="login.html"] {
+      font-size: 0;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .nav-right a[href="login.html"]:before {
+      content: "🔐";
+      font-size: 16px;
+    }
+  }
+}
+
+/* ========================================
+   EXTRA SMALL MOBILE (0-480px)
+   ======================================== */
+
+@media (max-width: 480px) {
+  
+  header h1 {
+    font-size: 13px !important;
+  }
+
+  .subnav-btn {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+
+  .dash-box h4,
+  .dash-box h3 {
+    font-size: 10px;
+  }
+
+  .dash-box p {
+    font-size: 14px;
+  }
+
+  .product-info h3 {
+    font-size: 14px;
+  }
+
+  .dropdown-menu {
+    width: 85vw;
+  }
+
+  .left-bar {
+    width: 85vw;
+  }
+}
+
+/* ========================================
+   LANDSCAPE MOBILE (max-height: 500px)
+   ======================================== */
+
+@media (max-height: 500px) and (orientation: landscape) {
+  
+  header {
+    position: relative;
+  }
+
+  #subNavBar {
+    position: relative !important;
+  }
+
+  .left-bar {
+    top: 0;
+    height: 100vh;
+  }
+
+  #modalContent,
+  .details-box {
+    height: 100vh !important;
+  }
+}
+
+/* ========================================
+   TOUCH IMPROVEMENTS
+   ======================================== */
+
+@media (max-width: 768px) {
+  
+  /* Larger touch targets */
+  button,
+  a,
+  input[type="checkbox"],
+  select {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Prevent double-tap zoom */
+  button,
+  a {
+    touch-action: manipulation;
+  }
+
+  /* Better form inputs */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="date"],
+  select,
+  textarea {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+    padding: 12px;
+    border-radius: 8px;
+  }
+
+  /* Smooth scrolling */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* ========================================
+   PRINT MEDIA (Optional)
+   ======================================== */
+
+@media print {
+  
+  header,
+  .nav-right,
+  #subNavBar,
+  .burger-menu,
+  .dropdown-menu,
+  button,
+  .floating-btn,
+  footer {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+  }
+
+  .right-panel {
+    width: 100%;
+    padding: 0;
+  }
+}
+
+/* ========================================
+   ANIMATIONS (Mobile Optimized)
+   ======================================== */
+
+@media (max-width: 768px) {
+  
+  @keyframes slideInFromLeft {
+    from {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideInFromRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .left-bar.active {
+    animation: slideInFromLeft 0.35s ease-out;
+  }
+
+  .dropdown-menu.active {
+    animation: slideInFromRight 0.35s ease-out;
+  }
+
+  .product,
+  .cl-card {
+    animation: fadeIn 0.4s ease-out;
+  }
 }
 #estimates-leftbar h3 {
     margin:0 0 15px 0;
@@ -3452,6 +4152,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
