@@ -39,14 +39,21 @@ document.addEventListener("DOMContentLoaded", () => {
     addUserMessage(text);
 
     // show analyzing message
-    addBotMessage("Analyzing…");
+    addBotMessage(`<span id="aiAnalyzingMsg">Analyzing…</span>`);
 
     if (typeof window.analyzeAI !== "function") {
       showToast("AI core not loaded", "error");
       return;
     }
 window.analyzeAI();
+    
+const analyzing = document.getElementById("aiAnalyzingMsg");
+if (analyzing) {
+  analyzing.closest(".ai-msg")?.remove();
+}
 
+
+    
   });
 
   // ---------- SAVE ----------
