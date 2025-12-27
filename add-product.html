@@ -4086,6 +4086,7 @@ let aiTargetModule = "records"; // default
 
 
 function analyzeAI() {
+    aiOriginalResult = null;
 
     const text = document.getElementById("aiInput").value.trim();
     if (!text) {
@@ -4113,6 +4114,7 @@ function analyzeAI() {
     // 3️⃣ NUMBER SERIES
     // -------------------------
     else {
+        const { prNo, estimateNo } = detectNumberSeries(text);
         const numbers = text.match(/\b\d{10}\b/g) || [];
         let hasEstimate = numbers.some(n => n.startsWith("13") || n.startsWith("21"));
         let hasPR = numbers.some(n => n.startsWith("10"));
@@ -4123,6 +4125,7 @@ function analyzeAI() {
     }
 
     aiResult = parseTextToData(text, aiTargetModule);
+    aiOriginalResult = JSON.parse(JSON.stringify(aiResult));
 
     document.getElementById("aiTarget").innerHTML =
         `Detected Module: <b>${aiTargetModule.toUpperCase()}</b>`;
@@ -4198,10 +4201,13 @@ function parseTextToData(text, target) {
 
         manpower: get(/manpower\s*[:\-]\s*(.+)/i),
 
+        divisionLabel: detectDivision(text),
+
         status: /completed|done/i.test(text)
             ? "Completed"
             : "In Progress"
     };
+
 }
 
 
@@ -4280,10 +4286,10 @@ async function saveAIData() {
         case "daily":
             url = `${API}/daily-progress`;
             payload = {
-                date: aiResult.date,
+                date: normalizeDate(aiResult.date),
                 tableHTML: `
                     <tr>
-                        <td>${aiResult.date}</td>
+                        <td>${normalizeDate(aiResult.date)}</td>
                         <td>${aiResult.divisionLabel || ""}</td>
                         <td></td>
                         <td>${aiResult.activity}</td>
@@ -4318,11 +4324,14 @@ async function saveAIData() {
             showToast("Saved to CL BIO DATA ✔");
             loadCLData();
             document.getElementById("aiSaveBtn").disabled = true;
-            return; // 🔥 IMPORTANT — STOP HERE
+
+            // ✅ LEARN ONLY AFTER SUCCESS
+            await learnAI();
+
+            return;
         }
     }
 
-    // 🔹 SINGLE JSON REQUEST FOR RECORDS / ESTIMATES / DAILY
     const res = await fetch(url, {
         method: "POST",
         headers: {
@@ -4345,19 +4354,52 @@ async function saveAIData() {
     if (aiTargetModule === "daily") loadSavedProgress();
 
     document.getElementById("aiSaveBtn").disabled = true;
-await fetch(`${API}/ai/learn`, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    "Authorization": `Bearer ${token}`
-  },
-  body: JSON.stringify({
-    rawText: document.getElementById("aiInput").value,
-    module: aiTargetModule,
-    extracted: aiOriginalResult,
-    corrected: aiResult
-  })
-});
+
+    // ✅ LEARN ONLY AFTER SUCCESS
+    await learnAI();
+
+}
+
+
+async function learnAI() {
+    const token = localStorage.getItem("adminToken");
+    if (!token) return;
+
+    try {
+        await fetch(`${API}/ai/learn`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                rawText: document.getElementById("aiInput").value,
+                module: aiTargetModule,
+                extracted: aiOriginalResult,
+                corrected: aiResult
+            })
+        });
+    } catch (err) {
+        console.warn("AI learning skipped:", err.message);
+    }
+}
+
+        
+function normalizeDate(dateStr) {
+    if (!dateStr) return "";
+
+    // DD-MM-YYYY → DD/MM/YYYY
+    if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
+        return dateStr.replace(/-/g, "/");
+    }
+
+    // YYYY-MM-DD → DD/MM/YYYY
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+        const [y, m, d] = dateStr.split("-");
+        return `${d}/${m}/${y}`;
+    }
+
+    return dateStr;
 }
 
         /* =================================================================== */
@@ -4392,6 +4434,7 @@ await fetch(`${API}/ai/learn`, {
     </script></body>
 
 </html>
+
 
 
 
