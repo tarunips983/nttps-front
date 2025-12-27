@@ -13,7 +13,9 @@ if (!window.API) {
 
 let aiMemory = [];
 let aiMemoryLoaded = false;
-let __LAST_AI_INPUT__ = "";
+window.__LAST_AI_INPUT__ = "";
+let aiOriginalResult = null;
+
 
 
 async function loadAIMemory() {
@@ -206,13 +208,13 @@ function findLearnedMatch(text, module) {
 
 
 async function analyzeAI(passedText) {
-  const text = passedText?.trim();
+
 
  if (!aiMemoryLoaded) {
   await loadAIMemory();
 }
 
-  const text = (__LAST_AI_INPUT__ || "").trim();
+  const text = (window.__LAST_AI_INPUT__ || "").trim();
 if (!text) {
   addBotMessage("⚠️ No input text received.");
   return;
@@ -448,9 +450,9 @@ async function saveAIData() {
     }
 
     // Capture edited preview values
-    document.querySelectorAll("#aiPreview td[data-key]").forEach(td => {
-        aiResult[td.dataset.key] = td.innerText.trim();
-    });
+//    document.querySelectorAll("#aiPreview td[data-key]").forEach(td => {
+    //    aiResult[td.dataset.key] = td.innerText.trim();
+ //   });
 
     let url = "";
     let payload = {};
