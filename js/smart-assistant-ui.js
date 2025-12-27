@@ -1,29 +1,29 @@
-// smart-assistant-ui.js
-// UI layer ONLY – no AI logic, no backend analyze calls
-// smart-assistant-ui.js
-console.log("Smart Assistant UI loaded");
+console.log("✅ Smart Assistant UI loaded");
 
-// ================================
-// SMART ASSISTANT UI (GLOBAL)
-// ================================
-document.getElementById("aiAnalyzeBtn")
-  .addEventListener("click", onAnalyzeClick);
+document.addEventListener("DOMContentLoaded", () => {
+  const analyzeBtn = document.getElementById("aiAnalyzeBtn");
+  const saveBtn = document.getElementById("aiSaveBtn");
 
-function onAnalyzeClick() {
-  if (typeof window.analyzeAI !== "function") {
-    alert("Smart Assistant not ready yet");
+  if (!analyzeBtn) {
+    console.warn("⚠️ aiAnalyzeBtn not found (UI not visible yet)");
     return;
   }
-  window.analyzeAI();
-}
 
-
-window.saveAIData = function () {
-    if (typeof window._saveAICore !== "function") {
-        alert("AI core not loaded");
-        return;
+  analyzeBtn.addEventListener("click", () => {
+    if (typeof window.analyzeAI !== "function") {
+      alert("Smart Assistant core not loaded yet");
+      return;
     }
+    window.analyzeAI();
+  });
 
-    window._saveAICore();
-};
-
+  if (saveBtn) {
+    saveBtn.addEventListener("click", () => {
+      if (typeof window.saveAIData !== "function") {
+        alert("Save function not ready");
+        return;
+      }
+      window.saveAIData();
+    });
+  }
+});
