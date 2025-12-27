@@ -1,21 +1,22 @@
 // smart-assistant-ui.js
 // UI layer ONLY – no AI logic, no backend analyze calls
+// smart-assistant-ui.js
+console.log("Smart Assistant UI loaded");
+
+// ================================
+// SMART ASSISTANT UI (GLOBAL)
+// ================================
 
 window.analyzeAI = function () {
-    const text = document.getElementById("aiInput").value.trim();
-    if (!text) {
-        alert("Enter text");
-        return;
-    }
+    console.log("Analyze clicked");
 
-    // ✅ Call AI CORE directly (frontend brain)
-    if (typeof window.detectModuleSmart !== "function") {
+    if (typeof window._analyzeCore !== "function") {
         alert("AI core not loaded");
+        console.error("_analyzeCore missing");
         return;
     }
 
-    // Core analyze function
-    window._analyzeCore(text);
+    window._analyzeCore();
 };
 
 window.saveAIData = function () {
@@ -23,5 +24,7 @@ window.saveAIData = function () {
         alert("AI core not loaded");
         return;
     }
+
     window._saveAICore();
 };
+
