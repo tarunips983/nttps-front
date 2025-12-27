@@ -4131,6 +4131,22 @@ function analyzeAI() {
     document.getElementById("aiSaveBtn").disabled = false;
 }
 
+function cleanDailyActivity(text) {
+    return text
+        // remove date
+        .replace(/\b\d{2}[-/]\d{2}[-/]\d{4}\b/g, "")
+        // remove keywords
+        .replace(/daily work progress\.?/gi, "")
+        .replace(/today\.?/gi, "")
+        // remove manpower line
+        .replace(/manpower\s*[:\-].*/gi, "")
+        // clean extra spaces / lines
+        .replace(/\n+/g, " ")
+        .trim();
+}
+
+
+        
 function parseTextToData(text, target) {
 
     const get = (r) => {
@@ -4174,13 +4190,20 @@ function parseTextToData(text, target) {
     // DAILY PROGRESS
     // -------------------------
     if (target === "daily") {
-        return {
-            date: get(/(\d{2}[-/]\d{2}[-/]\d{4})/) || new Date().toISOString().slice(0,10),
-            activity: cleanWorkName(text),
-            manpower: get(/(\d+\s*(fitters?|helpers?|supervisors?|persons?))/i),
-            status: /completed|done/i.test(text) ? "Completed" : "In Progress"
-        };
-    }
+    return {
+        date: get(/\b(\d{2}[-/]\d{2}[-/]\d{4})\b/) || 
+              new Date().toISOString().slice(0, 10),
+
+        activity: cleanDailyActivity(text),
+
+        manpower: get(/manpower\s*[:\-]\s*(.+)/i),
+
+        status: /completed|done/i.test(text)
+            ? "Completed"
+            : "In Progress"
+    };
+}
+
 
     // -------------------------
     // CL BIO DATA
@@ -4357,6 +4380,7 @@ async function saveAIData() {
     </script></body>
 
 </html>
+
 
 
 
