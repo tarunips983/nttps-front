@@ -14,6 +14,9 @@ body {
     background: #f4f4f4;
     scroll-behavior: smooth;
 }
+* {
+  -webkit-tap-highlight-color: transparent;
+}
 
 header {
     background: #232f3e;
@@ -26,6 +29,9 @@ header {
     position: sticky;
     top: 0;
     z-index: 1000;
+}
+button, a, .burger-menu {
+  touch-action: manipulation;
 }
 
 header h1 { margin: 0; font-size: 22px; }
@@ -59,15 +65,10 @@ header h1 { margin: 0; font-size: 22px; }
   display: flex;
 }
 
-@media (max-width: 768px) {
-  .left-bar {
-      visibility: hidden;
-      transform: translateX(-120%) !important;
-      opacity: 0 !important;
-  }
 
 
-}
+
+
 /* ===== EXTRA SMALL SCREENS ===== */
 @media (max-width: 480px) {
   header h1 {
@@ -109,13 +110,7 @@ header h1 { margin: 0; font-size: 22px; }
     font-size: 14px;
   }
 
-  .dropdown-menu {
-    width: 85vw;
-  }
-
-  .left-bar {
-    width: 85vw;
-  }
+ 
 }
 
 /* ========================================
@@ -132,10 +127,7 @@ header h1 { margin: 0; font-size: 22px; }
     position: relative !important;
   }
 
-  .left-bar {
-    top: 0;
-    height: 100vh;
-  }
+
 
   #modalContent,
   .details-box {
@@ -244,10 +236,6 @@ header h1 { margin: 0; font-size: 22px; }
     to {
       opacity: 1;
     }
-  }
-
-  .left-bar.active {
-    animation: slideInFromLeft 0.35s ease-out;
   }
 
   .dropdown-menu.active {
@@ -554,19 +542,22 @@ header.dark-mode input::placeholder { color:#bbb !important; }
 /* MOBILE BURGER MENU */
 @media (max-width: 768px) {
     .dropdown-menu {
-        position: fixed !important;
-        right: 0 !important;
-        top: 156px !important;
-        width: 70% !important;
-        transform: translateX(100%);
-        transition: transform 0.35s ease-in-out;
-        display: flex !important;
-        flex-direction: column;
-    }
+  position: fixed;
+  top: 68px;
+  right: 0;
+  width: 70vw;
+  height: calc(100vh - 68px);
+  background: #232f3e;
+  transform: translateX(100%);
+  transition: transform 0.35s ease;
+  z-index: 5000;
+  display: flex; /* ALWAYS */
+}
 
-    .dropdown-menu.active {
-        transform: translateX(0%);
-    }
+.dropdown-menu.active {
+  transform: translateX(0);
+}
+
 }
     
 .view-btn { background:#007bff; color:white; }
@@ -604,22 +595,9 @@ header.dark-mode input::placeholder { color:#bbb !important; }
     color:#fff;
     box-shadow:inset 0px 2px 6px rgba(0,0,0,0.2);
 }
-.menu-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.4);
-    display: none;
-    z-index: 1500;
-}
 
-.menu-overlay.active {
-    display: block;
-}
 
-.dropdown-menu {
-    z-index: 1600;
-    margin-top: 10px;
-}
+
 
 /* Modal */
 #productModal {
@@ -749,12 +727,7 @@ main {
 
     /* Desktop restore */
 @media (min-width: 769px) {
-    .left-bar {
-        position: sticky !important;
-        transform: none !important;
-        opacity: 1 !important;
-        z-index: 1 !important;
-    }
+    
 
     #mobileFilterBtn,
     #mobileEstFilterBtn,
@@ -762,13 +735,9 @@ main {
         display: none !important;
     }
 }
-#menuOverlay {
-    z-index: 4000 !important;
-}
 
-.dropdown-menu {
-    z-index: 5000 !important;
-}
+
+
 
 /* ---- ESTIMATE TABLE MATCH INDENT TABLE ---- */
 .estimate-table {
@@ -823,13 +792,7 @@ main {
 }
 
     
-.dropdown-menu {
-    position: absolute;
-    z-index: 5000 !important;
-}
-.menu-overlay.active {
-    z-index: 4000 !important;
-}
+
 
 /* PDF NAV BUTTONS */
 #pdf-nav-bar button {
@@ -936,31 +899,6 @@ main {
     .product img { height:140px !important; }
 
 /* --- Smooth Slide + Fade for Sidebar --- */
-.left-bar {
-    position: fixed;
-    top: 68px;
-    left: 0;
-    width: 220px;
-    background: #f0f4f8;
-    height: calc(100vh - 68px);
-    padding: 12px;
-    transform: translateX(-120%);
-    
-    opacity: 0;
-    transition:
-        transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
-        opacity 0.35s ease-in-out;
-  
-    z-index: 1500;
-    overflow-y: auto;
-}
-
-/* Sidebar becomes visible */
-.left-bar.active {
-    transform: translateX(0);
-    opacity: 1;
-}
-
 
     #modalContent {
         width:100% !important;
@@ -985,10 +923,7 @@ main {
     #inlineSnapshotFrame { padding:10px; }
     table th, table td { font-size:0.75rem !important; padding:6px !important; }
 }
-    /* Left-bar smooth fade + slide-in animation */
-.left-bar {
-    animation: leftbarFade 0.35s ease;
-}
+
 
 .right-bar-header { display:flex; justify-content:space-between; align-items:center; padding: 10px 20px; border-bottom: 1px solid #ccc; background: #f9f9f9; } .right-bar-header h3 { margin: 0; color: #232f3e; } .right-bar-header button { background: #007bff; color:white; border:none; border-radius: 5px; padding: 8px 14px; font-weight: bold; cursor: pointer; } .right-bar-header button:hover { background: #0056b3; }
 
@@ -1135,12 +1070,7 @@ main {
     }
 }
 @media (min-width: 769px) {
-    .left-bar {
-        position: sticky !important;
-        transform: none !important;
-        opacity: 1 !important;
-        z-index: 2 !important;
-    }
+   
 
     #mobileFilterBtn,
     #mobileDailyFilterBtn {
@@ -1202,6 +1132,16 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
 
 .details-modal.active {
     display: flex;
+}
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  z-index: 4000;
+}
+.menu-overlay.active {
+  display: block;
 }
 
 /* Modal box */
@@ -1377,10 +1317,7 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
 #estimates-leftbar .pdf-nav-content {
     padding-left: 15px;
 }
-#estimates-leftbar {
-    display: block !important;
-    visibility: visible !important;
-}
+
 #estimatesContainer {
     flex-direction: row;
     width: 100%;
@@ -1718,6 +1655,25 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
     bottom: 90px !important;
   }
 }
+@media (max-width: 768px) {
+  .left-bar {
+    position: fixed;
+    top: 68px;
+    left: 0;
+    width: 85vw;
+    height: calc(100vh - 68px);
+    background: #f0f4f8;
+    transform: translateX(-110%);
+    opacity: 0;
+    transition: transform 0.35s ease, opacity 0.25s ease;
+    z-index: 1500;
+  }
+
+  .left-bar.active {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
 
 </style>
 
@@ -1749,7 +1705,7 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
 </div>
     </div>
   </header>
-
+<div id="menuOverlay" class="menu-overlay"></div>
   <div id="subNavBar">
   <button class="subnav-btn" onclick="showMainView('pdf')">📄 All Indents</button>
     <button class="subnav-btn" onclick="showMainView('estimates')">📘 Estimates</button>
@@ -2020,8 +1976,16 @@ if (fileAutoRefreshTimer && viewName !== "files") {
   clearInterval(fileAutoRefreshTimer);
   fileAutoRefreshTimer = null;
 }
+function closeAllSidebars() {
+  document.querySelectorAll(".left-bar.active").forEach(el => {
+    el.classList.remove("active");
+    el.setAttribute("aria-hidden", "true");
+  });
+}
 
 window.showMainView = function(viewName){
+closeAllSidebars();
+  updateMobileButtons(viewName);
 
     document.querySelectorAll(".subnav-btn").forEach(btn => btn.classList.remove("active"));
   document.getElementById("file-transfer-container").style.display = "none";
@@ -2106,22 +2070,28 @@ function collapseAllDropdowns(sidebarId) {
 
     
     // Set initial mobile buttons visibility depending on width
-    function updateMobileButtons(){
-      if(window.innerWidth <= 768){
-        mobileFilterBtn.style.display = "block";
-        mobileEstFilterBtn.style.display = "block";
-        mobileDailyFilterBtn.style.display = "block";
-      } else {
-        mobileFilterBtn.style.display = "none";
-        mobileEstFilterBtn.style.display = "none";
-        mobileDailyFilterBtn.style.display = "none";
-        // ensure sidebars visible on desktop
-        pdfNav.classList.remove("active");
-        document.getElementById("inlineLeftBar")?.classList?.remove("active");
-      }
-    }
-    window.addEventListener("resize", updateMobileButtons);
-    updateMobileButtons();
+    function updateMobileButtons(view) {
+  mobileFilterBtn.style.display = "none";
+  mobileEstFilterBtn.style.display = "none";
+  mobileDailyFilterBtn.style.display = "none";
+
+  if (window.innerWidth > 768) return;
+
+  if (view === "pdf") mobileFilterBtn.style.display = "block";
+  if (view === "estimates") mobileEstFilterBtn.style.display = "block";
+  if (view === "progress") mobileDailyFilterBtn.style.display = "block";
+}
+
+    window.addEventListener("resize", () => {
+  const activeView =
+    pdfView.style.display !== "none" ? "pdf" :
+    estimatesContainer.style.display !== "none" ? "estimates" :
+    progressView.style.display !== "none" ? "progress" :
+    null;
+
+  if (activeView) updateMobileButtons(activeView);
+});
+
 
     // Load records
     async function loadRecords(){
@@ -3448,17 +3418,19 @@ if (pendingDownloadUrl) {
     });
     
 //dropdown
-window.toggleMenu = function () {
-    const menu = document.getElementById("dropdownMenu");
+    document.getElementById("menuOverlay").addEventListener("click", () => {
+  document.getElementById("dropdownMenu").classList.remove("active");
+  document.getElementById("menuOverlay").classList.remove("active");
+});
 
-    if (window.innerWidth <= 768) {
-        // MOBILE → slide menu
-        menu.classList.toggle("active");
-    } else {
-        // DESKTOP → simple show/hide
-        menu.style.display = menu.style.display === "flex" ? "none" : "flex";
-    }
+window.toggleMenu = function () {
+  const menu = document.getElementById("dropdownMenu");
+  const overlay = document.getElementById("menuOverlay");
+
+  menu.classList.toggle("active");
+  overlay.classList.toggle("active");
 };
+
 
 
 
@@ -3642,6 +3614,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
