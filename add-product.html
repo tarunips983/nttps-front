@@ -4029,6 +4029,141 @@ async function loadEstimateList() {
     renderEstimateList();
 }
 
+let aiResult = null;
+
+function analyzeAI() {
+    const text = document.getElementById("aiInput").value.trim();
+    if (!text) {
+        showToast("Please enter some text", true);
+        return;
+    }
+
+    // BASIC DOMAIN DETECTION (safe & deterministic)
+    let target = "records";
+
+    if (/estimate|loa|gross|net/i.test(text)) target = "estimates";
+    else if (/manpower|progress|today|completed/i.test(text)) target = "daily";
+    else if (/aadhar|doj|wages|nominee/i.test(text)) target = "cl";
+
+    aiResult = parseTextToData(text, target);
+
+    document.getElementById("aiTarget").innerHTML =
+        `Detected Module: <b>${target.toUpperCase()}</b>`;
+
+    renderAIPreview(target, aiResult);
+
+    document.getElementById("aiSaveBtn").disabled = false;
+}
+function parseTextToData(text, target) {
+
+    const get = (regex) => {
+        const m = text.match(regex);
+        return m ? m[1] : "";
+    };
+
+    if (target === "records") {
+        return {
+            prNo: get(/PR\s*No\s*(\d+)/i),
+            prDate: get(/(\d{2}[-/]\d{2}[-/]\d{4})/),
+            workName: text.split("\n")[0],
+            amount: get(/Rs\.?\s*([\d,]+)/i).replace(/,/g,""),
+            divisionLabel: get(/division\s*([A-Za-z]+)/i)
+        };
+    }
+
+    if (target === "estimates") {
+        return {
+            description: text,
+            grossAmount: get(/gross\s*([\d,]+)/i),
+            division: get(/division\s*([A-Za-z]+)/i)
+        };
+    }
+
+    if (target === "daily") {
+        return {
+            date: get(/(\d{2}[-/]\d{2}[-/]\d{4})/),
+            activity: text,
+            status: /completed/i.test(text) ? "Done" : "In Progress"
+        };
+    }
+
+    if (target === "cl") {
+        return {
+            name: get(/name\s*([A-Za-z ]+)/i),
+            aadhar: get(/(\d{4}\s\d{4}\s\d{4})/),
+            wages: get(/(\d+)\s*\/?\s*day/i)
+        };
+    }
+
+    return {};
+}
+function renderAIPreview(target, data) {
+    let html = "<table><tbody>";
+
+    Object.keys(data).forEach(k => {
+        html += `
+            <tr>
+                <th style="width:200px">${k}</th>
+                <td contenteditable="true" data-key="${k}">${data[k]}</td>
+            </tr>`;
+    });
+
+    html += "</tbody></table>";
+
+    document.getElementById("aiPreview").innerHTML = html;
+}
+async function saveAIData() {
+
+    const rows = document.querySelectorAll("#aiPreview td[data-key]");
+    rows.forEach(td => {
+        aiResult[td.dataset.key] = td.innerText.trim();
+    });
+
+    const target = document.getElementById("aiTarget").innerText.toLowerCase();
+
+    if (target.includes("records")) {
+        await fetch(`${API}/upload`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(aiResult)
+        });
+        loadRecords();
+    }
+
+    else if (target.includes("estimates")) {
+        await fetch(`${API}/estimates`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(aiResult)
+        });
+        loadEstimateList();
+    }
+
+    else if (target.includes("daily")) {
+        await fetch(`${API}/daily-progress`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                date: aiResult.date,
+                tableHTML: aiResult.activity,
+                rowCount: 1
+            })
+        });
+        loadSavedProgress();
+    }
+
+    else if (target.includes("cl")) {
+        await fetch(`${API}/cl`, {
+            method: "POST",
+            body: JSON.stringify(aiResult),
+            headers: { "Content-Type": "application/json" }
+        });
+        loadCLData();
+    }
+
+    showToast("Saved successfully via Smart Assistant ✔");
+    document.getElementById("aiSaveBtn").disabled = true;
+}
 
 
         /* =================================================================== */
@@ -4063,5 +4198,6 @@ async function loadEstimateList() {
     </script></body>
 
 </html>
+
 
 
