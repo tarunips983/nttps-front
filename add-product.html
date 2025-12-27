@@ -4154,7 +4154,7 @@ function analyzeAI() {
     aiOriginalResult = null;
 
     if (!aiMemoryLoaded) {
-        showToast("AI is still learning, please wait...", true);
+        showToast("AI is initializing, please wait…", true);
         return;
     }
 
@@ -4164,18 +4164,22 @@ function analyzeAI() {
         return;
     }
 
-    const lower = text.toLowerCase();
+    // 🔥 TABLE DETECTION FIRST
+    if (looksLikeTableRow(text)) {
+        const estNo = text.match(/\b(13|21)\d{8}\b/);
+        if (estNo) {
+            aiTargetModule = "estimates";
+            aiResult = parseEstimateTableRow(text);
+        } else {
+            aiTargetModule = detectModuleSmart(text);
+            aiResult = parseTextToData(text, aiTargetModule);
+        }
+    } else {
+        aiTargetModule = detectModuleSmart(text);
 
-  aiTargetModule = detectModuleSmart(text);
-
-
-    const learned = findLearnedMatch(text, aiTargetModule);
-
-if (learned) {
-    aiResult = learned;        // 🔥 USE TRAINED DATA
-} else {
-    aiResult = parseTextToData(text, aiTargetModule);
-}
+        const learned = findLearnedMatch(text, aiTargetModule);
+        aiResult = learned ? learned : parseTextToData(text, aiTargetModule);
+    }
 
     aiOriginalResult = JSON.parse(JSON.stringify(aiResult));
 
@@ -4185,6 +4189,7 @@ if (learned) {
     renderAIPreview(aiTargetModule, aiResult);
     document.getElementById("aiSaveBtn").disabled = false;
 }
+
 
 function cleanDailyActivity(text) {
     return text
@@ -4294,6 +4299,29 @@ function parseTextToData(text, target) {
     }
 
     return {};
+}
+function looksLikeTableRow(text) {
+    const numberCount = (text.match(/\d+/g) || []).length;
+    const hasMultipleSpaces = /\s{2,}/.test(text);
+    const hasKnownMarkers = /MB\s*No|Pg|D\.No|WE\s*No|PO\s*No/i.test(text);
+
+    return numberCount >= 4 && hasMultipleSpaces && hasKnownMarkers;
+}
+function parseEstimateTableRow(text) {
+    return {
+        estimateNo: (text.match(/\b(13|21)\d{8}\b/) || [""])[0],
+        divisionLabel: (text.match(/TM&CAM|EM\s*&\s*MRT|I&C|C&I/i) || [""])[0],
+        poNo: (text.match(/\b52\d{8}\b/) || [""])[0],
+        description: text
+            .replace(/\b(13|21)\d{8}\b/g, "")
+            .replace(/\b52\d{8}\b/g, "")
+            .replace(/D\.No.*$/i, "")
+            .trim(),
+        dNo: (text.match(/D\.No[:\s]*([\d/]+)/i) || ["",""])[1],
+        date: (text.match(/\b\d{2}-\d{2}-\d{4}\b/) || [""])[0],
+        mbNo: (text.match(/MB\s*No[-:\s]*(\d+)/i) || ["",""])[1],
+        pageNo: (text.match(/Pg[-:\s]*(\d+)/i) || ["",""])[1]
+    };
 }
 
 
@@ -4504,6 +4532,7 @@ function normalizeDate(dateStr) {
     </script></body>
 
 </html>
+
 
 
 
