@@ -428,22 +428,30 @@ function parseEstimateTableRow(text) {
 
 
 function renderAIPreview(target, data) {
+  const preview = document.getElementById("aiPreview");
+  if (!preview) return;
+
   let html = "<table style='border-collapse:collapse;width:100%'>";
 
   Object.keys(data).forEach(k => {
-
-
     html += `
       <tr>
-        <th style="text-align:left;padding:6px;border:1px solid #ddd;width:200px">${k}</th>
-        <td style="padding:6px;border:1px solid #ddd">${data[k]}</td>
+        <th style="text-align:left;padding:6px;border:1px solid #ddd;width:200px">
+          ${k}
+        </th>
+        <td 
+          contenteditable="true"
+          data-key="${k}"
+          style="padding:6px;border:1px solid #ddd;background:#fffbe6"
+        >
+          ${data[k] ?? ""}
+        </td>
       </tr>`;
-
-
-
   });
 
   html += "</table>";
+
+  preview.innerHTML = html;
 
   addBotMessage(html);
 }
