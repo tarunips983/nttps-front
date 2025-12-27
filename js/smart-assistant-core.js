@@ -1,3 +1,9 @@
+if (!window.API) {
+  window.API = "https://https-backend.onrender.com";
+}
+
+
+
 (function () {
 
   if (window.__SMART_AI_LOADED__) return;
