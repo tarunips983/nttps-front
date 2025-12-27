@@ -581,8 +581,12 @@ function normalizeDate(dateStr) {
     return dateStr;
 }
 // expose to window (GLOBAL)
-window.analyzeAI = analyzeAI;
-window.saveAIData = saveAIData;
+
+  // expose core functions safely
+window._analyzeCore = analyzeAI;
+window._saveAICore = saveAIData;
 window.loadAIMemory = loadAIMemory;
 window.detectModuleSmart = detectModuleSmart;
+
+
 })();
