@@ -4082,75 +4082,119 @@ function cleanWorkName(text) {
 
         
 let aiResult = null;
+let aiTargetModule = "records"; // default
+
 
 function analyzeAI() {
+
     const text = document.getElementById("aiInput").value.trim();
     if (!text) {
-        showToast("Please enter some text", true);
+        showToast("Please enter text", true);
         return;
     }
 
-    // BASIC DOMAIN DETECTION (safe & deterministic)
-    let target = "records";
+    const lower = text.toLowerCase();
 
-    if (/estimate|loa|gross|net/i.test(text)) target = "estimates";
-    else if (/manpower|progress|today|completed/i.test(text)) target = "daily";
-    else if (/aadhar|doj|wages|nominee/i.test(text)) target = "cl";
+    // -------------------------
+    // 1️⃣ CL BIO DATA (HIGHEST)
+    // -------------------------
+    if (/aadhar|aadhaar|doj|wages|nominee|contractor|cl\b/.test(lower)) {
+        aiTargetModule = "cl";
+    }
 
-    aiResult = parseTextToData(text, target);
+    // -------------------------
+    // 2️⃣ DAILY PROGRESS
+    // -------------------------
+    else if (/today|progress|completed|work done|manpower|shift|activity/.test(lower)) {
+        aiTargetModule = "daily";
+    }
+
+    // -------------------------
+    // 3️⃣ NUMBER SERIES
+    // -------------------------
+    else {
+        const numbers = text.match(/\b\d{10}\b/g) || [];
+        let hasEstimate = numbers.some(n => n.startsWith("13") || n.startsWith("21"));
+        let hasPR = numbers.some(n => n.startsWith("10"));
+
+        if (hasEstimate) aiTargetModule = "estimates";
+        else if (hasPR) aiTargetModule = "records";
+        else aiTargetModule = "records"; // fallback
+    }
+
+    aiResult = parseTextToData(text, aiTargetModule);
 
     document.getElementById("aiTarget").innerHTML =
-        `Detected Module: <b>${target.toUpperCase()}</b>`;
+        `Detected Module: <b>${aiTargetModule.toUpperCase()}</b>`;
 
-    renderAIPreview(target, aiResult);
-
+    renderAIPreview(aiTargetModule, aiResult);
     document.getElementById("aiSaveBtn").disabled = false;
 }
+
 function parseTextToData(text, target) {
 
-    const { prNo, estimateNo } = detectNumberSeries(text);
-    const divisionLabel = detectDivision(text);
-    const workName = cleanWorkName(text);
+    const get = (r) => {
+        const m = text.match(r);
+        return m ? m[1].trim() : "";
+    };
 
-    // AUTO MODULE OVERRIDE (VERY IMPORTANT)
-    if (estimateNo) target = "estimates";
-    if (prNo) target = "records";
+    const numbers = text.match(/\b\d{10}\b/g) || [];
 
+    const prNo = numbers.find(n => n.startsWith("10")) || "";
+    const estimateNo = numbers.find(n => n.startsWith("13") || n.startsWith("21")) || "";
+
+    // -------------------------
+    // RECORDS (PR)
+    // -------------------------
     if (target === "records") {
         return {
             prNo,
-            workName,
-            divisionLabel,
+            workName: cleanWorkName(text),
+            divisionLabel: detectDivision(text),
             sendTo: /ce\s*o&m/i.test(text) ? "CE O&M" : "",
             recordType: "PR"
         };
     }
 
+    // -------------------------
+    // ESTIMATES
+    // -------------------------
     if (target === "estimates") {
         return {
             estimateNo,
-            description: workName,
-            divisionLabel
-        };
-    }
-    if (target === "daily") {
-        return {
-            date: get(/(\d{2}[-/]\d{2}[-/]\d{4})/),
-            activity: text,
-            status: /completed/i.test(text) ? "Done" : "In Progress"
+            description: cleanWorkName(text),
+            divisionLabel: detectDivision(text)
         };
     }
 
+    // -------------------------
+    // DAILY PROGRESS
+    // -------------------------
+    if (target === "daily") {
+        return {
+            date: get(/(\d{2}[-/]\d{2}[-/]\d{4})/) || new Date().toISOString().slice(0,10),
+            activity: cleanWorkName(text),
+            manpower: get(/(\d+\s*(fitters?|helpers?|supervisors?|persons?))/i),
+            status: /completed|done/i.test(text) ? "Completed" : "In Progress"
+        };
+    }
+
+    // -------------------------
+    // CL BIO DATA
+    // -------------------------
     if (target === "cl") {
         return {
-            name: get(/name\s*([A-Za-z ]+)/i),
-            aadhar: get(/(\d{4}\s\d{4}\s\d{4})/),
-            wages: get(/(\d+)\s*\/?\s*day/i)
+            name: get(/name\s*([a-z ]+)/i),
+            aadhar: get(/\b\d{4}\s?\d{4}\s?\d{4}\b/),
+            doj: get(/doj\s*([\d/-]+)/i),
+            wages: get(/(\d+)\s*\/?\s*day/i),
+            divisionLabel: detectDivision(text)
         };
     }
 
     return {};
 }
+
 function renderAIPreview(target, data) {
     let html = "<table><tbody>";
 
@@ -4172,66 +4216,86 @@ function renderAIPreview(target, data) {
         
 async function saveAIData() {
 
-    const rows = document.querySelectorAll("#aiPreview td[data-key]");
-    rows.forEach(td => {
+    const token = localStorage.getItem("adminToken");
+    if (!token) {
+        showToast("Session expired. Login again.", true);
+        return;
+    }
+
+    // Capture edited preview values
+    document.querySelectorAll("#aiPreview td[data-key]").forEach(td => {
         aiResult[td.dataset.key] = td.innerText.trim();
     });
 
-    const target = document.getElementById("aiTarget").innerText.toLowerCase();
+    let url = "";
+    let payload = {};
 
-    if (target.includes("records")) {
-        await fetch(`${API}/upload`, {
-            method: "POST",
-            headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`   // ✅ THIS IS THE FIX
-        },
-            body: JSON.stringify(aiResult)
-        });
-        loadRecords();
-    }
+    switch (aiTargetModule) {
 
-    else if (target.includes("estimates")) {
-        await fetch(`${API}/estimates`, {
-            method: "POST",
-            headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`   // ✅ THIS IS THE FIX
-        },
-            body: JSON.stringify(aiResult)
-        });
-        loadEstimateList();
-    }
+        case "records":
+            url = `${API}/upload`;
+            payload = {
+                prNo: aiResult.prNo,
+                workName: aiResult.workName,
+                divisionLabel: aiResult.divisionLabel,
+                sendTo: aiResult.sendTo,
+                recordType: "PR"
+            };
+            break;
 
-    else if (target.includes("daily")) {
-        await fetch(`${API}/daily-progress`, {
-            method: "POST",
-            headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`   // ✅ THIS IS THE FIX
-        },
-            body: JSON.stringify({
+        case "estimates":
+            url = `${API}/estimates`;
+            payload = {
+                estimate_no: aiResult.estimateNo,
+                description: aiResult.description,
+                division_label: aiResult.divisionLabel,
+                is_deleted: false
+            };
+            break;
+
+        case "daily":
+            url = `${API}/daily-progress`;
+            payload = {
                 date: aiResult.date,
-                tableHTML: aiResult.activity,
+                tableHTML: `
+                    <tr>
+                        <td>${aiResult.activity}</td>
+                        <td>${aiResult.manpower || ""}</td>
+                        <td>${aiResult.status}</td>
+                    </tr>
+                `,
                 rowCount: 1
-            })
-        });
-        loadSavedProgress();
+            };
+            break;
+
+        case "cl":
+            url = `${API}/cl`;
+            payload = aiResult;
+            break;
     }
 
-    else if (target.includes("cl")) {
-        await fetch(`${API}/cl`, {
-            method: "POST",
-            body: JSON.stringify(aiResult),
-            headers: {
+    const res = await fetch(url, {
+        method: "POST",
+        headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`   // ✅ THIS IS THE FIX
-        }
-        });
-        loadCLData();
+            "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+        const err = await res.json();
+        showToast(err.error || "Save failed", true);
+        return;
     }
 
-    showToast("Saved successfully via Smart Assistant ✔");
+    showToast(`Saved to ${aiTargetModule.toUpperCase()} successfully ✔`);
+
+    if (aiTargetModule === "records") loadRecords();
+    if (aiTargetModule === "estimates") loadEstimateList();
+    if (aiTargetModule === "daily") loadSavedProgress();
+    if (aiTargetModule === "cl") loadCLData();
+
     document.getElementById("aiSaveBtn").disabled = true;
 }
 
@@ -4268,6 +4332,7 @@ async function saveAIData() {
     </script></body>
 
 </html>
+
 
 
 
