@@ -4045,7 +4045,85 @@ async function loadAIMemory() {
     aiMemoryLoaded = true; // ✅ ADD THIS LINE
 }
 
+const RECORD_COLUMNS = [
+  "prNo",
+  "prDate",
+  "workName",
+  "amount",
+  "budgetHead",
+  "poNo",
+  "poDate",
+  "firmName",
+  "divisionLabel",
+  "pageNo",
+  "remarks",
+  "status",
+  "highValueSpares"
+];
 
+const ESTIMATE_COLUMNS = [
+  "description",
+  "divisionLabel",
+  "prNo",
+  "estimateNo",
+  "tSpecNo",
+  "firmContractor",
+  "poNo",
+  "grossAmount",
+  "amount",
+  "loaNo",
+  "sapBillingDoc",
+  "mbNo",
+  "pageNo",
+  "backCharging",
+  "startDate"
+];
+const DAILY_COLUMNS = [
+  "date",
+  "divisionLabel",
+  "subDivision",
+  "activity",
+  "manpower",
+  "status",
+  "remarks",
+  "location"
+];
+const CL_COLUMNS = [
+  "name",
+  "gender",
+  "aadhar",
+  "doj",
+  "wages",
+  "nominee",
+  "relation",
+  "divisionLabel"
+];
+function parseTabularRow(text, columns) {
+  const cells = text
+    .replace(/\r?\n/g, "")
+    .split("\t")
+    .map(v => v.trim());
+
+  const result = {};
+  columns.forEach((col, i) => {
+    result[col] = cells[i] || "";
+  });
+
+  return result;
+}
+function isTabularPaste(text) {
+  return text.includes("\t") || /\s{2,}/.test(text);
+}
+function detectModuleSmart(text) {
+  const lower = text.toLowerCase();
+
+  if (/aadhar|male|female|nominee|contractor/.test(lower)) return "cl";
+  if (/today|progress|manpower|completed/.test(lower)) return "daily";
+  if (/\b(13|21)\d{8}\b/.test(text)) return "estimates";
+  if (/\b10\d{8}\b/.test(text)) return "records";
+
+  return "records";
+}
 
         
 function detectNumberSeries(text) {
@@ -4151,58 +4229,66 @@ function findLearnedMatch(text, module) {
 
 
 async function analyzeAI() {
-    aiOriginalResult = null;
+  if (!aiMemoryLoaded) {
+    showToast("AI initializing, please wait…", true);
+    return;
+  }
 
-    if (!aiMemoryLoaded) {
-        showToast("AI is initializing, please wait…", true);
-        return;
-    }
+  const text = document.getElementById("aiInput").value.trim();
+  if (!text) {
+    showToast("Please enter text", true);
+    return;
+  }
 
-    const text = document.getElementById("aiInput").value.trim();
-    if (!text) {
-        showToast("Please enter text", true);
-        return;
-    }
+  aiTargetModule = detectModuleSmart(text);
 
-    // 🔥 TABLE DETECTION FIRST
-    if (looksLikeTableRow(text)) {
-        const estNo = text.match(/\b(13|21)\d{8}\b/);
-        if (estNo) {
-            aiTargetModule = "estimates";
-            aiResult = parseEstimateTableRow(text);
-        } else {
-            aiTargetModule = detectModuleSmart(text);
-            aiResult = parseTextToData(text, aiTargetModule);
-        }
+  /* ======================================================
+     1️⃣ TABULAR DATA → DIRECT COLUMN MAPPING (BEST)
+     ====================================================== */
+  if (isTabularPaste(text)) {
+    if (aiTargetModule === "records")
+      aiResult = parseTabularRow(text, RECORD_COLUMNS);
+
+    else if (aiTargetModule === "estimates")
+      aiResult = parseTabularRow(text, ESTIMATE_COLUMNS);
+
+    else if (aiTargetModule === "daily")
+      aiResult = parseTabularRow(text, DAILY_COLUMNS);
+
+    else if (aiTargetModule === "cl")
+      aiResult = parseTabularRow(text, CL_COLUMNS);
+  }
+
+  /* ======================================================
+     2️⃣ EXISTING SUPABASE DATA MATCH
+     ====================================================== */
+  else {
+    const dbMatch = await searchExistingData(aiTargetModule, text);
+    if (dbMatch) {
+      aiResult = dbMatch;
     } else {
-        aiTargetModule = detectModuleSmart(text);
-
-        // 1️⃣ Try matching EXISTING DATABASE DATA
-const dbMatch = await searchExistingData(aiTargetModule, text);
-
-if (dbMatch) {
-    aiResult = dbMatch; // 🔥 AUTO-FILL FROM SUPABASE
-} else {
-    // 2️⃣ Try AI memory
-    const learned = findLearnedMatch(text, aiTargetModule);
-
-    if (learned) {
+      /* ==================================================
+         3️⃣ AI LEARNING MEMORY
+         ================================================== */
+      const learned = findLearnedMatch(text, aiTargetModule);
+      if (learned) {
         aiResult = learned;
-    } else {
-        // 3️⃣ Fallback to rule parsing
+      } else {
+        /* ==============================================
+           4️⃣ REGEX FALLBACK (LAST OPTION)
+           ============================================== */
         aiResult = parseTextToData(text, aiTargetModule);
+      }
     }
-}
+  }
 
-    }
+  aiOriginalResult = JSON.parse(JSON.stringify(aiResult));
 
-    aiOriginalResult = JSON.parse(JSON.stringify(aiResult));
+  document.getElementById("aiTarget").innerHTML =
+    `Detected Module: <b>${aiTargetModule.toUpperCase()}</b>`;
 
-    document.getElementById("aiTarget").innerHTML =
-        `Detected Module: <b>${aiTargetModule.toUpperCase()}</b>`;
-
-    renderAIPreview(aiTargetModule, aiResult);
-    document.getElementById("aiSaveBtn").disabled = false;
+  renderAIPreview(aiTargetModule, aiResult);
+  document.getElementById("aiSaveBtn").disabled = false;
 }
 
 
@@ -4563,6 +4649,7 @@ function normalizeDate(dateStr) {
     </script></body>
 
 </html>
+
 
 
 
