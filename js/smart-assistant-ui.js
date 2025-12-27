@@ -1,33 +1,27 @@
-window.analyzeAI = async function () {
-  const text = document.getElementById("aiInput").value.trim();
-  if (!text) return alert("Enter text");
+// smart-assistant-ui.js
+// UI layer ONLY – no AI logic, no backend analyze calls
 
-  const res = await fetch(`${SERVER_URL}/ai/analyze`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text })
-  });
+window.analyzeAI = function () {
+    const text = document.getElementById("aiInput").value.trim();
+    if (!text) {
+        alert("Enter text");
+        return;
+    }
 
-  const data = await res.json();
+    // ✅ Call AI CORE directly (frontend brain)
+    if (typeof window.detectModuleSmart !== "function") {
+        alert("AI core not loaded");
+        return;
+    }
 
-  window.aiResult = data.extracted;
-  window.aiTargetModule = data.module;
-
-  document.getElementById("aiDetectedModule").innerText =
-    "Detected Module: " + data.module.toUpperCase();
-
-  renderAIPreview(data.extracted);
-  document.getElementById("aiSaveBtn").disabled = false;
+    // Core analyze function
+    window._analyzeCore(text);
 };
 
-function renderAIPreview(obj) {
-  const table = Object.entries(obj).map(
-    ([k, v]) => `<tr><td><b>${k}</b></td><td contenteditable data-key="${k}">${v}</td></tr>`
-  ).join("");
-
-  document.getElementById("aiPreview").innerHTML = `
-    <table class="estimate-table">
-      <tbody>${table}</tbody>
-    </table>
-  `;
-}
+window.saveAIData = function () {
+    if (typeof window._saveAICore !== "function") {
+        alert("AI core not loaded");
+        return;
+    }
+    window._saveAICore();
+};
