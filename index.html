@@ -1814,7 +1814,7 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
   <button class="subnav-btn" onclick="showMainView('progress')">📅 Daily Progress</button>
   <button class="subnav-btn" onclick="showMainView('clbiodata')">👥 CL's Bio Data</button>
    <button class="subnav-btn" onclick="showMainView('files')">📁 File Transfer</button>
-    <button class="tab-btn" onclick="openTab('smartAssistantTab')">🤖 Smart Assistant</button>
+    <button class="subnav-btn" onclick="showMainView('smart')">🤖 Smart Assistant</button>
 
 
 </div>
@@ -1945,35 +1945,36 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
 
   </section>
 </div>
-<div id="smartAssistantTab" class="tab-content">
+<!-- SMART ASSISTANT VIEW -->
+<div id="smart-assistant-container" class="main-view">
+  <section class="right-panel">
 
-    <div class="ai-chat-container">
+    <h1 style="margin-bottom:10px;">🤖 Smart Assistant</h1>
 
-        <div class="ai-chat-header">
-            🤖 Smart Assistant
-            <span class="ai-status">Online</span>
-        </div>
+    <div id="smartLoginBlock" style="display:none;color:#dc3545;font-weight:600;">
+      🔒 Login required to use Smart Assistant
+    </div>
 
-        <div id="aiChatMessages" class="ai-chat-messages">
-            <div class="ai-msg bot">
-                Hello 👋  
-                Paste any PR / Estimate / Daily / CL text and I’ll understand it.
-            </div>
-        </div>
+    <div id="smartAssistantUI" style="display:none;">
 
-        <div class="ai-chat-input">
-            <textarea id="aiInput"
-                placeholder="Paste text here (table row / paragraph / document)…"></textarea>
+      <textarea id="aiInput"
+        placeholder="Paste PR / Estimate / Daily Progress / CL text here…"
+        style="width:100%;min-height:160px;padding:12px;font-size:15px;border-radius:8px;"></textarea>
 
-            <button onclick="analyzeAI()">Analyze</button>
-            <button onclick="saveAIData()" class="primary">Save</button>
-        </div>
+      <div style="margin-top:10px;display:flex;gap:10px;">
+        <button class="view-btn" onclick="analyzeAI()">🔍 Analyze</button>
+        <button class="view-btn" onclick="saveAIData()" id="aiSaveBtn" disabled>💾 Save</button>
+      </div>
 
-        <div id="aiPreview" class="ai-preview"></div>
+      <p id="aiDetectedModule" style="margin-top:10px;font-weight:600;"></p>
+
+      <div id="aiPreview" style="margin-top:15px;"></div>
 
     </div>
 
+  </section>
 </div>
+
 
 
   </main>
@@ -2122,6 +2123,8 @@ closeAllSidebars();
 
     document.querySelectorAll(".subnav-btn").forEach(btn => btn.classList.remove("active"));
   document.getElementById("file-transfer-container").style.display = "none";
+  document.getElementById("smart-assistant-container").style.display = "none";
+
 
   pdfView.style.display = "none";
   progressView.style.display = "none";
@@ -2182,6 +2185,20 @@ if (productModal.classList.contains("active")) {
   // ✅ Start auto refresh every 4 seconds
   if (!fileAutoRefreshTimer) {
     fileAutoRefreshTimer = setInterval(loadFiles, 4000);
+  }
+}
+if (viewName === "smart") {
+  document.getElementById("smart-assistant-container").style.display = "flex";
+  document.querySelector("#subNavBar button:last-child").classList.add("active");
+
+  const token = localStorage.getItem("adminToken");
+
+  if (!token) {
+    document.getElementById("smartLoginBlock").style.display = "block";
+    document.getElementById("smartAssistantUI").style.display = "none";
+  } else {
+    document.getElementById("smartLoginBlock").style.display = "none";
+    document.getElementById("smartAssistantUI").style.display = "block";
   }
 }
 
@@ -3767,11 +3784,13 @@ window.addEventListener("DOMContentLoaded", function () {
     showMainView("pdf");   // Forces All Indents to open first
 });
   </script>
-  <script src="js/smart-assistant-ui.js"></script>
+  <script src="js/smart-assistant-core.js"></script>
+<script src="js/smart-assistant-ui.js"></script>
 
 
 </body>
 </html>
+
 
 
 
