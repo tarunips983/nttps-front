@@ -4134,9 +4134,12 @@ function analyzeAI() {
 function parseTextToData(text, target) {
 
     const get = (r) => {
-        const m = text.match(r);
-        return m ? m[1].trim() : "";
-    };
+    const m = text.match(r);
+    if (!m) return "";
+    if (typeof m[1] === "string") return m[1].trim();
+    return m[0]?.trim() || "";
+};
+
 
     const numbers = text.match(/\b\d{10}\b/g) || [];
 
@@ -4213,7 +4216,6 @@ function renderAIPreview(target, data) {
 
 
 
-        
 async function saveAIData() {
 
     const token = localStorage.getItem("adminToken");
@@ -4238,7 +4240,7 @@ async function saveAIData() {
                 prNo: aiResult.prNo,
                 workName: aiResult.workName,
                 divisionLabel: aiResult.divisionLabel,
-                sendTo: aiResult.sendTo,
+                sendTo: aiResult.sendTo || "",
                 recordType: "PR"
             };
             break;
@@ -4246,10 +4248,9 @@ async function saveAIData() {
         case "estimates":
             url = `${API}/estimates`;
             payload = {
-                estimate_no: aiResult.estimateNo,
+                estimateNo: aiResult.estimateNo,
                 description: aiResult.description,
-                division_label: aiResult.divisionLabel,
-                is_deleted: false
+                division: aiResult.divisionLabel
             };
             break;
 
@@ -4259,21 +4260,46 @@ async function saveAIData() {
                 date: aiResult.date,
                 tableHTML: `
                     <tr>
+                        <td>${aiResult.date}</td>
+                        <td>${aiResult.divisionLabel || ""}</td>
+                        <td></td>
                         <td>${aiResult.activity}</td>
                         <td>${aiResult.manpower || ""}</td>
                         <td>${aiResult.status}</td>
+                        <td></td>
+                        <td></td>
                     </tr>
                 `,
                 rowCount: 1
             };
             break;
 
-        case "cl":
+        case "cl": {
             url = `${API}/cl`;
-            payload = aiResult;
-            break;
+            const fd = new FormData();
+            Object.entries(aiResult).forEach(([k, v]) =>
+                fd.append(k, v || "")
+            );
+
+            const res = await fetch(url, {
+                method: "POST",
+                headers: { "Authorization": `Bearer ${token}` },
+                body: fd
+            });
+
+            if (!res.ok) {
+                showToast("CL save failed", true);
+                return;
+            }
+
+            showToast("Saved to CL BIO DATA ✔");
+            loadCLData();
+            document.getElementById("aiSaveBtn").disabled = true;
+            return; // 🔥 IMPORTANT — STOP HERE
+        }
     }
 
+    // 🔹 SINGLE JSON REQUEST FOR RECORDS / ESTIMATES / DAILY
     const res = await fetch(url, {
         method: "POST",
         headers: {
@@ -4294,7 +4320,6 @@ async function saveAIData() {
     if (aiTargetModule === "records") loadRecords();
     if (aiTargetModule === "estimates") loadEstimateList();
     if (aiTargetModule === "daily") loadSavedProgress();
-    if (aiTargetModule === "cl") loadCLData();
 
     document.getElementById("aiSaveBtn").disabled = true;
 }
@@ -4332,6 +4357,7 @@ async function saveAIData() {
     </script></body>
 
 </html>
+
 
 
 
