@@ -1204,6 +1204,7 @@ html, body {
             <button id="tabEstimate" class="tab-btn" onclick="showPanel('estimate')">Estimates</button>
             <button id="tabDaily" class="tab-btn" onclick="showPanel('daily')">Daily Work Progress</button>
             <button id="tabCL" class="tab-btn" onclick="showPanel('cl')">CL Bio Data</button>
+            <button id="tabAI" class="tab-btn" onclick="showPanel('ai')">🧠 Smart Assistant</button>
         </div>
 
         <div id="pdfPanel" class="panel active">
@@ -1623,6 +1624,37 @@ html, body {
     </table>
 </div>
     </div>
+
+    <div id="aiPanel" class="panel">
+
+    <h2>🧠 Smart Assistant Entry</h2>
+
+    <p class="muted">
+        Type or paste any description. The system will automatically detect
+        whether it belongs to PR Records, Estimates, Daily Progress, or CL Data.
+    </p>
+
+    <textarea id="aiInput"
+        placeholder="Example:
+PR No 4500198765 dated 24-12-2025 for procurement of turbine oil filter
+amount Rs. 3,25,000 sent to MM division"
+        style="width:100%; min-height:160px; padding:12px;"></textarea>
+
+    <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="small btn-add" onclick="analyzeAI()">🔍 Analyze</button>
+        <button class="small btn-save" onclick="saveAIData()" disabled id="aiSaveBtn">💾 Save</button>
+        <span id="aiTarget" class="muted"></span>
+    </div>
+
+    <hr style="margin:20px 0;">
+
+    <h3>📋 Preview</h3>
+    <div id="aiPreview" class="table-scroll">
+        <em class="muted">Nothing analyzed yet</em>
+    </div>
+
+</div>
+
         <!-- ================= CONFIRM MODAL (REQUIRED) ================= -->
 <div id="confirmModal" class="modal-overlay">
     <div id="confirmModalContent">
@@ -1701,12 +1733,16 @@ async function authFetch(url, options = {}) {
     document.getElementById('estimatePanel').classList.remove('active');
     document.getElementById('dailyPanel').classList.remove('active');
     document.getElementById('clPanel').classList.remove('active');
+    document.getElementById('aiPanel').classList.remove('active');
+
+
 
     // Reset tab highlights
     document.getElementById('tabPdf').classList.remove('active');
     document.getElementById('tabEstimate').classList.remove('active');
     document.getElementById('tabDaily').classList.remove('active');
     document.getElementById('tabCL').classList.remove('active');
+    document.getElementById('tabAI').classList.remove('active');
 
     // Activate correct panel
     if (name === 'pdf') {
@@ -1728,8 +1764,11 @@ async function authFetch(url, options = {}) {
     else if (name === 'cl') {
         document.getElementById('clPanel').classList.add('active');
         document.getElementById('tabCL').classList.add('active');
-        ;
-    }
+         }
+    else if (name === 'ai') {
+    document.getElementById('aiPanel').classList.add('active');
+    document.getElementById('tabAI').classList.add('active');
+}
 }
 
 
@@ -4024,4 +4063,5 @@ async function loadEstimateList() {
     </script></body>
 
 </html>
+
 
