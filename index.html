@@ -89,6 +89,19 @@ header h1 { margin: 0; font-size: 22px; }
 
 
 /* Dropdown menu – shared */
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  z-index: 4000;
+  pointer-events: none;        /* 🔑 KEY FIX */
+}
+
+.menu-overlay.active {
+  display: block;
+  pointer-events: auto;        /* only active overlay blocks background */
+}
 
 
 /* Desktop */
@@ -741,16 +754,7 @@ main {
     z-index: 1;
   padding: 20px;
 }
-.menu-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.4);
-  display: none;
-  z-index: 9000;
-}
-.menu-overlay.active {
-  display: block;
-}
+
     /* Desktop restore */
 @media (min-width: 769px) {
     
@@ -3632,6 +3636,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
