@@ -4177,8 +4177,23 @@ function analyzeAI() {
     } else {
         aiTargetModule = detectModuleSmart(text);
 
-        const learned = findLearnedMatch(text, aiTargetModule);
-        aiResult = learned ? learned : parseTextToData(text, aiTargetModule);
+        // 1️⃣ Try matching EXISTING DATABASE DATA
+const dbMatch = await searchExistingData(aiTargetModule, text);
+
+if (dbMatch) {
+    aiResult = dbMatch; // 🔥 AUTO-FILL FROM SUPABASE
+} else {
+    // 2️⃣ Try AI memory
+    const learned = findLearnedMatch(text, aiTargetModule);
+
+    if (learned) {
+        aiResult = learned;
+    } else {
+        // 3️⃣ Fallback to rule parsing
+        aiResult = parseTextToData(text, aiTargetModule);
+    }
+}
+
     }
 
     aiOriginalResult = JSON.parse(JSON.stringify(aiResult));
@@ -4242,6 +4257,22 @@ function detectAadharFromText(text) {
 
         
 
+async function searchExistingData(module, text) {
+    const token = localStorage.getItem("adminToken");
+    if (!token) return null;
+
+    const keywords = text.split(/\s+/).slice(0, 6).join(" ");
+
+    const res = await fetch(
+        `${API}/ai/search/${module}?q=${encodeURIComponent(keywords)}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    if (!res.ok) return null;
+
+    const results = await res.json();
+    return results.length ? results[0] : null;
+}
 
 
 function parseTextToData(text, target) {
@@ -4532,6 +4563,7 @@ function normalizeDate(dateStr) {
     </script></body>
 
 </html>
+
 
 
 
