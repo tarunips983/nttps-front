@@ -431,29 +431,42 @@ function renderAIPreview(target, data) {
   const preview = document.getElementById("aiPreview");
   if (!preview) return;
 
-  let html = "<table style='border-collapse:collapse;width:100%'>";
+  let html = `
+    <div style="overflow-x:auto">
+      <table style="border-collapse:collapse;width:100%;background:#fff">
+  `;
 
   Object.keys(data).forEach(k => {
     html += `
       <tr>
-        <th style="text-align:left;padding:6px;border:1px solid #ddd;width:200px">
+        <th style="
+          text-align:left;
+          padding:6px;
+          border:1px solid #ddd;
+          width:220px;
+          background:#f5f7fa
+        ">
           ${k}
         </th>
-        <td 
+        <td
           contenteditable="true"
           data-key="${k}"
-          style="padding:6px;border:1px solid #ddd;background:#fffbe6"
+          style="
+            padding:6px;
+            border:1px solid #ddd;
+            background:#fffbe6;
+          "
         >
           ${data[k] ?? ""}
         </td>
       </tr>`;
   });
 
-  html += "</table>";
+  html += "</table></div>";
 
   preview.innerHTML = html;
-
 }
+
 
 
 
