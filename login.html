@@ -394,8 +394,6 @@ form.addEventListener("submit", (e) => {
 
 
 async function handleRegister() {
-  console.log("handleRegister called");
-
   const email = emailField.value.trim();
   const password = passwordField.value;
   const confirm = confirmPasswordField.value;
@@ -426,11 +424,31 @@ async function handleRegister() {
     submitButton.textContent = "Verify OTP";
     isVerifyMode = true;
 
+    // ✅ ADD THIS
+    lockRegisterFields(true);
+
   } catch (err) {
     console.error(err);
     showMessage(errorMsg, "OTP send failed");
   }
 }
+
+function lockRegisterFields(lock = true) {
+  const fields = [
+    emailField,
+    passwordField,
+    confirmPasswordField,
+    inviteCodeField
+  ];
+
+  fields.forEach(field => {
+    field.disabled = lock;
+    field.style.backgroundColor = lock ? "#f0f0f0" : "";
+    field.style.cursor = lock ? "not-allowed" : "";
+  });
+}
+
+    
 async function handleVerify() {
   console.log("handleVerify called");
 
@@ -494,6 +512,7 @@ async function handleForgotStep2() {
   </script>
 </body>
 </html>
+
 
 
 
