@@ -2020,7 +2020,10 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
    <h1 style="margin-bottom:12px;">🤖 Smart Assistant</h1>
         <!-- CHAT MESSAGES -->
         <div id="aiChatMessages" class="ai-chat-messages"></div>
-        <div id="aiPreview" style="margin:20px 0;"></div>
+        <div id="aiPreview" style="margin:20px 0;">
+          <button class="view-btn" id="aiSaveBtn" disabled>💾 Save</button>
+        </div>
+        
           
         <div id="aiTarget" style="margin:8px 0;font-weight:600;color:#007bff;"></div>
 
@@ -2036,14 +2039,12 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
             rows="2"></textarea>
 
           <button class="view-btn" id="aiAnalyzeBtn">Analyze</button>
+          
         </div>
 
       </div>
 
-      <!-- SAVE BUTTON (appears after analysis) -->
-      <div style="margin-top:12px;text-align:right;">
-        <button class="view-btn" id="aiSaveBtn" disabled>💾 Save</button>
-      </div>
+  
 
     </div>
 
@@ -3868,6 +3869,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
