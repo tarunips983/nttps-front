@@ -49,6 +49,23 @@ const RECORD_COLUMNS = [
   "highValueSpares"
 ];
 
+const RECORD_SCHEMA = {
+  prNo: "",
+  prDate: "",
+  workName: "",
+  amount: "",
+  budgetHead: "",
+  poNo: "",
+  poDate: "",
+  firmName: "",
+  divisionLabel: "",
+  pageNo: "",
+  remarks: "",
+  status: "",
+  highValueSpares: ""
+};
+
+  
 const ESTIMATE_COLUMNS = [
   "description",
   "divisionLabel",
@@ -307,14 +324,14 @@ if (!text) {
 
   aiOriginalResult = JSON.parse(JSON.stringify(aiResult));
 
-  const aiTargetEl = document.getElementById("aiTarget");
-if (aiTargetEl) {
-  aiTargetEl.innerHTML =
-    `Detected Module: <b>${aiTargetModule.toUpperCase()}</b>`;
+if (aiTargetModule === "records") {
+  aiResult = {
+    ...RECORD_SCHEMA,
+    ...aiResult   // AI-filled values override blanks
+  };
 }
 
-
-  renderAIPreview(aiTargetModule, aiResult);
+renderAIPreview(aiTargetModule, aiResult);
 
 // ⚠️ If AI extracted nothing useful, warn user
 if (!Object.values(aiResult || {}).some(v => v && v.toString().trim())) {
