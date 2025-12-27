@@ -1709,6 +1709,10 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
   flex-direction: column;
   transition: all 0.4s ease;
 }
+.ai-chat-wrapper {
+  overflow: visible !important;
+  height: auto !important;
+}
 
 /* CENTER STATE (before analyze) */
 .ai-chat-wrapper.center {
@@ -1726,6 +1730,15 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
   overflow-y: auto;
   padding: 20px;
   display: none;            /* hidden initially */
+}
+.ai-chat-messages {
+  max-height: 180px;          /* adjust as you like */
+  overflow-y: auto;
+  padding-right: 6px;
+}
+#aiPreview {
+  overflow: visible;
+  margin-top: 12px;
 }
 
 /* Show messages after analyze */
@@ -3855,6 +3868,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
