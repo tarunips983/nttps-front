@@ -4124,7 +4124,10 @@ async function saveAIData() {
     if (target.includes("records")) {
         await fetch(`${API}/upload`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`   // ✅ THIS IS THE FIX
+        },
             body: JSON.stringify(aiResult)
         });
         loadRecords();
@@ -4133,7 +4136,10 @@ async function saveAIData() {
     else if (target.includes("estimates")) {
         await fetch(`${API}/estimates`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`   // ✅ THIS IS THE FIX
+        },
             body: JSON.stringify(aiResult)
         });
         loadEstimateList();
@@ -4142,7 +4148,10 @@ async function saveAIData() {
     else if (target.includes("daily")) {
         await fetch(`${API}/daily-progress`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`   // ✅ THIS IS THE FIX
+        },
             body: JSON.stringify({
                 date: aiResult.date,
                 tableHTML: aiResult.activity,
@@ -4156,7 +4165,10 @@ async function saveAIData() {
         await fetch(`${API}/cl`, {
             method: "POST",
             body: JSON.stringify(aiResult),
-            headers: { "Content-Type": "application/json" }
+            headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`   // ✅ THIS IS THE FIX
+        }
         });
         loadCLData();
     }
@@ -4198,6 +4210,7 @@ async function saveAIData() {
     </script></body>
 
 </html>
+
 
 
 
