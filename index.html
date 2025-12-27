@@ -1800,13 +1800,7 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
 .ai-input-bar button:hover {
   background: #1d4ed8;
 }
-#aiPreview {
-  margin-top: 12px;
-  padding: 10px;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  background: #fafafa;
-}
+
 
 /* Animation */
 @keyframes fadeSlide {
@@ -2013,10 +2007,11 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
    <h1 style="margin-bottom:12px;">🤖 Smart Assistant</h1>
         <!-- CHAT MESSAGES -->
         <div id="aiChatMessages" class="ai-chat-messages"></div>
+        <div id="aiPreview" style="margin:20px 0;"></div>
         <div id="aiTarget" style="margin:8px 0;font-weight:600;color:#007bff;"></div>
 
         <!-- AI PREVIEW (RESULT TABLE) -->
-<div id="aiPreview" style="margin:20px 0;"></div>
+
         
     
         <!-- INPUT BAR -->
@@ -3859,6 +3854,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
