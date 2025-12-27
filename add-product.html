@@ -4148,6 +4148,36 @@ function cleanDailyActivity(text) {
         .trim();
 }
 
+function detectNameFromText(text) {
+    const firstLine = text.split("\n")[0].trim();
+    const match = firstLine.match(/^([A-Z][a-z]+(?:\s[A-Z][a-z]+)*)/);
+    return match ? match[1] : "";
+}
+
+function detectDOJFromText(text) {
+    const m1 = text.match(/joined.*?([A-Za-z]+\s+\d{4})/i);
+    if (m1) return m1[1];
+
+    const m2 = text.match(/\b(\d{2}[-/]\d{2}[-/]\d{4})\b/);
+    if (m2) return m2[1];
+
+    return "";
+}
+
+function detectWagesFromText(text) {
+    const m1 = text.match(/paid\s*(\d+)/i);
+    if (m1) return m1[1];
+
+    const m2 = text.match(/(\d+)\s*(per\s*day|daily)/i);
+    if (m2) return m2[1];
+
+    return "";
+}
+
+function detectAadharFromText(text) {
+    const m = text.match(/\b\d{4}\s?\d{4}\s?\d{4}\b/);
+    return m ? m[0].replace(/\s/g, "") : "";
+}
 
         
 function parseTextToData(text, target) {
@@ -4214,15 +4244,16 @@ function parseTextToData(text, target) {
     // -------------------------
     // CL BIO DATA
     // -------------------------
-    if (target === "cl") {
-        return {
-            name: get(/name\s*([a-z ]+)/i),
-            aadhar: get(/\b\d{4}\s?\d{4}\s?\d{4}\b/),
-            doj: get(/doj\s*([\d/-]+)/i),
-            wages: get(/(\d+)\s*\/?\s*day/i),
-            divisionLabel: detectDivision(text)
-        };
-    }
+   if (target === "cl") {
+    return {
+        name: detectNameFromText(text),
+        aadhar: detectAadharFromText(text),
+        doj: detectDOJFromText(text),
+        wages: detectWagesFromText(text),
+        divisionLabel: detectDivision(text)
+    };
+}
+
 
     return {};
 }
@@ -4434,6 +4465,7 @@ function normalizeDate(dateStr) {
     </script></body>
 
 </html>
+
 
 
 
