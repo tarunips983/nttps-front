@@ -4029,6 +4029,58 @@ async function loadEstimateList() {
     renderEstimateList();
 }
 
+function detectNumberSeries(text) {
+    const numbers = text.match(/\b\d{10}\b/g) || [];
+
+    let prNo = "";
+    let estimateNo = "";
+
+    numbers.forEach(n => {
+        if (n.startsWith("10")) prNo = n;
+        if (n.startsWith("13")) estimateNo = n;
+    });
+
+    return { prNo, estimateNo };
+}
+const DIVISION_KEYWORDS = {
+    "TM&CAM": [
+        "hydraulic", "cylinder", "actuator", "servo",
+        "lubricant", "oil", "pump", "valve", "seal",
+        "bearing", "gear", "mechanical"
+    ],
+    "EM": [
+        "motor", "transformer", "breaker", "relay",
+        "electrical", "panel", "cable", "switchgear"
+    ],
+    "C&I": [
+        "plc", "dcs", "sensor", "transmitter",
+        "control", "instrument", "automation"
+    ],
+    "MM": [
+        "dispatch", "stores", "indent", "purchase",
+        "vendor", "supply"
+    ]
+};
+function detectDivision(text) {
+    const lower = text.toLowerCase();
+
+    for (const division in DIVISION_KEYWORDS) {
+        if (DIVISION_KEYWORDS[division].some(k => lower.includes(k))) {
+            return division;
+        }
+    }
+    return ""; // fallback
+}
+function cleanWorkName(text) {
+    return text
+        .replace(/pr\s*no\s*\d+/i, "")
+        .replace(/\b\d{10}\b/g, "")
+        .replace(/[-–]/g, "")
+        .trim();
+}
+
+
+        
 let aiResult = null;
 
 function analyzeAI() {
@@ -4056,29 +4108,31 @@ function analyzeAI() {
 }
 function parseTextToData(text, target) {
 
-    const get = (regex) => {
-        const m = text.match(regex);
-        return m ? m[1] : "";
-    };
+    const { prNo, estimateNo } = detectNumberSeries(text);
+    const divisionLabel = detectDivision(text);
+    const workName = cleanWorkName(text);
+
+    // AUTO MODULE OVERRIDE (VERY IMPORTANT)
+    if (estimateNo) target = "estimates";
+    if (prNo) target = "records";
 
     if (target === "records") {
         return {
-            prNo: get(/PR\s*No\s*(\d+)/i),
-            prDate: get(/(\d{2}[-/]\d{2}[-/]\d{4})/),
-            workName: text.split("\n")[0],
-            amount: get(/Rs\.?\s*([\d,]+)/i).replace(/,/g,""),
-            divisionLabel: get(/division\s*([A-Za-z]+)/i)
+            prNo,
+            workName,
+            divisionLabel,
+            sendTo: /ce\s*o&m/i.test(text) ? "CE O&M" : "",
+            recordType: "PR"
         };
     }
 
     if (target === "estimates") {
         return {
-            description: text,
-            grossAmount: get(/gross\s*([\d,]+)/i),
-            division: get(/division\s*([A-Za-z]+)/i)
+            estimateNo,
+            description: workName,
+            divisionLabel
         };
     }
-
     if (target === "daily") {
         return {
             date: get(/(\d{2}[-/]\d{2}[-/]\d{4})/),
@@ -4112,6 +4166,10 @@ function renderAIPreview(target, data) {
 
     document.getElementById("aiPreview").innerHTML = html;
 }
+
+
+
+        
 async function saveAIData() {
 
     const rows = document.querySelectorAll("#aiPreview td[data-key]");
@@ -4210,6 +4268,7 @@ async function saveAIData() {
     </script></body>
 
 </html>
+
 
 
 
