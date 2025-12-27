@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
       showToast("AI core not loaded", "error");
       return;
     }
-window.analyzeAI(text);
+window.analyzeAI();
 
   });
 
