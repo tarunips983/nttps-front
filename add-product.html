@@ -4345,8 +4345,20 @@ async function saveAIData() {
     if (aiTargetModule === "daily") loadSavedProgress();
 
     document.getElementById("aiSaveBtn").disabled = true;
+await fetch(`${API}/ai/learn`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${token}`
+  },
+  body: JSON.stringify({
+    rawText: document.getElementById("aiInput").value,
+    module: aiTargetModule,
+    extracted: aiOriginalResult,
+    corrected: aiResult
+  })
+});
 }
-
 
         /* =================================================================== */
         /* ========================= INITIAL LOAD ========================== */
@@ -4380,6 +4392,7 @@ async function saveAIData() {
     </script></body>
 
 </html>
+
 
 
 
