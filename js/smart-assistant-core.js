@@ -205,7 +205,9 @@ function findLearnedMatch(text, module) {
 }
 
 
-async function analyzeAI() {
+async function analyzeAI(passedText) {
+  const text = passedText?.trim();
+
  if (!aiMemoryLoaded) {
   await loadAIMemory();
 }
