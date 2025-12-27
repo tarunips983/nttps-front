@@ -393,6 +393,23 @@ header h1 { margin: 0; font-size: 22px; }
     background: #007bff !important;
     color: white !important;
 }
+@media (min-width: 769px) {
+  .dropdown-menu {
+    position: absolute;
+    top: 70px;
+    right: 10px;
+    width: 220px;
+    background: #232f3e;
+    border-radius: 8px;
+    display: none;
+    flex-direction: column;
+    z-index: 5000;
+  }
+
+  .dropdown-menu.active {
+    display: flex;
+  }
+}
 
 @media (max-width: 768px) {
     .nav-right {
@@ -3614,6 +3631,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
