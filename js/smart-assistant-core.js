@@ -1,10 +1,9 @@
-// expose to window (GLOBAL)
-window.analyzeAI = analyzeAI;
-window.saveAIData = saveAIData;
-window.loadAIMemory = loadAIMemory;
-window.detectModuleSmart = detectModuleSmart;
+(function () {
 
+  if (window.__SMART_AI_LOADED__) return;
+  window.__SMART_AI_LOADED__ = true;
 
+  const API = window.API || window.SERVER_URL;
 
 let aiMemory = [];
 let aiMemoryLoaded = false;
@@ -90,16 +89,7 @@ function parseTabularRow(text, columns) {
 function isTabularPaste(text) {
   return text.includes("\t") || /\s{2,}/.test(text);
 }
-function detectModuleSmart(text) {
-  const lower = text.toLowerCase();
 
-  if (/aadhar|male|female|nominee|contractor/.test(lower)) return "cl";
-  if (/today|progress|manpower|completed/.test(lower)) return "daily";
-  if (/\b(13|21)\d{8}\b/.test(text)) return "estimates";
-  if (/\b10\d{8}\b/.test(text)) return "records";
-
-  return "records";
-}
 
         
 function detectNumberSeries(text) {
@@ -205,10 +195,9 @@ function findLearnedMatch(text, module) {
 
 
 async function analyzeAI() {
-  if (!aiMemoryLoaded) {
-    showToast("AI initializing, please wait…", true);
-    return;
-  }
+ if (!aiMemoryLoaded) {
+  await loadAIMemory();
+}
 
   const text = document.getElementById("aiInput").value.trim();
   if (!text) {
@@ -591,4 +580,9 @@ function normalizeDate(dateStr) {
 
     return dateStr;
 }
-
+// expose to window (GLOBAL)
+window.analyzeAI = analyzeAI;
+window.saveAIData = saveAIData;
+window.loadAIMemory = loadAIMemory;
+window.detectModuleSmart = detectModuleSmart;
+})();
