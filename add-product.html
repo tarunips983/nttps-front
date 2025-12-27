@@ -4029,6 +4029,25 @@ async function loadEstimateList() {
     renderEstimateList();
 }
 
+
+let aiMemory = [];
+let aiMemoryLoaded = false;
+
+async function loadAIMemory() {
+    const token = localStorage.getItem("adminToken");
+    if (!token) return;
+
+    const res = await fetch(`${API}/ai/memory`, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+
+    aiMemory = res.ok ? await res.json() : [];
+    aiMemoryLoaded = true; // ✅ ADD THIS LINE
+}
+
+
+
+        
 function detectNumberSeries(text) {
     const numbers = text.match(/\b\d{10}\b/g) || [];
 
@@ -4062,15 +4081,12 @@ const DIVISION_KEYWORDS = {
     ]
 };
 function detectDivision(text) {
-    const lower = text.toLowerCase();
-
-    for (const division in DIVISION_KEYWORDS) {
-        if (DIVISION_KEYWORDS[division].some(k => lower.includes(k))) {
-            return division;
-        }
-    }
-    return ""; // fallback
+    if (/tm&cam/i.test(text)) return "TM&CAM";
+    if (/stage[-\s]?v/i.test(text)) return "Stage-V";
+    if (/sd[-\s]?iv/i.test(text)) return "SD-IV";
+    return "";
 }
+
 function cleanWorkName(text) {
     return text
         .replace(/pr\s*no\s*\d+/i, "")
@@ -4115,9 +4131,32 @@ function detectModuleSmart(text) {
     return Object.entries(score).sort((a, b) => b[1] - a[1])[0][0];
 }
 
+function findLearnedMatch(text, module) {
+    const normalize = s =>
+        s.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 30);
+
+    const inputKey = normalize(text);
+
+    for (const row of aiMemory) {
+        if (row.module !== module) continue;
+
+        const memoryKey = normalize(row.raw_text);
+
+        if (inputKey.startsWith(memoryKey) || memoryKey.startsWith(inputKey)) {
+            return row.corrected;
+        }
+    }
+    return null;
+}
+
 
 function analyzeAI() {
     aiOriginalResult = null;
+
+    if (!aiMemoryLoaded) {
+        showToast("AI is still learning, please wait...", true);
+        return;
+    }
 
     const text = document.getElementById("aiInput").value.trim();
     if (!text) {
@@ -4130,7 +4169,14 @@ function analyzeAI() {
   aiTargetModule = detectModuleSmart(text);
 
 
+    const learned = findLearnedMatch(text, aiTargetModule);
+
+if (learned) {
+    aiResult = learned;        // 🔥 USE TRAINED DATA
+} else {
     aiResult = parseTextToData(text, aiTargetModule);
+}
+
     aiOriginalResult = JSON.parse(JSON.stringify(aiResult));
 
     document.getElementById("aiTarget").innerHTML =
@@ -4155,20 +4201,24 @@ function cleanDailyActivity(text) {
 }
 
 function detectNameFromText(text) {
-    const firstLine = text.split("\n")[0].trim();
-    const match = firstLine.match(/^([A-Z][a-z]+(?:\s[A-Z][a-z]+)*)/);
-    return match ? match[1] : "";
+    // Match patterns like: M. raju, M Raju, Raju Kumar
+    const m = text.match(/\b([A-Z]\.\s*[A-Za-z]+|[A-Z][a-z]+(?:\s[A-Z][a-z]+)*)\b/);
+    return m ? m[0].trim() : "";
 }
 
-function detectDOJFromText(text) {
-    const m1 = text.match(/joined.*?([A-Za-z]+\s+\d{4})/i);
-    if (m1) return m1[1];
 
-    const m2 = text.match(/\b(\d{2}[-/]\d{2}[-/]\d{4})\b/);
-    if (m2) return m2[1];
+function detectDOJFromText(text) {
+    // Year only (2016)
+    const y = text.match(/\b(19\d{2}|20\d{2})\b/);
+    if (y) return y[1];
+
+    // Full date
+    const d = text.match(/\b\d{2}[./-]\d{2}[./-]\d{4}\b/);
+    if (d) return d[0];
 
     return "";
 }
+
 
 function detectWagesFromText(text) {
     const m1 = text.match(/paid\s*(\d+)/i);
@@ -4186,24 +4236,22 @@ function detectAadharFromText(text) {
 }
 
         
+
+
+
 function parseTextToData(text, target) {
 
     const get = (r) => {
-    const m = text.match(r);
-    if (!m) return "";
-    if (typeof m[1] === "string") return m[1].trim();
-    return m[0]?.trim() || "";
-};
-
+        const m = text.match(r);
+        if (!m) return "";
+        if (typeof m[1] === "string") return m[1].trim();
+        return m[0]?.trim() || "";
+    };
 
     const numbers = text.match(/\b\d{10}\b/g) || [];
-
     const prNo = numbers.find(n => n.startsWith("10")) || "";
     const estimateNo = numbers.find(n => n.startsWith("13") || n.startsWith("21")) || "";
 
-    // -------------------------
-    // RECORDS (PR)
-    // -------------------------
     if (target === "records") {
         return {
             prNo,
@@ -4214,9 +4262,6 @@ function parseTextToData(text, target) {
         };
     }
 
-    // -------------------------
-    // ESTIMATES
-    // -------------------------
     if (target === "estimates") {
         return {
             estimateNo,
@@ -4225,44 +4270,32 @@ function parseTextToData(text, target) {
         };
     }
 
-    // -------------------------
-    // DAILY PROGRESS
-    // -------------------------
     if (target === "daily") {
-    return {
-        date: get(/\b(\d{2}[-/]\d{2}[-/]\d{4})\b/) || 
-              new Date().toISOString().slice(0, 10),
+        return {
+            date: get(/\b(\d{2}[-/]\d{2}[-/]\d{4})\b/) || new Date().toISOString().slice(0, 10),
+            activity: cleanDailyActivity(text),
+            manpower: get(/manpower\s*[:\-]\s*(.+)/i),
+            divisionLabel: detectDivision(text),
+            status: /completed|done/i.test(text) ? "Completed" : "In Progress"
+        };
+    }
 
-        activity: cleanDailyActivity(text),
-
-        manpower: get(/manpower\s*[:\-]\s*(.+)/i),
-
-        divisionLabel: detectDivision(text),
-
-        status: /completed|done/i.test(text)
-            ? "Completed"
-            : "In Progress"
-    };
-
-}
-
-
-    // -------------------------
-    // CL BIO DATA
-    // -------------------------
-   if (target === "cl") {
-    return {
-        name: detectNameFromText(text),
-        aadhar: detectAadharFromText(text),
-        doj: detectDOJFromText(text),
-        wages: detectWagesFromText(text),
-        divisionLabel: detectDivision(text)
-    };
-}
-
+    if (target === "cl") {
+        return {
+            name: detectNameFromText(text),
+            gender: /\bmale\b/i.test(text) ? "Male" :
+                    /\bfemale\b/i.test(text) ? "Female" : "",
+            aadhar: detectAadharFromText(text),
+            doj: detectDOJFromText(text),
+            wages: detectWagesFromText(text),
+            nominee: get(/\b([A-Z]\.\s*[A-Za-z]+)\s+(Mother|Father|Wife|Husband)/i),
+            divisionLabel: detectDivision(text)
+        };
+    }
 
     return {};
 }
+
 
 function renderAIPreview(target, data) {
     let html = "<table><tbody>";
@@ -4445,6 +4478,7 @@ function normalizeDate(dateStr) {
         loadRecords();
         initPdfEntryGrid();
         initEstimateEntryGrid();
+        loadAIMemory();
         initSheet();
         setDefaultDate(); 
         loadSavedProgress();
@@ -4470,6 +4504,7 @@ function normalizeDate(dateStr) {
     </script></body>
 
 </html>
+
 
 
 
