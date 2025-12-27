@@ -13,6 +13,8 @@ if (!window.API) {
 
 let aiMemory = [];
 let aiMemoryLoaded = false;
+let __LAST_AI_INPUT__ = "";
+
 
 async function loadAIMemory() {
     const token = localStorage.getItem("adminToken");
@@ -208,11 +210,12 @@ async function analyzeAI() {
   await loadAIMemory();
 }
 
-  const text = document.getElementById("aiInput").value.trim();
-  if (!text) {
-    showToast("Please enter text", true);
-    return;
-  }
+  const text = (__LAST_AI_INPUT__ || "").trim();
+if (!text) {
+  addBotMessage("⚠️ No input text received.");
+  return;
+}
+
 
   aiTargetModule = detectModuleSmart(text);
 
@@ -417,19 +420,19 @@ function parseEstimateTableRow(text) {
 
 
 function renderAIPreview(target, data) {
-    let html = "<table><tbody>";
+  let html = "<table style='border-collapse:collapse;width:100%'>";
 
-    Object.keys(data).forEach(k => {
-        html += `
-            <tr>
-                <th style="width:200px">${k}</th>
-                <td contenteditable="true" data-key="${k}">${data[k]}</td>
-            </tr>`;
-    });
+  Object.keys(data).forEach(k => {
+    html += `
+      <tr>
+        <th style="text-align:left;padding:6px;border:1px solid #ddd;width:200px">${k}</th>
+        <td style="padding:6px;border:1px solid #ddd">${data[k]}</td>
+      </tr>`;
+  });
 
-    html += "</tbody></table>";
+  html += "</table>";
 
-    document.getElementById("aiPreview").innerHTML = html;
+  addBotMessage(html);
 }
 
 
@@ -561,7 +564,7 @@ async function learnAI() {
                 "Authorization": `Bearer ${token}`
             },
             body: JSON.stringify({
-                rawText: document.getElementById("aiInput").value,
+                rawText: __LAST_AI_INPUT__,
                 module: aiTargetModule,
                 extracted: aiOriginalResult,
                 corrected: aiResult
