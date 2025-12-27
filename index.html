@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="style.css">
   <link rel="icon" style="border-radius: 25px;" href="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg">
+  <script src="js/smart-assistant-core.js"></script>
   <style>
 /* ---------- RESTORED: Desktop + Shared styles (unchanged) ---------- */
 body {
@@ -1695,6 +1696,85 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
     opacity: 1;
   }
 }
+.ai-chat-container {
+    max-width: 900px;
+    margin: auto;
+    border-radius: 10px;
+    background: #f9fafb;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
+}
+
+.ai-chat-header {
+    background: #2563eb;
+    color: white;
+    padding: 12px 16px;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+}
+
+.ai-chat-messages {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    background: #eef2ff;
+}
+
+.ai-msg {
+    max-width: 80%;
+    margin-bottom: 10px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 14px;
+}
+
+.ai-msg.bot {
+    background: white;
+}
+
+.ai-msg.user {
+    background: #2563eb;
+    color: white;
+    margin-left: auto;
+}
+
+.ai-chat-input {
+    display: flex;
+    gap: 8px;
+    padding: 10px;
+    background: white;
+    border-top: 1px solid #ddd;
+}
+
+.ai-chat-input textarea {
+    flex: 1;
+    resize: none;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.ai-chat-input button {
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}
+
+.ai-chat-input .primary {
+    background: #16a34a;
+    color: white;
+}
+
+.ai-preview {
+    padding: 10px;
+    background: #fff;
+    border-top: 1px dashed #ccc;
+}
 
 </style>
 
@@ -1734,6 +1814,8 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
   <button class="subnav-btn" onclick="showMainView('progress')">📅 Daily Progress</button>
   <button class="subnav-btn" onclick="showMainView('clbiodata')">👥 CL's Bio Data</button>
    <button class="subnav-btn" onclick="showMainView('files')">📁 File Transfer</button>
+    <button class="tab-btn" onclick="openTab('smartAssistantTab')">🤖 Smart Assistant</button>
+
 
 </div>
 
@@ -1862,6 +1944,35 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
     </table>
 
   </section>
+</div>
+<div id="smartAssistantTab" class="tab-content">
+
+    <div class="ai-chat-container">
+
+        <div class="ai-chat-header">
+            🤖 Smart Assistant
+            <span class="ai-status">Online</span>
+        </div>
+
+        <div id="aiChatMessages" class="ai-chat-messages">
+            <div class="ai-msg bot">
+                Hello 👋  
+                Paste any PR / Estimate / Daily / CL text and I’ll understand it.
+            </div>
+        </div>
+
+        <div class="ai-chat-input">
+            <textarea id="aiInput"
+                placeholder="Paste text here (table row / paragraph / document)…"></textarea>
+
+            <button onclick="analyzeAI()">Analyze</button>
+            <button onclick="saveAIData()" class="primary">Save</button>
+        </div>
+
+        <div id="aiPreview" class="ai-preview"></div>
+
+    </div>
+
 </div>
 
 
@@ -3591,7 +3702,29 @@ window.addEventListener('resize', fixIOSViewport);
 window.addEventListener('orientationchange', fixIOSViewport);
 fixIOSViewport();
 
-    
+   function addUserMessage(text) {
+    const box = document.getElementById("aiChatMessages");
+    box.innerHTML += `<div class="ai-msg user">${text}</div>`;
+    box.scrollTop = box.scrollHeight;
+}
+
+function addBotMessage(text) {
+    const box = document.getElementById("aiChatMessages");
+    box.innerHTML += `<div class="ai-msg bot">${text}</div>`;
+    box.scrollTop = box.scrollHeight;
+}
+
+const _analyzeAI = analyzeAI;
+analyzeAI = function () {
+    const text = document.getElementById("aiInput").value.trim();
+    if (!text) return;
+
+    addUserMessage(text);
+    addBotMessage("Analyzing data…");
+
+    _analyzeAI();
+};
+ 
 function scrollToTop() {
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
@@ -3634,8 +3767,12 @@ window.addEventListener("DOMContentLoaded", function () {
     showMainView("pdf");   // Forces All Indents to open first
 });
   </script>
+  <script src="js/smart-assistant-ui.js"></script>
+
+
 </body>
 </html>
+
 
 
 
