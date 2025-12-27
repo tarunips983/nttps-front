@@ -6,6 +6,8 @@ console.log("Smart Assistant UI loaded");
 // ================================
 // SMART ASSISTANT UI (GLOBAL)
 // ================================
+document.getElementById("aiAnalyzeBtn")
+  .addEventListener("click", onAnalyzeClick);
 
 function onAnalyzeClick() {
   if (typeof window.analyzeAI !== "function") {
