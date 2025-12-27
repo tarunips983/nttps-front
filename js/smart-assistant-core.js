@@ -703,9 +703,14 @@ function clearChatHistory() {
   // expose core functions safely
 
 // ================== GLOBAL API ==================
+// ================== GLOBAL API ==================
 window.analyzeAI = analyzeAI;
 window.saveAIData = saveAIData;
 window.loadAIMemory = loadAIMemory;
+
+window.saveChatMessage = saveChatMessage;
+window.loadChatHistory = loadChatHistory;
+
 
 console.log("✅ Smart Assistant Core loaded");
 
