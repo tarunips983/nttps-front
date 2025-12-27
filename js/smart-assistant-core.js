@@ -185,29 +185,67 @@ function detectModuleSmart(text) {
     });
 
     // ---------- FINAL DECISION ----------
-    return Object.entries(score).sort((a, b) => b[1] - a[1])[0][0];
+    const sorted = Object.entries(score).sort((a,b)=>b[1]-a[1]);
+if (sorted[0][1] < 3) return "records"; // safe default
+return sorted[0][0];
+
+}
+function normalizeText(text) {
+  return text
+    .toLowerCase()
+    .replace(/[\r\n]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function findLearnedMatch(text, module) {
     const normalize = s =>
-        s.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 30);
+        s
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, "")
+          .slice(0, 50); // slightly longer improves recall
 
     const inputKey = normalize(text);
+
+    // simple fuzzy similarity (deterministic, fast)
+    function similarity(a, b) {
+        let matches = 0;
+        const len = Math.min(a.length, b.length);
+
+        for (let i = 0; i < len; i++) {
+            if (a[i] === b[i]) matches++;
+        }
+        return matches / Math.max(a.length, b.length);
+    }
+
+    let bestMatch = null;
+    let bestScore = 0;
 
     for (const row of aiMemory) {
         if (row.module !== module) continue;
 
         const memoryKey = normalize(row.raw_text);
+        if (!memoryKey) continue;
 
-        if (inputKey.startsWith(memoryKey) || memoryKey.startsWith(inputKey)) {
-            return row.corrected;
+        const score = similarity(inputKey, memoryKey);
+
+        // 🔑 threshold controls "smartness"
+        if (score > 0.65 && score > bestScore) {
+            bestScore = score;
+            bestMatch = row.corrected;
         }
     }
-    return null;
+
+    return bestMatch;
 }
 
 
+
 async function analyzeAI(passedText) {
+
+const text = normalizeText(
+  passedText || window.__LAST_AI_INPUT__ || ""
+);
 
 
  if (!aiMemoryLoaded) {
@@ -273,6 +311,17 @@ if (aiTargetEl) {
 
 
   renderAIPreview(aiTargetModule, aiResult);
+
+// ⚠️ If AI extracted nothing useful, warn user
+if (!Object.values(aiResult || {}).some(v => v && v.toString().trim())) {
+    if (typeof addBotMessage === "function") {
+        addBotMessage(
+          "I could not confidently extract fields. Please paste structured text (table / PR format) or edit the preview manually."
+        );
+    }
+}
+
+  
   const saveBtn = document.getElementById("aiSaveBtn");
 if (saveBtn) {
   saveBtn.style.display = "inline-flex";
@@ -639,6 +688,21 @@ function normalizeDate(dateStr) {
     return dateStr;
 }
 // expose to window (GLOBAL)
+const CHAT_KEY = "smartChatHistory";
+
+function saveChatMessage(role, text) {
+  const history = JSON.parse(localStorage.getItem(CHAT_KEY) || "[]");
+  history.push({ role, text, time: Date.now() });
+  localStorage.setItem(CHAT_KEY, JSON.stringify(history));
+}
+
+function loadChatHistory() {
+  return JSON.parse(localStorage.getItem(CHAT_KEY) || "[]");
+}
+
+function clearChatHistory() {
+  localStorage.removeItem(CHAT_KEY);
+}
 
   // expose core functions safely
 
