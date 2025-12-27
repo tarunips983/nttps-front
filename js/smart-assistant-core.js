@@ -279,7 +279,7 @@ if (saveBtn) {
   saveBtn.disabled = false;
 }
 
-  document.getElementById("aiSaveBtn").disabled = false;
+  
 }
 
 
