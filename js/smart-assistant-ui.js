@@ -37,9 +37,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // show user message
     addUserMessage(text);
+saveChatMessage("user", text);
 
     // show analyzing message
     addBotMessage(`<span id="aiAnalyzingMsg">Analyzing…</span>`);
+    saveChatMessage("bot", text);
 
     if (typeof window.analyzeAI !== "function") {
       showToast("AI core not loaded", "error");
@@ -134,5 +136,19 @@ function collectCorrectedAIData() {
 
   return corrected;
 }
+document.addEventListener("DOMContentLoaded", () => {
+  const messages = loadChatHistory();
+  const box = document.getElementById("aiChatMessages");
+
+  messages.forEach(m => {
+    if (m.role === "user") addUserMessage(m.text);
+    else addBotMessage(m.text);
+  });
+
+  if (messages.length) {
+    document.getElementById("aiChatWrapper")
+      .classList.replace("center", "chat");
+  }
+});
 
 
