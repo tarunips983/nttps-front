@@ -427,20 +427,24 @@ function parseEstimateTableRow(text) {
 }
 
 
-function renderAIPreview(target, data) {
-  let html = "<table style='border-collapse:collapse;width:100%'>";
+function renderAIPreview(module, data) {
+  const preview = document.getElementById("aiPreview");
 
-  Object.keys(data).forEach(k => {
+  let html = `<table class="ai-preview-table">`;
+
+  Object.entries(data).forEach(([key, value]) => {
     html += `
       <tr>
-        <th style="text-align:left;padding:6px;border:1px solid #ddd;width:200px">${k}</th>
-        <td style="padding:6px;border:1px solid #ddd">${data[k]}</td>
-      </tr>`;
+        <th>${key}</th>
+        <td contenteditable="true" data-key="${key}">
+          ${value ?? ""}
+        </td>
+      </tr>
+    `;
   });
 
-  html += "</table>";
-
-  addBotMessage(html);
+  html += `</table>`;
+  preview.innerHTML = html;
 }
 
 
@@ -452,11 +456,12 @@ async function saveAIData() {
         showToast("Session expired. Login again.", true);
         return;
     }
+// ✅ Capture edited preview values BEFORE saving
+document.querySelectorAll("#aiPreview td[data-key]").forEach(td => {
+    const key = td.dataset.key;
+    aiResult[key] = td.innerText.trim();
+});
 
-    // Capture edited preview values
-//    document.querySelectorAll("#aiPreview td[data-key]").forEach(td => {
-    //    aiResult[td.dataset.key] = td.innerText.trim();
- //   });
 
     let url = "";
     let payload = {};
