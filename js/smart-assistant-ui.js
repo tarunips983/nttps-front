@@ -7,17 +7,14 @@ console.log("Smart Assistant UI loaded");
 // SMART ASSISTANT UI (GLOBAL)
 // ================================
 
-window.analyzeAI = function () {
-    console.log("Analyze clicked");
+function onAnalyzeClick() {
+  if (typeof window.analyzeAI !== "function") {
+    alert("Smart Assistant not ready yet");
+    return;
+  }
+  window.analyzeAI();
+}
 
-    if (typeof window._analyzeCore !== "function") {
-        alert("AI core not loaded");
-        console.error("_analyzeCore missing");
-        return;
-    }
-
-    window._analyzeCore();
-};
 
 window.saveAIData = function () {
     if (typeof window._saveAICore !== "function") {
