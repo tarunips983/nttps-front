@@ -16,7 +16,10 @@ let aiMemoryLoaded = false;
 
 async function loadAIMemory() {
     const token = localStorage.getItem("adminToken");
-    if (!token) return;
+    if (!token || !window.API) {
+  console.warn("AI memory skipped: missing token or API");
+  return;
+}
 
     const res = await fetch(`${API}/ai/memory`, {
         headers: { Authorization: `Bearer ${token}` }
