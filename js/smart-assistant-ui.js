@@ -115,3 +115,17 @@ function escapeHtml(str) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
 }
+
+function collectCorrectedAIData() {
+  const rows = document.querySelectorAll("#aiPreview td[data-key]");
+  const corrected = {};
+
+  rows.forEach(td => {
+    const key = td.dataset.key;
+    corrected[key] = td.innerText.trim();
+  });
+
+  return corrected;
+}
+
+
