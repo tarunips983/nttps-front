@@ -4084,6 +4084,37 @@ function cleanWorkName(text) {
 let aiResult = null;
 let aiTargetModule = "records"; // default
 
+function detectModuleSmart(text) {
+    const lower = text.toLowerCase();
+
+    let score = {
+        cl: 0,
+        daily: 0,
+        records: 0,
+        estimates: 0
+    };
+
+    // ---------- CL SCORING ----------
+    if (/\b(male|female)\b/.test(lower)) score.cl += 2;
+    if (/\b\d{12}\b/.test(text)) score.cl += 3;          // Aadhaar
+    if (/\b\d{2}[./-]\d{2}[./-]\d{4}\b/.test(text)) score.cl += 2; // DOB
+    if (/\b(mother|father|wife|husband)\b/.test(lower)) score.cl += 2;
+    if (text.split(/\s+/).length > 8) score.cl += 1;     // tabular row
+
+    // ---------- DAILY SCORING ----------
+    if (/today|progress|completed|carried out|manpower/.test(lower)) score.daily += 3;
+
+    // ---------- RECORDS / ESTIMATES ----------
+    const numbers = text.match(/\b\d{10}\b/g) || [];
+    numbers.forEach(n => {
+        if (n.startsWith("10")) score.records += 4;
+        if (n.startsWith("13") || n.startsWith("21")) score.estimates += 4;
+    });
+
+    // ---------- FINAL DECISION ----------
+    return Object.entries(score).sort((a, b) => b[1] - a[1])[0][0];
+}
+
 
 function analyzeAI() {
     aiOriginalResult = null;
@@ -4096,33 +4127,8 @@ function analyzeAI() {
 
     const lower = text.toLowerCase();
 
-    // -------------------------
-    // 1️⃣ CL BIO DATA (HIGHEST)
-    // -------------------------
-    if (/aadhar|aadhaar|doj|wages|nominee|contractor|cl\b/.test(lower)) {
-        aiTargetModule = "cl";
-    }
+  aiTargetModule = detectModuleSmart(text);
 
-    // -------------------------
-    // 2️⃣ DAILY PROGRESS
-    // -------------------------
-    else if (/today|progress|completed|work done|manpower|shift|activity/.test(lower)) {
-        aiTargetModule = "daily";
-    }
-
-    // -------------------------
-    // 3️⃣ NUMBER SERIES
-    // -------------------------
-    else {
-        const { prNo, estimateNo } = detectNumberSeries(text);
-        const numbers = text.match(/\b\d{10}\b/g) || [];
-        let hasEstimate = numbers.some(n => n.startsWith("13") || n.startsWith("21"));
-        let hasPR = numbers.some(n => n.startsWith("10"));
-
-        if (hasEstimate) aiTargetModule = "estimates";
-        else if (hasPR) aiTargetModule = "records";
-        else aiTargetModule = "records"; // fallback
-    }
 
     aiResult = parseTextToData(text, aiTargetModule);
     aiOriginalResult = JSON.parse(JSON.stringify(aiResult));
@@ -4391,7 +4397,6 @@ async function saveAIData() {
 
 }
 
-
 async function learnAI() {
     const token = localStorage.getItem("adminToken");
     if (!token) return;
@@ -4465,6 +4470,7 @@ function normalizeDate(dateStr) {
     </script></body>
 
 </html>
+
 
 
 
