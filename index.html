@@ -1962,7 +1962,7 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
         style="width:100%;min-height:160px;padding:12px;font-size:15px;border-radius:8px;"></textarea>
 
       <div style="margin-top:10px;display:flex;gap:10px;">
-        <button class="view-btn" onclick="analyzeAI()">🔍 Analyze</button>
+        <button class="view-btn" onclick="window.analyzeAI && window.analyzeAI()">🔍 Analyze</button>
         <button class="view-btn" onclick="saveAIData()" id="aiSaveBtn" disabled>💾 Save</button>
       </div>
 
@@ -3794,6 +3794,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
