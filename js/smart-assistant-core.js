@@ -1,3 +1,11 @@
+// expose to window (GLOBAL)
+window.analyzeAI = analyzeAI;
+window.saveAIData = saveAIData;
+window.loadAIMemory = loadAIMemory;
+window.detectModuleSmart = detectModuleSmart;
+
+
+
 let aiMemory = [];
 let aiMemoryLoaded = false;
 
