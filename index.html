@@ -59,142 +59,94 @@ header h1 { margin: 0; font-size: 22px; }
   display: flex;
 }
 
-/* Prevent sidebar flash on load (mobile only) */
 @media (max-width: 768px) {
   
-  /* ===== GENERAL RESETS ===== */
+  /* Reset everything */
   * {
     -webkit-tap-highlight-color: transparent;
+    box-sizing: border-box;
   }
   
-  html {
-    font-size: 14px;
-    -webkit-text-size-adjust: 100%;
-  }
-  
-  body {
-    padding: 0 !important;
-    margin: 0;
+  html, body {
+    width: 100%;
     overflow-x: hidden;
-    background: #f8f9fa;
+    font-size: 14px;
+    margin: 0;
+    padding: 0;
   }
 
-  /* ===== HEADER OPTIMIZATION ===== */
+  /* ===== HEADER ===== */
   header {
     padding: 10px 12px !important;
     flex-wrap: wrap;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   }
 
   header h1 {
-    font-size: 15px !important;
-    line-height: 1.3;
+    font-size: 14px !important;
+    line-height: 1.2;
     flex: 1;
-    margin: 0;
   }
 
   header img {
-    height: 36px !important;
-    margin-right: 8px;
+    height: 32px !important;
   }
 
   /* ===== NAVIGATION ===== */
   .nav-right {
     width: 100%;
     margin-top: 8px;
-    gap: 8px !important;
-    justify-content: space-between;
+    gap: 6px !important;
   }
 
   .nav-right a {
     font-size: 12px;
-    padding: 6px 10px;
-    white-space: nowrap;
+    padding: 8px 10px;
   }
 
   .search-wrapper {
     flex: 1;
-    min-width: 0;
   }
 
   .search-field {
-    width: 100%;
+    width: 100% !important;
     font-size: 14px !important;
-    padding: 8px 10px !important;
-  }
-
-  .search-btn {
-    padding: 8px 12px;
-    font-size: 16px;
+    padding: 8px !important;
   }
 
   /* ===== BURGER MENU ===== */
   .burger-menu {
-    font-size: 22px;
-    padding: 6px 8px;
+    font-size: 20px;
+    padding: 6px 10px;
   }
 
   .dropdown-menu {
     position: fixed !important;
     top: 70px !important;
     right: 0;
-    left: auto;
     width: 75vw;
-    max-width: 280px;
+    max-width: 300px;
     height: calc(100vh - 70px);
-    border-radius: 0;
     transform: translateX(100%);
-    transition: transform 0.3s ease-in-out;
-    overflow-y: auto;
+    transition: transform 0.3s ease;
+    z-index: 2000;
   }
 
   .dropdown-menu.active {
     transform: translateX(0);
   }
 
-  .dropdown-menu a {
-    padding: 14px 20px;
-    font-size: 15px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-  }
-
-  .menu-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 999;
-  }
-
-  .menu-overlay.active {
-    display: block;
-  }
-
   /* ===== SUB NAVIGATION ===== */
   #subNavBar {
-    padding: 8px 6px;
-    gap: 6px;
+    padding: 8px !important;
+    gap: 6px !important;
     overflow-x: auto;
-    overflow-y: hidden;
     white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    position: relative !important;
-  }
-
-  #subNavBar::-webkit-scrollbar {
-    display: none;
   }
 
   .subnav-btn {
-    font-size: 12px;
-    padding: 8px 14px;
-    border-radius: 20px;
+    font-size: 11px !important;
+    padding: 8px 12px !important;
     flex-shrink: 0;
-    min-width: fit-content;
   }
 
   /* ===== MOBILE FILTER BUTTONS ===== */
@@ -205,88 +157,41 @@ header h1 { margin: 0; font-size: 22px; }
     width: calc(100% - 20px);
     margin: 10px auto;
     padding: 12px;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 15px;
-    font-weight: 600;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    position: relative;
-    z-index: 10;
+    font-size: 14px;
   }
 
-  /* ===== LEFT SIDEBAR (Mobile Slide-in) ===== */
+  /* ===== LEFT SIDEBAR (FIXED SLIDE-IN) ===== */
   .left-bar {
     position: fixed !important;
     top: 0;
     left: 0;
     width: 280px;
     height: 100vh;
-    background: #ffffff;
+    background: white;
     z-index: 1500;
-    padding: 15px;
-    box-shadow: 2px 0 10px rgba(0,0,0,0.2);
     transform: translateX(-100%);
-    transition: transform 0.35s ease-in-out;
+    transition: transform 0.3s ease;
     overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    padding: 15px;
   }
 
   .left-bar.active {
     transform: translateX(0);
   }
 
-  .left-bar h3 {
-    font-size: 17px;
-    margin-top: 10px;
-    margin-bottom: 15px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #007bff;
-  }
-
-  .left-bar button {
-    font-size: 14px;
-    padding: 10px 12px;
-  }
-
   /* ===== RIGHT PANEL ===== */
   .right-panel {
-    width: 100%;
-    padding: 12px 10px !important;
+    width: 100% !important;
+    padding: 15px 10px !important;
     overflow-x: hidden;
   }
 
   .right-panel h1 {
     font-size: 18px !important;
-    margin: 10px 0 15px !important;
-    text-align: center;
+    margin: 10px 0 !important;
   }
 
-  /* ===== DASHBOARD CARDS ===== */
-  .pdf-dashboard-grid,
-  #estimateDashboard {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 10px;
-    margin-bottom: 15px;
-  }
-
-  .dash-box {
-    padding: 12px;
-    border-radius: 10px;
-  }
-
-  .dash-box h4,
-  .dash-box h3 {
-    font-size: 11px;
-    margin-bottom: 6px;
-  }
-
-  .dash-box p {
-    font-size: 16px;
-  }
-
-  /* ===== PRODUCT/ESTIMATE GRID ===== */
+  /* ===== CARDS/PRODUCTS ===== */
   .product-grid,
   #estimatesGrid {
     grid-template-columns: 1fr !important;
@@ -294,9 +199,7 @@ header h1 { margin: 0; font-size: 22px; }
     padding: 10px;
   }
 
-  .product,
-  .cl-card {
-    margin-bottom: 0;
+  .product {
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   }
 
@@ -312,71 +215,43 @@ header h1 { margin: 0; font-size: 22px; }
     font-size: 13px;
   }
 
-  .view-btn,
-  .product .view-btn {
-    font-size: 14px;
-    padding: 10px 14px;
-  }
-
-  /* ===== TABLES - HORIZONTAL SCROLL ===== */
+  /* ===== TABLES (HORIZONTAL SCROLL) ===== */
   .table-scroll {
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch;
-    border-radius: 8px;
   }
 
   .estimate-table,
   #pdfListTable,
-  #estimateListTable,
-  #clTable {
+  #estimateListTable {
     min-width: 800px;
-    font-size: 13px;
-  }
-
-  .estimate-table th,
-  .estimate-table td {
-    padding: 8px 6px;
     font-size: 12px;
   }
 
-  /* ===== FILTER BAR ===== */
-  .filter-bar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-    padding: 10px;
+  /* ===== DASHBOARD ===== */
+  .pdf-dashboard-grid,
+  #estimateDashboard {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px;
   }
 
-  .filter-bar input,
-  .filter-bar select {
-    width: 100%;
-    font-size: 14px;
-    padding: 10px;
+  .dash-box {
+    padding: 12px;
   }
 
-  .filter-bar button {
-    width: 100%;
-    padding: 10px;
+  .dash-box h3,
+  .dash-box h4 {
+    font-size: 11px;
   }
 
-  /* ===== PAGINATION ===== */
-  #pageInfo,
-  #estimatePageInfo,
-  #savedPageInfo {
-    font-size: 13px;
-    margin: 0 8px;
+  .dash-box p {
+    font-size: 15px;
   }
 
-  .pagination-btn {
-    padding: 8px 12px;
-    font-size: 13px;
-  }
-
-  /* ===== MODALS ===== */
+  /* ===== MODALS (FULL SCREEN) ===== */
   #productModal,
   #recordDetailsModal,
-  #filePreviewModal,
-  #snapshotPreviewModal {
+  #filePreviewModal {
     padding: 0;
   }
 
@@ -391,11 +266,9 @@ header h1 { margin: 0; font-size: 22px; }
     padding: 0;
   }
 
-  #modalContent iframe,
-  #pdfFrame {
+  #modalContent iframe {
     width: 100%;
     height: calc(100vh - 60px) !important;
-    border-radius: 0;
   }
 
   #closeModal,
@@ -408,90 +281,65 @@ header h1 { margin: 0; font-size: 22px; }
     border-radius: 50%;
     background: #dc3545;
     color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     font-size: 20px;
     z-index: 10000;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
 
   /* ===== RECORD DETAILS MODAL ===== */
   .details-grid {
     grid-template-columns: 1fr !important;
     gap: 12px;
-    padding: 10px;
-  }
-
-  .details-title {
-    font-size: 18px;
-    padding: 15px 10px;
-  }
-
-  .details-grid p {
-    font-size: 13px;
-    padding: 10px;
   }
 
   /* ===== CL BIO CARDS ===== */
   #clBioGrid {
     grid-template-columns: 1fr !important;
     gap: 15px;
+  }
+
+  /* ===== FILTER BAR ===== */
+  .filter-bar {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .filter-bar input,
+  .filter-bar select {
+    width: 100%;
     padding: 10px;
+    font-size: 14px;
   }
 
-  .cl-card {
-    padding: 15px;
+  /* ===== BUTTONS ===== */
+  button,
+  a,
+  .view-btn {
+    min-height: 44px;
+    touch-action: manipulation;
   }
 
-  .cl-photo {
-    width: 90px;
-    height: 90px;
-  }
-
-  .cl-name {
-    font-size: 17px;
-  }
-
-  .cl-info-box p {
-    font-size: 13px;
-  }
-
-  /* ===== FILE TRANSFER ===== */
-  #file-transfer-container .right-panel {
-    padding: 15px 10px;
-  }
-
-  .drop-zone {
-    padding: 20px 15px;
-  }
-
-  .drop-text {
-    font-size: 15px;
-  }
-
-  .drop-icon {
-    font-size: 40px;
+  /* ===== INPUTS (PREVENT ZOOM) ===== */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="date"],
+  select,
+  textarea {
+    font-size: 16px !important;
+    padding: 12px;
   }
 
   /* ===== FLOATING BUTTONS ===== */
   .floating-btn,
   #goTopBtn,
-  #goBottomBtn,
-  #scrollTopBtn {
+  #goBottomBtn {
     width: 48px;
     height: 48px;
-    font-size: 20px;
     right: 15px;
   }
 
-  #goTopBtn {
-    bottom: 90px;
-  }
-
-  #goBottomBtn {
-    bottom: 25px;
-  }
+  #goTopBtn { bottom: 90px; }
+  #goBottomBtn { bottom: 25px; }
 
   /* ===== FOOTER ===== */
   footer {
@@ -499,97 +347,29 @@ header h1 { margin: 0; font-size: 22px; }
     font-size: 12px;
   }
 
-  footer p {
-    margin: 5px 0;
+  /* ===== MAIN VIEW ===== */
+  .main-view {
+    flex-direction: column !important;
   }
 
-  /* ===== LOADER ===== */
-  .loader {
-    width: 40px;
-    height: 40px;
-    border-width: 4px;
-  }
-
-  /* ===== ESTIMATE/DAILY PROGRESS CONTROLS ===== */
-  .sheet-controls,
-  #pdfEntryControls,
-  #estimateEntryControls {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-    padding: 10px;
-  }
-
-  .control-group {
-    flex-direction: column;
-    border-left: none;
-    border-top: 1px solid #ddd;
-    padding: 10px 0 0 0;
-    gap: 8px;
-  }
-
-  .control-group:first-child {
-    border-top: none;
-    padding-top: 0;
-  }
-
-  .control-group input[type="date"] {
-    width: 100%;
-  }
-
-  .small,
-  .btn-add,
-  .btn-save,
-  .btn-clear,
-  .btn-export,
-  .btn-import-label {
-    width: 100%;
-    padding: 10px 12px;
-    font-size: 14px;
-    text-align: center;
-  }
-
-  /* ===== DAILY PROGRESS TABLE ===== */
-  #progressTable,
-  #savedProgressTable {
-    min-width: 900px;
-    font-size: 12px;
-  }
-
-  #progressTable th,
-  #progressTable td {
-    padding: 6px 4px;
-  }
-
-  /* ===== STATUS BADGES ===== */
-  .status-badge {
-    font-size: 11px;
-    padding: 3px 8px;
-  }
-
-  /* ===== SEARCH ICON BUTTON ===== */
-  .search-btn {
-    display: block;
-  }
-
-  /* ===== HIDE DESKTOP-ONLY ELEMENTS ===== */
-  @media (max-width: 768px) {
-    .nav-right a[href="login.html"] {
-      font-size: 0;
-      width: 32px;
-      height: 32px;
-      padding: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .nav-right a[href="login.html"]:before {
-      content: "🔐";
-      font-size: 16px;
-    }
+  /* ===== HIDE DESKTOP ELEMENTS ===== */
+  .nav-right a[onclick="openPasswordModal()"] {
+    display: none !important;
   }
 }
+
+/* ===== EXTRA SMALL SCREENS ===== */
+@media (max-width: 480px) {
+  header h1 {
+    font-size: 12px !important;
+  }
+
+  .subnav-btn {
+    font-size: 10px !important;
+    padding: 6px 10px !important;
+  }
+}
+
 
 /* ========================================
    EXTRA SMALL MOBILE (0-480px)
@@ -4152,6 +3932,7 @@ window.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 </html>
+
 
 
 
