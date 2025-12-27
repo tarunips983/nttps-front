@@ -453,7 +453,6 @@ function renderAIPreview(target, data) {
 
   preview.innerHTML = html;
 
-  addBotMessage(html);
 }
 
 
