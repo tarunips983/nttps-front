@@ -2003,8 +2003,12 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
       <!-- CHAT WRAPPER -->
       <div id="aiChatWrapper" class="ai-chat-wrapper center">
 
+
         <!-- CHAT MESSAGES -->
         <div id="aiChatMessages" class="ai-chat-messages"></div>
+        <!-- AI PREVIEW (RESULT TABLE) -->
+<div id="aiPreview" style="margin:20px 0;"></div>
+        
        <h1 style="margin-bottom:12px;">🤖 Smart Assistant</h1>
         <!-- INPUT BAR -->
         <div id="aiInputBar" class="ai-input-bar">
@@ -3794,53 +3798,6 @@ window.addEventListener('resize', fixIOSViewport);
 window.addEventListener('orientationchange', fixIOSViewport);
 fixIOSViewport();
 
-  function addUserMessage(text) {
-  const box = document.getElementById("aiChatMessages");
-  const wrapper = document.getElementById("aiChatWrapper");
-
-  // 🔑 switch layout mode
-  wrapper.classList.remove("center");
-  wrapper.classList.add("chat");
-
-  box.insertAdjacentHTML(
-    "beforeend",
-    `<div class="ai-msg user">${text}</div>`
-  );
-
-  box.scrollTop = box.scrollHeight;
-}
-
-
-function addBotMessage(text) {
-  const box = document.getElementById("aiChatMessages");
-  const wrapper = document.getElementById("aiChatWrapper");
-
-  // 🔑 ensure chat mode is active
-  wrapper.classList.add("chat");
-
-  box.insertAdjacentHTML(
-    "beforeend",
-    `<div class="ai-msg bot">${text}</div>`
-  );
-
-  box.scrollTop = box.scrollHeight;
-}
-
-const _analyzeAI = analyzeAI;
-analyzeAI = function () {
-  const input = document.getElementById("aiInput");
-  const text = input.value.trim();
-  if (!text) return;
-
-  input.value = "";
-
-  addUserMessage(text);
-  addBotMessage("Analyzing…");
-
-  _analyzeAI();
-};
-
- 
 function scrollToTop() {
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
@@ -3893,6 +3850,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
