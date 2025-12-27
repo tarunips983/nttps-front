@@ -3798,7 +3798,9 @@ fixIOSViewport();
   const box = document.getElementById("aiChatMessages");
   const wrapper = document.getElementById("aiChatWrapper");
 
+  // 🔑 switch layout mode
   wrapper.classList.remove("center");
+  wrapper.classList.add("chat");
 
   box.insertAdjacentHTML(
     "beforeend",
@@ -3808,8 +3810,13 @@ fixIOSViewport();
   box.scrollTop = box.scrollHeight;
 }
 
+
 function addBotMessage(text) {
   const box = document.getElementById("aiChatMessages");
+  const wrapper = document.getElementById("aiChatWrapper");
+
+  // 🔑 ensure chat mode is active
+  wrapper.classList.add("chat");
 
   box.insertAdjacentHTML(
     "beforeend",
@@ -3886,6 +3893,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
