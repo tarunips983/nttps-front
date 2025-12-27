@@ -584,15 +584,12 @@ function normalizeDate(dateStr) {
 
   // expose core functions safely
 
-window.loadAIMemory = loadAIMemory;
-window.detectModuleSmart = detectModuleSmart;
-// ================================
-// EXPOSE CORE TO WINDOW
-// ================================
-window._analyzeCore = analyzeAI;
-window._saveAICore = saveAIData;
-
 console.log("Smart Assistant Core loaded");
+
+// expose to window
+window.analyzeAI = analyzeAI;
+window.saveAIData = saveAIData;
+window.loadAIMemory = loadAIMemory;
 
 
 })();
