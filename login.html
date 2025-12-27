@@ -392,9 +392,109 @@ form.addEventListener("submit", (e) => {
   if (isForgotMode && isVerifyForgot) return handleForgotStep2();
 });
 
+
+async function handleRegister() {
+  console.log("handleRegister called");
+
+  const email = emailField.value.trim();
+  const password = passwordField.value;
+  const confirm = confirmPasswordField.value;
+  const inviteCode = inviteCodeField.value.trim();
+
+  if (!email || !password || !confirm || !inviteCode) {
+    return showMessage(errorMsg, "All fields are required");
+  }
+
+  if (password !== confirm) {
+    return showMessage(errorMsg, "Passwords do not match");
+  }
+
+  try {
+    const res = await fetch("https://nttps-email.vercel.app/api/send-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password, inviteCode })
+    });
+
+    const data = await res.json();
+    if (!res.ok) return showMessage(errorMsg, data.message);
+
+    successMsg.textContent = "OTP sent to your email";
+    successMsg.style.display = "block";
+
+    otpField.style.display = "block";
+    submitButton.textContent = "Verify OTP";
+    isVerifyMode = true;
+
+  } catch (err) {
+    console.error(err);
+    showMessage(errorMsg, "OTP send failed");
+  }
+}
+async function handleVerify() {
+  console.log("handleVerify called");
+
+  const email = emailField.value.trim();
+  const otp = otpField.value.trim();
+
+  if (!otp) return showMessage(errorMsg, "Enter OTP");
+
+  const res = await fetch("https://nttps-email.vercel.app/api/verify-otp", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, otp })
+  });
+
+  const data = await res.json();
+  if (!res.ok) return showMessage(errorMsg, data.message);
+
+  successMsg.textContent = "Registration successful. Login now.";
+  successMsg.style.display = "block";
+
+  setTimeout(() => location.reload(), 1500);
+}
+async function handleForgotStep1() {
+  const email = emailField.value.trim();
+  if (!email) return showMessage(errorMsg, "Enter email");
+
+  const res = await fetch("https://nttps-email.vercel.app/api/send-forgot-otp", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email })
+  });
+
+  const data = await res.json();
+  if (!res.ok) return showMessage(errorMsg, data.message);
+
+  otpField.style.display = "block";
+  passwordField.style.display = "block";
+  submitButton.textContent = "Reset Password";
+  isVerifyForgot = true;
+}
+async function handleForgotStep2() {
+  const email = emailField.value.trim();
+  const otp = otpField.value.trim();
+  const newPassword = passwordField.value;
+
+  const res = await fetch("https://nttps-email.vercel.app/api/reset-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, otp, newPassword })
+  });
+
+  const data = await res.json();
+  if (!res.ok) return showMessage(errorMsg, data.message);
+
+  successMsg.textContent = "Password reset successful";
+  successMsg.style.display = "block";
+  setTimeout(() => location.reload(), 1500);
+}
+
+    
   </script>
 </body>
 </html>
+
 
 
 
