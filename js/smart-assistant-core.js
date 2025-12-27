@@ -214,7 +214,7 @@ async function analyzeAI(passedText) {
   await loadAIMemory();
 }
 
-  const text = (window.__LAST_AI_INPUT__ || "").trim();
+  const text = (passedText || window.__LAST_AI_INPUT__ || "").trim();
 if (!text) {
   addBotMessage("⚠️ No input text received.");
   return;
@@ -265,8 +265,12 @@ if (!text) {
 
   aiOriginalResult = JSON.parse(JSON.stringify(aiResult));
 
-  document.getElementById("aiTarget").innerHTML =
+  const aiTargetEl = document.getElementById("aiTarget");
+if (aiTargetEl) {
+  aiTargetEl.innerHTML =
     `Detected Module: <b>${aiTargetModule.toUpperCase()}</b>`;
+}
+
 
   renderAIPreview(aiTargetModule, aiResult);
   document.getElementById("aiSaveBtn").disabled = false;
