@@ -1951,7 +1951,8 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
 
     <h1 style="margin-bottom:10px;">🤖 Smart Assistant</h1>
 
-    <div id="smartLoginBlock" style="display:none;color:#dc3545;font-weight:600;">
+    <div id="smartLoginBlock"
+         style="display:none;color:#dc3545;font-weight:600;">
       🔒 Login required to use Smart Assistant
     </div>
 
@@ -1959,14 +1960,15 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
 
       <textarea id="aiInput"
         placeholder="Paste PR / Estimate / Daily Progress / CL text here…"
-        style="width:100%;min-height:160px;padding:12px;font-size:15px;border-radius:8px;"></textarea>
+        style="width:100%;min-height:160px;padding:12px;font-size:15px;border-radius:8px;">
+      </textarea>
 
       <div style="margin-top:10px;display:flex;gap:10px;">
-        <button class="view-btn" onclick="window.analyzeAI && window.analyzeAI()">🔍 Analyze</button>
-        <button class="view-btn" onclick="saveAIData()" id="aiSaveBtn" disabled>💾 Save</button>
+        <button class="view-btn" id="aiAnalyzeBtn">🔍 Analyze</button>
+        <button class="view-btn" id="aiSaveBtn" disabled>💾 Save</button>
       </div>
 
-      <p id="aiDetectedModule" style="margin-top:10px;font-weight:600;"></p>
+      <p id="aiTarget" style="margin-top:10px;font-weight:600;"></p>
 
       <div id="aiPreview" style="margin-top:15px;"></div>
 
@@ -1974,6 +1976,7 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
 
   </section>
 </div>
+
 
 
 
@@ -3709,6 +3712,26 @@ function stopIOS(e) {
   e.preventDefault();
   e.stopPropagation();
 }
+    
+document.addEventListener("DOMContentLoaded", () => {
+  const token = localStorage.getItem("adminToken");
+
+  const loginBlock = document.getElementById("smartLoginBlock");
+  const uiBlock = document.getElementById("smartAssistantUI");
+
+  if (!token) {
+    loginBlock.style.display = "block";
+    uiBlock.style.display = "none";
+  } else {
+    loginBlock.style.display = "none";
+    uiBlock.style.display = "block";
+
+    // preload AI memory
+    if (window.loadAIMemory) {
+      window.loadAIMemory();
+    }
+  }
+});
 
 
 function fixIOSViewport() {
@@ -3794,6 +3817,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
