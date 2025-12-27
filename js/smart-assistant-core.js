@@ -99,9 +99,17 @@ function parseTabularRow(text, columns) {
 
   return result;
 }
+  
 function isTabularPaste(text) {
-  return text.includes("\t") || /\s{2,}/.test(text);
+  // Only treat as tabular if it is ACTUALLY tab-separated
+  const tabCount = (text.match(/\t/g) || []).length;
+
+  // At least 3 tabs = real table row
+  if (tabCount >= 3) return true;
+
+  return false;
 }
+
 
 
         
