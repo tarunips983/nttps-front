@@ -273,6 +273,12 @@ if (aiTargetEl) {
 
 
   renderAIPreview(aiTargetModule, aiResult);
+  const saveBtn = document.getElementById("aiSaveBtn");
+if (saveBtn) {
+  saveBtn.style.display = "inline-flex";
+  saveBtn.disabled = false;
+}
+
   document.getElementById("aiSaveBtn").disabled = false;
 }
 
@@ -578,7 +584,13 @@ document.querySelectorAll("#aiPreview td[data-key]").forEach(td => {
     if (aiTargetModule === "records") loadRecords();
     if (aiTargetModule === "estimates") loadEstimateList();
     if (aiTargetModule === "daily") loadSavedProgress();
+  
+const saveBtn = document.getElementById("aiSaveBtn");
+if (saveBtn) {
+  saveBtn.style.display = "none";
+}
 
+  
     document.getElementById("aiSaveBtn").disabled = true;
 
     // ✅ LEARN ONLY AFTER SUCCESS
