@@ -243,10 +243,6 @@ function findLearnedMatch(text, module) {
 
 async function analyzeAI(passedText) {
 
-const text = normalizeText(
-  passedText || window.__LAST_AI_INPUT__ || ""
-);
-
 
  if (!aiMemoryLoaded) {
   await loadAIMemory();
