@@ -114,54 +114,62 @@ async function handleAskAI() {
 function renderAIAnswer(intent, data) {
 
   if (intent === "FIND_PR") {
+
     if (typeof window.addBotMessage === "function") {
-  window.addBotMessage(
-      `PR No for "${data.work_name}" is ${data.pr_no}.
+      window.addBotMessage(
+        `PR No for "${data.work_name}" is ${data.pr_no}.
 Firm: ${data.firm_name || "N/A"}
 Amount: ₹${data.amount || "N/A"}`
-    );
-  }
+      );
+    }
 
+  } 
   else if (intent === "FILTER_RECORDS") {
+
     let msg = "Here are matching PRs:\n";
     data.forEach(r => {
       msg += `• ${r.pr_no} – ${r.work_name} (₹${r.amount})\n`;
     });
+
     if (typeof window.addBotMessage === "function") {
-  window.addBotMessage(msg);
-}
+      window.addBotMessage(msg);
+    }
 
-  }
-
+  } 
   else if (intent === "STATUS") {
+
     let msg = "Pending PRs:\n";
     data.forEach(r => {
       msg += `• ${r.pr_no} – ${r.work_name}\n`;
     });
+
     if (typeof window.addBotMessage === "function") {
-  window.addBotMessage(msg);
-}
+      window.addBotMessage(msg);
+    }
 
-  }
-
+  } 
   else if (intent === "DETAILS") {
-   if (typeof window.addBotMessage === "function") {
-  window.addBotMessage(
-      `Details for PR ${data.pr_no}:
+
+    if (typeof window.addBotMessage === "function") {
+      window.addBotMessage(
+        `Details for PR ${data.pr_no}:
 Work: ${data.work_name}
 Firm: ${data.firm_name}
 Amount: ₹${data.amount}
 Status: ${data.status}`
-    );
-  }
+      );
+    }
 
+  } 
   else {
-   if (typeof window.addBotMessage === "function") {
-  window.addBotMessage("I understood your question but no answer was found.");
-}
+
+    if (typeof window.addBotMessage === "function") {
+      window.addBotMessage("I understood your question but no answer was found.");
+    }
 
   }
 }
+
 
 
 async function loadAIMemory() {
