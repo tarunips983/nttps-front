@@ -20,15 +20,11 @@ let AI_MODE = "CHAT"; // CHAT | EDIT
 function detectEditIntent(text) {
   return /add|save|create|insert|update|edit/i.test(text);
 }
-function getAIInputElement() {
-  return (
-    document.getElementById("aiChatInput") ||
-    document.querySelector(".smart-assistant textarea") ||
-    document.querySelector("textarea[placeholder*='question']") ||
-    document.querySelector("textarea")
-  );
-}
 
+  function getAIInputElement() {
+  return document.getElementById("aiInput");
+}
+  
 function getAIMessagesElement() {
   return (
     document.getElementById("aiMessages") ||
@@ -84,20 +80,18 @@ async function handleAskAI() {
   const question = input.value.trim();
   if (!question) return;
 
-  // show user message
-  if (typeof addUserMessage === "function") {
-    addUserMessage(question);
-    saveChatMessage("user", question);
-  }
+
 
   input.value = "";
   window.__LAST_AI_INPUT__ = question;
 
   const token = localStorage.getItem("adminToken");
   if (!token) {
-    addBotMessage("🔒 Please login to chat with AI.");
-    return;
+  if (typeof addBotMessage === "function") {
+    addBotMessage("🔒 Please login to chat with Smart Assistant.");
   }
+  return;
+}
 
   try {
     await analyzeAI(question);
