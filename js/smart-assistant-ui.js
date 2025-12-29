@@ -1,5 +1,31 @@
 console.log("✅ Smart Assistant UI loaded");
 
+/* ===== GLOBAL HELPERS (ALWAYS AVAILABLE) ===== */
+
+window.addBotMessage = function (text) {
+  const messages = document.getElementById("aiMessages");
+  if (!messages) return;
+
+  const div = document.createElement("div");
+  div.className = "ai-msg ai-bot";
+  div.innerHTML = text;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+};
+
+window.addUserMessage = function (text) {
+  const messages = document.getElementById("aiMessages");
+  if (!messages) return;
+
+  const div = document.createElement("div");
+  div.className = "ai-msg ai-user";
+  div.textContent = text;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+};
+
+/* ===== DOM BINDING ===== */
+
 document.addEventListener("DOMContentLoaded", () => {
 
   const container = document.querySelector(".smart-assistant");
@@ -12,36 +38,13 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // ===== UI STATE =====
   function enterChatMode() {
     container.classList.remove("ai-welcome");
     messages.style.display = "block";
-    messages.scrollTop = messages.scrollHeight;
   }
 
-  // ===== CHAT HELPERS =====
-  function addUserMessage(text) {
-    enterChatMode();
-    const div = document.createElement("div");
-    div.className = "ai-msg ai-user";
-    div.textContent = text;
-    messages.appendChild(div);
-    messages.scrollTop = messages.scrollHeight;
-  }
+  window.enterChatMode = enterChatMode;
 
-  function addBotMessage(text) {
-    enterChatMode();
-    const div = document.createElement("div");
-    div.className = "ai-msg ai-bot";
-    div.innerHTML = text;
-    messages.appendChild(div);
-    messages.scrollTop = messages.scrollHeight;
-    if (window.saveChatMessage) {
-      saveChatMessage("bot", div.innerText);
-    }
-  }
-
-  // ===== EVENTS =====
   sendBtn.addEventListener("click", () => {
     if (window.handleAskAI) window.handleAskAI();
   });
@@ -53,15 +56,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // ===== LOAD HISTORY =====
   if (window.loadChatHistory) {
     loadChatHistory().forEach(m => {
-      m.role === "user" ? addUserMessage(m.text) : addBotMessage(m.text);
+      m.role === "user"
+        ? window.addUserMessage(m.text)
+        : window.addBotMessage(m.text);
     });
   }
-
-  // ===== EXPOSE =====
-  window.addUserMessage = addUserMessage;
-  window.addBotMessage = addBotMessage;
-  window.enterChatMode = enterChatMode;
 });
+
+
