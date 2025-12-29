@@ -46,78 +46,57 @@ async function askAIQuestion(question) {
   const token = localStorage.getItem("adminToken");
   if (!token) return;
 
-  // 1️⃣ Detect module
-  let module = "records";
-  if (/aadhaar|aadhar|cl\b/i.test(question)) module = "cl";
-  else if (/estimate/i.test(question)) module = "estimates";
-  else if (/daily|progress/i.test(question)) module = "daily";
-
-  // 2️⃣ Detect identifiers
-  let identifier = {};
-
+  /* ================= DETECT IDENTIFIERS ================= */
   const prMatch = question.match(/\b\d{10}\b/);
   const aadhaarMatch = question.match(/\b\d{12}\b/);
-  const estimateMatch = question.match(/\b13\d{8}\b/);
 
-  if (prMatch) identifier.prNo = prMatch[0];
-  if (aadhaarMatch) identifier.aadhar = aadhaarMatch[0];
-  if (estimateMatch) identifier.estimateNo = estimateMatch[0];
+  let module = "records";
+  let identifier = {};
 
-  // 3️⃣ Send structured query
+  if (aadhaarMatch) {
+    module = "cl";
+    identifier.aadhar = aadhaarMatch[0];
+  } 
+  else if (prMatch) {
+    module = "records";
+    identifier.prNo = prMatch[0];
+  }
+  else if (/estimate/i.test(question)) {
+    module = "estimates";
+  }
+  else if (/daily|progress/i.test(question)) {
+    module = "daily";
+  }
+
+  /* ================= BUILD PAYLOAD ================= */
+  const payload = {
+    module,
+    identifier,
+    intent: "DETAILS",
+    text: question
+  };
+
+  /* ================= SEND TO BACKEND ================= */
   const res = await fetch(`${API}/ai/query`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`
     },
-    const prMatch = question.match(/\b\d{10}\b/);
-const aadhaarMatch = question.match(/\b\d{12}\b/);
-
-let module = "records";
-let identifier = {};
-
-if (aadhaarMatch) {
-  module = "cl";
-  identifier.aadhar = aadhaarMatch[0];
-} 
-else if (prMatch) {
-  module = "records";
-  identifier.prNo = prMatch[0];
-}
-else if (/estimate/i.test(question)) {
-  module = "estimates";
-}
-else if (/daily|progress/i.test(question)) {
-  module = "daily";
-}
-
-const payload = {
-  module,
-  identifier,
-  intent: "DETAILS",
-  text: question
-};
-
-await fetch(`${API}/ai/query`, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`
-  },
-  body: JSON.stringify(payload)
-});
-
+    body: JSON.stringify(payload)
+  });
 
   const data = await res.json();
 
-  if (!data.result) {
+  if (!data || !data.result) {
     window.addBotMessage("No matching data found.");
     return;
   }
 
-  // 4️⃣ Render ALL fields
+  /* ================= RENDER ALL FIELDS ================= */
   window.addBotMessage(renderObject(data.result));
 }
+
 
   function renderObject(obj) {
   let html = `<table style="width:100%;border-collapse:collapse">`;
