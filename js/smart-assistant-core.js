@@ -47,7 +47,9 @@ async function askAIQuestion(question) {
 
   const token = localStorage.getItem("adminToken");
   if (!token) {
+    if (typeof window.addBotMessage === "function") {
     window.addBotMessage("Please login to ask database questions.");
+  }
     return;
   }
 
@@ -112,7 +114,8 @@ async function handleAskAI() {
 function renderAIAnswer(intent, data) {
 
   if (intent === "FIND_PR") {
-    window.addBotMessage(
+    if (typeof window.addBotMessage === "function") {
+  window.addBotMessage(
       `PR No for "${data.work_name}" is ${data.pr_no}.
 Firm: ${data.firm_name || "N/A"}
 Amount: ₹${data.amount || "N/A"}`
@@ -124,7 +127,10 @@ Amount: ₹${data.amount || "N/A"}`
     data.forEach(r => {
       msg += `• ${r.pr_no} – ${r.work_name} (₹${r.amount})\n`;
     });
-    window.addBotMessage(msg);
+    if (typeof window.addBotMessage === "function") {
+  window.addBotMessage(msg);
+}
+
   }
 
   else if (intent === "STATUS") {
@@ -132,11 +138,15 @@ Amount: ₹${data.amount || "N/A"}`
     data.forEach(r => {
       msg += `• ${r.pr_no} – ${r.work_name}\n`;
     });
-    window.addBotMessage(msg);
+    if (typeof window.addBotMessage === "function") {
+  window.addBotMessage(msg);
+}
+
   }
 
   else if (intent === "DETAILS") {
-    window.addBotMessage(
+   if (typeof window.addBotMessage === "function") {
+  window.addBotMessage(
       `Details for PR ${data.pr_no}:
 Work: ${data.work_name}
 Firm: ${data.firm_name}
@@ -146,7 +156,10 @@ Status: ${data.status}`
   }
 
   else {
-    window.addBotMessage("I understood your question but no answer was found.");
+   if (typeof window.addBotMessage === "function") {
+  window.addBotMessage("I understood your question but no answer was found.");
+}
+
   }
 }
 
@@ -435,7 +448,9 @@ async function analyzeAI(passedText) {
 
   const text = (passedText || window.__LAST_AI_INPUT__ || "").trim();
 if (!text) {
-  window.addBotMessage("⚠️ No input text received.");
+  if (typeof window.addBotMessage === "function") {
+    window.addBotMessage("⚠️ No input text received.");
+  }
   return;
 }
 
@@ -507,12 +522,13 @@ if (AI_MODE === "EDIT") {
 
 // ⚠️ If AI extracted nothing useful, warn user
 if (!Object.values(aiResult || {}).some(v => v && v.toString().trim())) {
-    if (typeof addUserMessage === "function") {
-        window.addBotMessage(
-          "I could not confidently extract fields. Please paste structured text (table / PR format) or edit the preview manually."
-        );
-    }
+  if (typeof window.addBotMessage === "function") {
+    window.addBotMessage(
+      "I could not confidently extract fields. Please paste structured text (table / PR format) or edit the preview manually."
+    );
+  }
 }
+
 
   
   const saveBtn = document.getElementById("aiSaveBtn");
@@ -554,7 +570,10 @@ Status: ${data.status}
     msg = "I found data, but could not format a response.";
   }
 
+  if (typeof window.addBotMessage === "function") {
   window.addBotMessage(msg.trim());
+}
+
 }
 
 function cleanDailyActivity(text) {
@@ -936,15 +955,11 @@ function safeAddMessage(text, role = "bot") {
   if (role === "user") {
     if (window.addUserMessage) window.addUserMessage(text);
   } else {
-    if (window.addBotMessage) window.window.addBotMessage(text);
+    if (window.addBotMessage) window.addBotMessage(text);
   }
 }
 
-  if (typeof window.addBotMessage === "function") {
-  window.addBotMessage("message");
-} else {
-  console.warn("addBotMessage not available yet");
-}
+ 
 
   // expose core functions safely
 
