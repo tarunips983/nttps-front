@@ -935,7 +935,12 @@ function safeAddMessage(text, role = "bot") {
   }
 }
 
-  
+  if (typeof window.addBotMessage === "function") {
+  window.addBotMessage("message");
+} else {
+  console.warn("addBotMessage not available yet");
+}
+
   // expose core functions safely
 
 // ================== GLOBAL API ==================
