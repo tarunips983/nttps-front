@@ -494,7 +494,7 @@ if (AI_MODE === "EDIT") {
 
 // ⚠️ If AI extracted nothing useful, warn user
 if (!Object.values(aiResult || {}).some(v => v && v.toString().trim())) {
-    if (typeof safeAddMessage === "function") {
+    if (typeof addBotMessage === "function") {
         addBotMessage(
           "I could not confidently extract fields. Please paste structured text (table / PR format) or edit the preview manually."
         );
@@ -902,6 +902,9 @@ function normalizeDate(dateStr) {
 // expose to window (GLOBAL)
 const CHAT_KEY = "smartChatHistory";
 
+
+
+  
 function saveChatMessage(role, text) {
   const history = JSON.parse(localStorage.getItem(CHAT_KEY) || "[]");
   history.push({ role, text, time: Date.now() });
@@ -916,6 +919,15 @@ function clearChatHistory() {
   localStorage.removeItem(CHAT_KEY);
 }
 
+function safeAddMessage(text, role = "bot") {
+  if (role === "user") {
+    if (window.addUserMessage) window.addUserMessage(text);
+  } else {
+    if (window.addBotMessage) window.addBotMessage(text);
+  }
+}
+
+  
   // expose core functions safely
 
 // ================== GLOBAL API ==================
