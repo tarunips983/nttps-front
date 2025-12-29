@@ -20,6 +20,24 @@ let AI_MODE = "CHAT"; // CHAT | EDIT
 function detectEditIntent(text) {
   return /add|save|create|insert|update|edit/i.test(text);
 }
+function getAIInputElement() {
+  return (
+    document.getElementById("aiChatInput") ||
+    document.querySelector(".smart-assistant textarea") ||
+    document.querySelector("textarea[placeholder*='question']") ||
+    document.querySelector("textarea")
+  );
+}
+
+function getAIMessagesElement() {
+  return (
+    document.getElementById("aiMessages") ||
+    document.querySelector(".ai-messages") ||
+    document.querySelector(".smart-assistant-messages") ||
+    document.querySelector(".right-panel") ||
+    document.body
+  );
+}
 
 
 function detectQueryIntent(text) {
@@ -38,7 +56,7 @@ async function askAIQuestion(question) {
 
   const token = localStorage.getItem("adminToken");
   if (!token) {
-    addBotMessage("Please login to ask database questions.");
+    safeAddMessage("Please login to ask database questions.");
     return;
   }
 
@@ -55,19 +73,21 @@ async function askAIQuestion(question) {
   renderAIAnswer(intent, data.result);
 }
 async function handleAskAI() {
-  const input = document.getElementById("aiChatInput");
-  const question = input.value.trim();
+  const input = getAIInputElement();
+if (!input) {
+  console.error("AI input not found");
+  return;
+}
 
-  if (!question) return;
+const question = input.value.trim();
 
-  addUserMessage(question); // show user message
   input.value = "";
 
   const intent = detectQueryIntent(question);
 
   const token = localStorage.getItem("adminToken");
   if (!token) {
-    addBotMessage("Please login to ask database questions.");
+    safeAddMessage("Please login to ask database questions.");
     return;
   }
 
@@ -85,13 +105,13 @@ async function handleAskAI() {
     });
 
     
-if (typeof addUserMessage !== "function") {
+if (typeof safeAddMessage !== "function") {
   console.error("Chat UI helpers not loaded");
   return;
 }
 const data = await res.json();
     if (!data.success || !data.result) {
-      addBotMessage("I could not find matching data in the database.");
+      safeAddMessage("I could not find matching data in the database.");
       return;
     }
 
@@ -99,13 +119,28 @@ const data = await res.json();
 
   } catch (err) {
     console.error(err);
-    addBotMessage("Error while processing your question.");
+    safeAddMessage("Error while processing your question.");
   }
 }
+
+function safeAddMessage(role, text) {
+  const container = getAIMessagesElement();
+  if (!container) return;
+
+  const msg = document.createElement("div");
+  msg.className = role === "user" ? "ai-user-msg" : "ai-bot-msg";
+  msg.innerText = text;
+
+  container.appendChild(msg);
+  container.scrollTop = container.scrollHeight;
+}
+
+
+  
 function renderAIAnswer(intent, data) {
 
   if (intent === "FIND_PR") {
-    addBotMessage(
+    safeAddMessage(
       `PR No for "${data.work_name}" is ${data.pr_no}.
 Firm: ${data.firm_name || "N/A"}
 Amount: ₹${data.amount || "N/A"}`
@@ -117,7 +152,7 @@ Amount: ₹${data.amount || "N/A"}`
     data.forEach(r => {
       msg += `• ${r.pr_no} – ${r.work_name} (₹${r.amount})\n`;
     });
-    addBotMessage(msg);
+    safeAddMessage(msg);
   }
 
   else if (intent === "STATUS") {
@@ -125,11 +160,11 @@ Amount: ₹${data.amount || "N/A"}`
     data.forEach(r => {
       msg += `• ${r.pr_no} – ${r.work_name}\n`;
     });
-    addBotMessage(msg);
+    safeAddMessage(msg);
   }
 
   else if (intent === "DETAILS") {
-    addBotMessage(
+    safeAddMessage(
       `Details for PR ${data.pr_no}:
 Work: ${data.work_name}
 Firm: ${data.firm_name}
@@ -139,7 +174,7 @@ Status: ${data.status}`
   }
 
   else {
-    addBotMessage("I understood your question but no answer was found.");
+    safeAddMessage("I understood your question but no answer was found.");
   }
 }
 
@@ -416,7 +451,7 @@ async function analyzeAI(passedText) {
 
   const text = (passedText || window.__LAST_AI_INPUT__ || "").trim();
 if (!text) {
-  addBotMessage("⚠️ No input text received.");
+  safeAddMessage("⚠️ No input text received.");
   return;
 }
 
@@ -488,8 +523,8 @@ if (AI_MODE === "EDIT") {
 
 // ⚠️ If AI extracted nothing useful, warn user
 if (!Object.values(aiResult || {}).some(v => v && v.toString().trim())) {
-    if (typeof addBotMessage === "function") {
-        addBotMessage(
+    if (typeof safeAddMessage === "function") {
+        safeAddMessage(
           "I could not confidently extract fields. Please paste structured text (table / PR format) or edit the preview manually."
         );
     }
@@ -535,7 +570,7 @@ Status: ${data.status}
     msg = "I found data, but could not format a response.";
   }
 
-  addBotMessage(msg.trim());
+  safeAddMessage(msg.trim());
 }
 
 function cleanDailyActivity(text) {
@@ -920,6 +955,9 @@ window.loadAIMemory = loadAIMemory;
 
 window.saveChatMessage = saveChatMessage;
 window.loadChatHistory = loadChatHistory;
+// 🔥 expose UI helpers to CORE
+window.addUserMessage = addUserMessage;
+window.addBotMessage = addBotMessage;
 
 // 🔥 ADD THIS LINE
 window.handleAskAI = handleAskAI;
