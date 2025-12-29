@@ -2580,7 +2580,20 @@ function activateSmartAssistant() {
 function deactivateSmartAssistant() {
   document.body.classList.remove("smart-ai-active");
 }
-// Auto-grow textarea
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+  const aiInput = document.getElementById("aiInput");
+  const aiSendBtn = document.getElementById("aiSendBtn");
+  const aiMessages = document.getElementById("aiMessages");
+  const aiTyping = document.getElementById("aiTyping");
+
+  if (!aiInput) {
+    console.warn("Smart Assistant UI not ready");
+    return;
+  }
+
 aiInput.addEventListener("input", () => {
   aiInput.style.height = "auto";
   aiInput.style.height = Math.min(aiInput.scrollHeight, 120) + "px";
@@ -4182,6 +4195,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
