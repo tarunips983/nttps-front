@@ -2673,6 +2673,9 @@ if (pm && pm.classList.contains("active")) {
 if (sa) {
   sa.style.display = "flex";
 }
+
+    document.querySelector("#subNavBar button:nth-child(6)").classList.add("active");
+
 updateSmartUserMenu();
 
     document.body.classList.add("smart-assistant-active");
@@ -4393,25 +4396,26 @@ function stopIOS(e) {
   e.stopPropagation();
 }
     
-document.addEventListener("DOMContentLoaded", () => {
+function updateSmartLoginStatus() {
   const token = localStorage.getItem("adminToken");
 
   const loginBlock = document.getElementById("smartLoginBlock");
   const uiBlock = document.getElementById("smartAssistantUI");
 
-  if (!token) {
-    loginBlock.style.display = "block";
-    uiBlock.style.display = "none";
-  } else {
-    loginBlock.style.display = "none";
-    uiBlock.style.display = "block";
-
-    // preload AI memory
-    if (window.loadAIMemory) {
-      window.loadAIMemory();
-    }
+  if (!loginBlock || !uiBlock) {
+    console.warn("Smart Assistant login UI not mounted yet");
+    return;
   }
-});
+
+  if (token) {
+    loginBlock.style.display = "none";
+    uiBlock.style.display = "flex";
+  } else {
+    loginBlock.style.display = "flex";
+    uiBlock.style.display = "none";
+  }
+}
+
 
     
 document.addEventListener("DOMContentLoaded", () => {
@@ -4489,6 +4493,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
