@@ -2023,49 +2023,54 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
     </div>
 
     <!-- AI UI -->
-    <div id="smartAssistantUI" style="display:none;">
+   <!-- ================= SMART ASSISTANT UI ================= -->
+<div id="smartAssistantUI" style="display:block;">
 
-      <!-- CHAT WRAPPER -->
-      <div id="aiChatWrapper" class="ai-chat-wrapper center">
+  <!-- CHAT WRAPPER -->
+  <div id="aiChatWrapper" class="ai-chat-wrapper center">
 
-   <h1 style="margin-bottom:12px;">🤖 Smart Assistant</h1>
-        <!-- CHAT MESSAGES -->
-        <div id="aiChatMessages" class="ai-chat-messages"></div>
-        <div id="aiPreview" style="margin:20px 0;"></div>
-        <div id="aiSaveContainer">
-  <button class="view-btn" id="aiSaveBtn" style="display:none">💾 Save</button>
-</div>
-          
-          
-        
-          
-        <div id="aiTarget" style="margin:8px 0;font-weight:600;color:#007bff;"></div>
+    <h1 style="margin-bottom:12px;">🤖 Smart Assistant</h1>
 
-        <!-- AI PREVIEW (RESULT TABLE) -->
+    <!-- ================= CHAT MESSAGES ================= -->
+    <div id="aiChatMessages" class="ai-chat-messages"></div>
 
-        
-    
-        <!-- INPUT BAR -->
-      <div class="nav-right" style="display:flex; gap:10px;">
+    <!-- ================= AI PREVIEW (OPTIONAL / LEGACY) ================= -->
+    <div id="aiPreview" style="margin:20px 0;"></div>
 
- <input
-  id="aiChatInput"
-  type="text"
-  class="ai-input-bar"
-  placeholder="Ask anything about PRs, Estimates, Daily Progress..."
-  onkeydown="if(event.key==='Enter') handleAskAI()"
-  style="flex:1; width:auto; min-width:300px;"
-/>
+    <!-- ================= SAVE BUTTON (LEGACY) ================= -->
+    <div id="aiSaveContainer" style="text-align:right;">
+      <button class="view-btn" id="aiSaveBtn" style="display:none">💾 Save</button>
+    </div>
 
+    <!-- ================= TARGET INFO ================= -->
+    <div id="aiTarget" style="margin:8px 0;font-weight:600;color:#007bff;"></div>
 
-  <button class="view-btn"  style="padding: 16px; border-radius: 31px; width: 86px; font-size: 19px;" onclick="handleAskAI()">Ask</button>
+    <!-- ================= INPUT BAR ================= -->
+    <div class="nav-right" style="display:flex; gap:10px; max-width:800px; margin:20px auto;">
 
-      </div>
+      <input
+        id="aiChatInput"
+        type="text"
+        class="ai-input-bar"
+        placeholder="Ask anything about PRs, Estimates, Daily Progress..."
+        onkeydown="if(event.key==='Enter') handleAskAI()"
+        style="flex:1; width:auto; min-width:300px;"
+      />
+
+      <button
+        class="view-btn"
+        style="padding:16px; border-radius:31px; width:86px; font-size:19px;"
+        onclick="handleAskAI()"
+      >
+        Ask
+      </button>
 
     </div>
 
-  </section>
+  </div>
 </div>
+<!-- ================= END SMART ASSISTANT UI ================= -->
+
 
 
 
@@ -3885,6 +3890,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
