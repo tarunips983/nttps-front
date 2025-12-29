@@ -2282,16 +2282,19 @@ body.smart-assistant-active {
 
   <section class="right-panel smart-ai-panel">
 <!-- SMART ASSISTANT LOGIN BLOCK -->
-<div id="smartLoginBlock" style="display:none; padding:20px; text-align:center;">
-  <h3>🔐 Login Required</h3>
-  <p>Please login to use Smart Assistant.</p>
-  <button class="btn-primary" onclick="openLogin()">Login</button>
+<!-- SMART ASSISTANT LOGIN BAR -->
+<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #ddd;background:#f9f9f9;">
+  <span id="smartLoginStatus" style="font-weight:600;color:#dc3545;">
+    🔒 Login required
+  </span>
+
+  <button id="smartAuthBtn"
+          class="view-btn"
+          style="min-width:110px;">
+    🔐 Login
+  </button>
 </div>
 
-<!-- SMART ASSISTANT UI BLOCK -->
-<div id="smartAssistantUI" style="display:none;">
-  <!-- ✅ EXISTING SMART ASSISTANT CHAT UI GOES HERE -->
-</div>
 
   <!-- HEADER -->
   <div class="ai-welcome-screen">
@@ -2498,9 +2501,11 @@ window.showMainView = function (viewName) {
   mobileDailyFilterBtn.style.display = "none";
 
   // ---------- CLOSE MODALS ----------
-  if (productModal.classList.contains("active")) {
-    closeModal();
-  }
+const pm = document.getElementById("productModal");
+if (pm && pm.classList.contains("active")) {
+  closeModal();
+}
+
 
   // ---------- PDF ----------
   if (viewName === "pdf") {
@@ -4216,6 +4221,21 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+    
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("smartAuthBtn");
+  if (!btn) return;
+
+  btn.onclick = () => {
+    const token = localStorage.getItem("adminToken");
+    if (token) {
+      handleFileAuthClick(); // reuse SAME logout logic
+    } else {
+      openPasswordModal();
+    }
+  };
+});
+
 
 function fixIOSViewport() {
   const vh = window.innerHeight * 0.01;
@@ -4277,6 +4297,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
