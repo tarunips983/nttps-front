@@ -3127,40 +3127,17 @@ async function loadEstimates() {
     }
 }
 
-const aiMessages = document.getElementById("aiMessages");
+aiMessagesconst aiMessages = document.getElementById("aiMessages");
 const aiInput = document.getElementById("aiInput");
 const aiSendBtn = document.getElementById("aiSendBtn");
 const aiTyping = document.getElementById("aiTyping");
 
-function addAI(role, text) {
-  const div = document.createElement("div");
-  div.className = `ai-msg ${role === "user" ? "ai-user" : "ai-bot"}`;
-  div.textContent = text;
-  aiMessages.appendChild(div);
-  aiMessages.scrollTop = aiMessages.scrollHeight;
-}
-
 aiSendBtn.onclick = () => {
-  const token = localStorage.getItem("adminToken");
-
-  if (!token) {
-    pendingAIMessage = aiInput.value.trim();
-    showAILoginOverlay();
-    return;
+  if (typeof window.handleAskAI === "function") {
+    window.handleAskAI();
+  } else {
+    console.error("handleAskAI not available");
   }
-
-  const text = aiInput.value.trim();
-  if (!text) return;
-
-  addAI("user", text);
-  aiInput.value = "";
-
-  window.__LAST_AI_INPUT__ = text;
-
-  aiTyping.style.display = "block";
-
-  // ✅ USE CORE ENGINE
-  window.handleAskAI();
 };
 
 aiInput.addEventListener("keydown", e => {
@@ -4480,6 +4457,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
