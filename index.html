@@ -1714,178 +1714,144 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
 }
 
 
-/* ===== SMART ASSISTANT – CHATGPT STYLE ===== */
-
-/* Chat wrapper */
-
-#aiPreview {
-  overflow: visible;
-  margin-top: 12px;
-}
-
-/* Show messages after analyze */
-
-/* =====================================================
-   SMART ASSISTANT – CHATGPT STYLE (FINAL & ISOLATED)
-   SAFE FOR ALL OTHER TABS
-===================================================== */
-
-/* ===============================
-   SMART ASSISTANT – CHATGPT STYLE
-   =============================== */
-
-/* Activate full-screen mode only in AI tab */
-body.smart-ai-active {
-  overflow: hidden;
-}
-
-/* Main container */
-#smart-assistant-container {
-  display: none;
-  height: calc(100vh - 110px); /* header + subnav */
-}
-
-/* When AI tab active */
-body.smart-ai-active #smart-assistant-container {
-  display: flex;
-}
-
-/* Layout */
-.ai-layout {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  background: #f8f9fb;
-}
-
-/* ========== LEFT SIDEBAR ========== */
-.ai-sidebar {
-  width: 260px;
-  background: linear-gradient(180deg, #0f172a, #020617);
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-  padding: 14px;
-}
-
-/* User */
-.ai-user {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
-.ai-avatar {
-  width: 38px;
-  height: 38px;
-  background: #2563eb;
+/* Floating button */
+#aiFab {
+  position: fixed;
+  bottom: 22px;
+  right: 22px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.ai-username {
-  font-weight: 600;
-}
-
-/* New chat */
-.ai-new-chat {
-  background: #1e293b;
   border: none;
+  background: #007bff;
   color: #fff;
-  padding: 10px;
-  border-radius: 8px;
+  font-size: 24px;
   cursor: pointer;
-  margin-bottom: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.25);
+  z-index: 3000;
 }
 
-.ai-new-chat:hover {
-  background: #334155;
-}
-
-/* Chat history */
-.ai-chat-list {
-  flex: 1;
-  overflow-y: auto;
-}
-
-/* Logout always visible */
-.ai-logout {
-  margin-top: auto;
-  background: #dc2626;
-  border: none;
-  color: white;
-  padding: 10px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-/* ========== RIGHT CHAT PANEL ========== */
-.ai-main {
-  flex: 1;
+/* Dock */
+#aiDock {
+  position: fixed;
+  bottom: 90px;
+  right: 22px;
+  width: 360px;
+  max-height: 520px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.3);
   display: flex;
   flex-direction: column;
-  height: 100%;
+  overflow: hidden;
+  transform: translateY(20px);
+  opacity: 0;
+  pointer-events: none;
+  transition: all .3s ease;
+  z-index: 3000;
+}
+
+#aiDock.active {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Header */
+#aiHeader {
+  background: #232f3e;
+  color: white;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
 }
 
 /* Messages */
-.ai-chat-messages {
+#aiMessages {
   flex: 1;
-  padding: 20px;
+  padding: 14px;
   overflow-y: auto;
+  background: #f6f8fb;
 }
 
-/* Message bubbles */
 .ai-msg {
-  max-width: 70%;
+  max-width: 85%;
+  margin-bottom: 10px;
   padding: 10px 14px;
   border-radius: 14px;
-  margin-bottom: 10px;
   font-size: 14px;
+  line-height: 1.4;
+  animation: fadeInUp .25s ease;
 }
 
-.ai-msg.user {
+.ai-user {
   margin-left: auto;
-  background: #2563eb;
+  background: #007bff;
   color: white;
 }
 
-.ai-msg.bot {
-  background: #e5e7eb;
+.ai-bot {
+  margin-right: auto;
+  background: #e9edf3;
+  color: #222;
 }
 
-/* ========== INPUT BAR (FIXED) ========== */
-.ai-input-bar {
+/* Typing dots */
+#aiTyping {
+  padding: 10px 16px;
+}
+
+#aiTyping span {
+  width: 6px;
+  height: 6px;
+  margin: 0 2px;
+  background: #999;
+  border-radius: 50%;
+  display: inline-block;
+  animation: blink 1.4s infinite both;
+}
+
+#aiTyping span:nth-child(2) { animation-delay: .2s }
+#aiTyping span:nth-child(3) { animation-delay: .4s }
+
+.hidden { display: none }
+
+/* Input */
+#aiInputBar {
   display: flex;
-  gap: 10px;
-  padding: 14px;
   border-top: 1px solid #ddd;
-  background: white;
 }
 
-.ai-input-bar input {
+#aiInput {
   flex: 1;
+  border: none;
   padding: 12px;
-  border-radius: 24px;
-  border: 1px solid #ccc;
+  resize: none;
   font-size: 14px;
 }
 
-.ai-input-bar button {
-  background: #2563eb;
+#aiSendBtn {
+  width: 48px;
   border: none;
+  background: #007bff;
   color: white;
-  padding: 0 18px;
-  border-radius: 50%;
+  font-size: 18px;
   cursor: pointer;
 }
 
-/* Hide footer ONLY in AI */
-body.smart-ai-active footer {
-  display: none;
+/* Animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
+
+@keyframes blink {
+  0% { opacity: .2 }
+  20% { opacity: 1 }
+  100% { opacity: .2 }
+}
+
 
 
 </style>
@@ -2057,51 +2023,31 @@ body.smart-ai-active footer {
 
   </section>
 </div>
-<!-- SMART ASSISTANT VIEW -->
-<div id="smart-assistant-container" class="main-view smart-mode">
+<!-- AI Assistant Dock -->
+<div id="aiDock">
+  <div id="aiHeader">
+    <span>🤖 Smart Assistant</span>
+    <button id="aiCloseBtn">✕</button>
+  </div>
 
-  <!-- THIS ID IS REQUIRED FOR JS -->
-  <div id="smartAssistantUI" style="display:none; width:100%; height:100%;">
+  <div id="aiMessages"></div>
 
-    <div class="ai-layout">
+  <div id="aiTyping" class="hidden">
+    <span></span><span></span><span></span>
+  </div>
 
-      <!-- LEFT SIDEBAR -->
-      <aside class="ai-sidebar">
-        <div class="ai-user">
-          <div class="ai-avatar">👤</div>
-          <div class="ai-username" id="aiUsername">Logged User</div>
-        </div>
-
-        <button class="ai-new-chat" onclick="startNewChat()">➕ New chat</button>
-
-        <div class="ai-chat-list" id="aiChatList"></div>
-
-        <button class="ai-logout" onclick="logoutAI()">Logout</button>
-      </aside>
-
-      <!-- RIGHT CHAT -->
-      <main class="ai-main">
-
-        <div id="smartLoginBlock"
-             style="display:none;color:#dc3545;font-weight:600;padding:10px;">
-          🔒 Login required to use Smart Assistant
-        </div>
-
-        <div id="aiChatMessages" class="ai-chat-messages"></div>
-
-        <div class="ai-input-bar">
-          <input
-            id="aiChatInput"
-            placeholder="Ask anything…"
-            onkeydown="if(event.key==='Enter') handleAskAI()"
-          />
-          <button onclick="handleAskAI()">➤</button>
-        </div>
-
-      </main>
-    </div>
+  <div id="aiInputBar">
+    <textarea
+      id="aiInput"
+      placeholder="Ask about PRs, Estimates, Daily Progress..."
+      rows="1"
+    ></textarea>
+    <button id="aiSendBtn">➤</button>
   </div>
 </div>
+
+<!-- Floating Button -->
+<button id="aiFab">🤖</button>
 
 <!-- ================= END SMART ASSISTANT UI ================= -->
 
@@ -3944,6 +3890,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
