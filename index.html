@@ -1730,53 +1730,55 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
    SAFE FOR ALL OTHER TABS
 ===================================================== */
 
-/* Disable footer ONLY in AI tab */
-body.smart-ai-active footer {
-  display: none !important;
-}
+/* ===============================
+   SMART ASSISTANT – CHATGPT STYLE
+   =============================== */
 
-/* Lock page scroll ONLY when AI tab is active */
+/* Activate full-screen mode only in AI tab */
 body.smart-ai-active {
   overflow: hidden;
 }
 
-/* ---------- ROOT CONTAINER ---------- */
-#smart-assistant-container.smart-mode {
-  height: calc(100vh - 120px); /* header + subnav */
-  overflow: hidden;
-  background: #f8fafc;
+/* Main container */
+#smart-assistant-container {
+  display: none;
+  height: calc(100vh - 110px); /* header + subnav */
 }
 
-/* ---------- MAIN AI LAYOUT ---------- */
-#smart-assistant-container.smart-mode .ai-layout {
+/* When AI tab active */
+body.smart-ai-active #smart-assistant-container {
   display: flex;
-  height: 100%;
-  width: 100%;
 }
 
-/* ---------- LEFT SIDEBAR ---------- */
-#smart-assistant-container.smart-mode .ai-sidebar {
+/* Layout */
+.ai-layout {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  background: #f8f9fb;
+}
+
+/* ========== LEFT SIDEBAR ========== */
+.ai-sidebar {
   width: 260px;
-  min-width: 260px;
-  background: #0f172a;
-  color: #ffffff;
+  background: linear-gradient(180deg, #0f172a, #020617);
+  color: #fff;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  padding: 14px;
 }
 
-/* User section */
-.ai-sidebar .ai-user {
+/* User */
+.ai-user {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 14px;
-  border-bottom: 1px solid rgba(255,255,255,0.12);
+  margin-bottom: 14px;
 }
 
-.ai-sidebar .ai-avatar {
-  width: 36px;
-  height: 36px;
+.ai-avatar {
+  width: 38px;
+  height: 38px;
   background: #2563eb;
   border-radius: 50%;
   display: flex;
@@ -1784,159 +1786,105 @@ body.smart-ai-active {
   justify-content: center;
 }
 
-.ai-sidebar .ai-username {
+.ai-username {
   font-weight: 600;
-  font-size: 14px;
 }
 
 /* New chat */
-.ai-sidebar .ai-new-chat {
-  margin: 12px;
+.ai-new-chat {
+  background: #1e293b;
+  border: none;
+  color: #fff;
   padding: 10px;
   border-radius: 8px;
-  background: #1e293b;
-  color: #fff;
-  border: none;
   cursor: pointer;
-  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.ai-new-chat:hover {
+  background: #334155;
 }
 
 /* Chat history */
-.ai-sidebar .ai-chat-list {
+.ai-chat-list {
   flex: 1;
   overflow-y: auto;
-  padding: 8px;
 }
 
-.ai-sidebar .ai-chat-list div {
-  padding: 8px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.ai-sidebar .ai-chat-list div:hover {
-  background: #374151;
-}
-
-/* Logout */
-.ai-sidebar .ai-logout {
-  margin: 12px;
+/* Logout always visible */
+.ai-logout {
+  margin-top: auto;
+  background: #dc2626;
+  border: none;
+  color: white;
   padding: 10px;
   border-radius: 8px;
-  background: #dc2626;
-  color: #ffffff;
-  border: none;
   cursor: pointer;
-  font-weight: 600;
 }
 
-/* ---------- RIGHT CHAT PANEL ---------- */
-#smart-assistant-container.smart-mode .ai-main {
+/* ========== RIGHT CHAT PANEL ========== */
+.ai-main {
   flex: 1;
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #ffffff;
-  overflow: hidden;
 }
 
-/* ---------- CHAT MESSAGES (ONLY SCROLL HERE) ---------- */
-#smart-assistant-container.smart-mode .ai-chat-messages {
+/* Messages */
+.ai-chat-messages {
   flex: 1;
-  overflow-y: auto;
   padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+  overflow-y: auto;
 }
 
-/* ---------- CHAT BUBBLES ---------- */
+/* Message bubbles */
 .ai-msg {
-  max-width: 75%;
-  padding: 12px 16px;
+  max-width: 70%;
+  padding: 10px 14px;
   border-radius: 14px;
-  font-size: 15px;
-  line-height: 1.5;
-  animation: aiFadeUp 0.25s ease;
+  margin-bottom: 10px;
+  font-size: 14px;
 }
 
 .ai-msg.user {
-  align-self: flex-end;
+  margin-left: auto;
   background: #2563eb;
-  color: #ffffff;
+  color: white;
 }
 
 .ai-msg.bot {
-  align-self: flex-start;
-  background: #f1f5f9;
-  color: #111827;
-  border: 1px solid #e5e7eb;
+  background: #e5e7eb;
 }
 
-/* ---------- INPUT BAR (FIXED) ---------- */
-#smart-assistant-container.smart-mode .ai-input-bar {
+/* ========== INPUT BAR (FIXED) ========== */
+.ai-input-bar {
   display: flex;
   gap: 10px;
   padding: 14px;
-  border-top: 1px solid #e5e7eb;
-  background: #ffffff;
+  border-top: 1px solid #ddd;
+  background: white;
 }
 
 .ai-input-bar input {
   flex: 1;
-  height: 44px;
-  padding: 10px 14px;
-  font-size: 15px;
-  border-radius: 10px;
-  border: 1px solid #cbd5e1;
+  padding: 12px;
+  border-radius: 24px;
+  border: 1px solid #ccc;
+  font-size: 14px;
 }
 
 .ai-input-bar button {
-  padding: 0 18px;
-  border-radius: 999px;
   background: #2563eb;
-  color: #ffffff;
   border: none;
-  font-size: 18px;
+  color: white;
+  padding: 0 18px;
+  border-radius: 50%;
   cursor: pointer;
 }
 
-.ai-input-bar button:hover {
-  background: #1d4ed8;
-}
-
-/* ---------- LOGIN WARNING ---------- */
-#smartLoginBlock {
-  padding: 14px;
-  background: #fff5f5;
-  color: #dc2626;
-  font-weight: 600;
-  border-bottom: 1px solid #fecaca;
-}
-
-/* ---------- ANIMATION ---------- */
-@keyframes aiFadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ---------- MOBILE ---------- */
-@media (max-width: 768px) {
-  #smart-assistant-container.smart-mode .ai-sidebar {
-    width: 220px;
-    min-width: 220px;
-  }
-
-  .ai-msg {
-    max-width: 85%;
-  }
+/* Hide footer ONLY in AI */
+body.smart-ai-active footer {
+  display: none;
 }
 
 
@@ -3996,6 +3944,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
