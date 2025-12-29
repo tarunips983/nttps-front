@@ -2961,6 +2961,14 @@ function addAI(role, text) {
 }
 
 async function sendAI() {
+const container = document.getElementById("smart-assistant-container");
+
+// Exit welcome mode on first message
+if (container.classList.contains("ai-welcome")) {
+  container.classList.remove("ai-welcome");
+}
+
+  
   const text = aiInput.value.trim();
   if (!text) return;
 
@@ -4232,6 +4240,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
