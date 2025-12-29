@@ -2406,6 +2406,33 @@ body.smart-assistant-active {
     <button id="aiSendBtn" title="Send">
       ➤
     </button>
+    
+  </div>
+</div>
+<div id="aiLoginOverlay" style="
+  display:none;
+  position:absolute;
+  inset:0;
+  background:rgba(255,255,255,0.92);
+  z-index:50;
+  align-items:center;
+  justify-content:center;
+">
+  <div style="
+    background:#fff;
+    padding:24px 28px;
+    border-radius:14px;
+    box-shadow:0 12px 30px rgba(0,0,0,0.2);
+    text-align:center;
+    max-width:360px;
+  ">
+    <h3 style="margin:0 0 10px;">🔐 Login Required</h3>
+    <p style="color:#555;margin-bottom:18px;">
+      Please login to chat with Smart Assistant.
+    </p>
+    <button class="view-btn" onclick="triggerSmartLogin()">
+      🔑 Login to Continue
+    </button>
   </div>
 </div>
 
@@ -2523,6 +2550,7 @@ body.smart-assistant-active {
     const viewScrollMemory = {};
     let lastViewName = null;
 
+let pendingAIMessage = null;
 
 
     // DOM refs
@@ -2712,6 +2740,7 @@ function handleSmartAuth() {
   } else {
     openPasswordModal();
   }
+  document.getElementById("smartUserDropdown")?.classList.remove("active");
 }
 
 function collapseAllDropdowns(sidebarId) {
@@ -3106,14 +3135,26 @@ function addAI(role, text) {
 }
 
 async function sendAI() {
-const container = document.getElementById("smart-assistant-container");
+  const token = localStorage.getItem("adminToken");
 
-// Exit welcome mode on first message
-if (container.classList.contains("ai-welcome")) {
-  container.classList.remove("ai-welcome");
+  // 🚫 BLOCK CHAT IF NOT LOGGED IN
+ if (!token) {
+  pendingAIMessage = aiInput.value.trim();
+  showAILoginOverlay();
+  return;
 }
 
-  
+if (pendingAIMessage) {
+  aiInput.value = pendingAIMessage;
+  pendingAIMessage = null;
+  sendAI();
+}
+
+  const container = document.getElementById("smart-assistant-container");
+
+  // Exit welcome mode
+  container.classList.remove("ai-welcome");
+
   const text = aiInput.value.trim();
   if (!text) return;
 
@@ -3122,7 +3163,6 @@ if (container.classList.contains("ai-welcome")) {
   aiTyping.style.display = "block";
 
   try {
-    const token = localStorage.getItem("adminToken");
     const res = await fetch(`${window.API}/ai/query`, {
       method: "POST",
       headers: {
@@ -3134,12 +3174,13 @@ if (container.classList.contains("ai-welcome")) {
 
     const data = await res.json();
     aiTyping.style.display = "none";
-    addAI("bot", data.result || "No result found.");
+    addAI("bot", data.result || "No response.");
   } catch {
     aiTyping.style.display = "none";
     addAI("bot", "AI service error.");
   }
 }
+
 
 aiSendBtn.onclick = sendAI;
 aiInput.addEventListener("keydown", e => {
@@ -3150,6 +3191,18 @@ aiInput.addEventListener("keydown", e => {
 });
 
 
+function showAILoginOverlay() {
+  document.getElementById("aiLoginOverlay").style.display = "flex";
+}
+
+function hideAILoginOverlay() {
+  document.getElementById("aiLoginOverlay").style.display = "none";
+}
+
+function triggerSmartLogin() {
+  hideAILoginOverlay();
+  openPasswordModal(); // ✅ your existing modal
+}
 
     
 function buildEstimateFilters() {
@@ -4096,9 +4149,12 @@ async function renderCLBioData() {
   localStorage.setItem("isAdmin", "true");
 
   closePasswordModal();
- updateFileLoginStatus();
 
-      loadFiles();
+  updateFileLoginStatus();
+  updateSmartAssistantLoginStatus();
+  updateSmartUserMenu();   // ⭐ THIS WAS MISSING
+  loadFiles();
+ hideAILoginOverlay();
 
 // ✅ Resume pending download after login
 if (pendingDownloadUrl) {
@@ -4126,6 +4182,8 @@ if (pendingDownloadUrl) {
     console.error('Login error', e);
     alert('⚠️ Could not connect to the login server.');
   }
+      document.getElementById("smartUserDropdown")?.classList.remove("active");
+
 };
 
 function loadUser() {
@@ -4412,6 +4470,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
