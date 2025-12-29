@@ -639,12 +639,18 @@ async function searchExistingData(module, text) {
     const token = localStorage.getItem("adminToken");
     if (!token) return null;
 
-    const keywords = text.split(/\s+/).slice(0, 6).join(" ");
+    const isPR = /^\d{10}$/.test(text.trim());
+
+const query = isPR
+  ? `prNo:${text.trim()}`
+  : text.split(/\s+/).slice(0, 6).join(" ");
+
 
     const res = await fetch(
-        `${API}/ai/search/${module}?q=${encodeURIComponent(keywords)}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-    );
+  `${API}/ai/search/${module}?q=${encodeURIComponent(query)}`,
+  { headers: { Authorization: `Bearer ${token}` } }
+);
+
 
     if (!res.ok) return null;
 
