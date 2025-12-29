@@ -1714,48 +1714,8 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
 }
 
 
-/* Floating button */
-#aiFab {
-  position: fixed;
-  bottom: 22px;
-  right: 22px;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  border: none;
-  background: #007bff;
-  color: #fff;
-  font-size: 24px;
-  cursor: pointer;
-  box-shadow: 0 6px 18px rgba(0,0,0,.25);
-  z-index: 3000;
-}
 
 /* Dock */
-#aiDock {
-  position: fixed;
-  bottom: 90px;
-  right: 22px;
-  width: 360px;
-  max-height: 520px;
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 12px 40px rgba(0,0,0,.3);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  transform: translateY(20px);
-  opacity: 0;
-  pointer-events: none;
-  transition: all .3s ease;
-  z-index: 3000;
-}
-
-#aiDock.active {
-  transform: translateY(0);
-  opacity: 1;
-  pointer-events: auto;
-}
 
 /* Header */
 #aiHeader {
@@ -2306,22 +2266,26 @@ body.smart-assistant-active {
 
   <aside class="left-bar">
    <!-- AI Welcome Screen -->
-<div class="ai-welcome-screen">
+
   <h2>🤖 Smart Assistant</h2>
   <p>
     Ask questions about PRs, Estimates,<br>
     Daily Progress and Records.
   </p>
-</div>
+
 
   </aside>
 
   <section class="right-panel smart-ai-panel">
 
   <!-- HEADER -->
-  <div class="ai-header">
-    🤖 Smart Assistant
-  </div>
+  <div class="ai-welcome-screen">
+  <h2>🤖 Smart Assistant</h2>
+  <p>
+    Ask questions about PRs, Estimates,<br>
+    Daily Progress and Records.
+  </p>
+</div>
 
   <!-- CHAT MESSAGES -->
   <div id="aiMessages" class="ai-messages"></div>
@@ -4240,6 +4204,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
