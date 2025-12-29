@@ -2082,6 +2082,54 @@ body.smart-assistant-active {
     padding: 10px;
   }
 }
+/* ================= CHATGPT-STYLE WELCOME MODE ================= */
+
+/* Center everything in welcome mode */
+.ai-welcome .smart-ai-panel {
+  justify-content: center;
+}
+
+/* Welcome text */
+.ai-welcome .ai-welcome-screen {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.ai-welcome .ai-welcome-screen h2 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  color: #232f3e;
+}
+
+.ai-welcome .ai-welcome-screen p {
+  color: #666;
+  font-size: 14px;
+}
+
+/* Center input in welcome */
+.ai-welcome .ai-input-wrapper {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+/* Hide chat history initially */
+.ai-welcome .ai-messages {
+  display: none;
+}
+
+/* ================= NORMAL CHAT MODE ================= */
+
+.smart-assistant-view:not(.ai-welcome) .ai-welcome-screen {
+  display: none;
+}
+
+.smart-assistant-view:not(.ai-welcome) .ai-messages {
+  display: block;
+}
+
+.smart-assistant-view:not(.ai-welcome) .ai-input-wrapper {
+  margin: 0;
+}
 
 </style>
 
@@ -2252,14 +2300,20 @@ body.smart-assistant-active {
   </section>
 </div>
 <!-- SMART ASSISTANT VIEW -->
-<div id="smart-assistant-container" class="main-view smart-assistant-view">
+<div id="smart-assistant-container"
+     class="main-view smart-assistant-view ai-welcome">
 
 
   <aside class="left-bar">
-    <h3>Smart Assistant</h3>
-    <p style="font-size:13px;color:#555;">
-      Ask questions about PRs, Estimates, Daily Progress.
-    </p>
+   <!-- AI Welcome Screen -->
+<div class="ai-welcome-screen">
+  <h2>🤖 Smart Assistant</h2>
+  <p>
+    Ask questions about PRs, Estimates,<br>
+    Daily Progress and Records.
+  </p>
+</div>
+
   </aside>
 
   <section class="right-panel smart-ai-panel">
@@ -4178,6 +4232,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
