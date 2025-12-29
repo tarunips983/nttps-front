@@ -40,7 +40,7 @@ window.bindSmartAssistantUI = function () {
     return;
   }
 
-  const container = document.querySelector(".smart-assistant");
+  const container = document.getElementById("smart-assistant-container");
   const input = document.getElementById("aiInput");
   const sendBtn = document.getElementById("aiSendBtn");
   const messages = document.getElementById("aiMessages");
