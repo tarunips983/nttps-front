@@ -81,8 +81,8 @@ async function handleAskAI() {
   }
 
   // ✅ SHOW USER MESSAGE
-  if (typeof addUserMessage === "function") {
-    addUserMessage(question);
+  if (typeof window.addUserMessage === "function") {
+    window.addUserMessage(question);
     saveChatMessage("user", question);
   }
 
@@ -91,7 +91,9 @@ async function handleAskAI() {
 
   const token = localStorage.getItem("adminToken");
   if (!token) {
-    window.addBotMessage("🔒 Please login to chat with Smart Assistant.");
+    if (typeof window.addBotMessage === "function") {
+      window.addBotMessage("🔒 Please login to chat with Smart Assistant.");
+    }
     return;
   }
 
@@ -99,9 +101,12 @@ async function handleAskAI() {
     await analyzeAI(question);
   } catch (err) {
     console.error(err);
-    window.addBotMessage("❌ Error while processing your request.");
+    if (typeof window.addBotMessage === "function") {
+      window.addBotMessage("❌ Error while processing your request.");
+    }
   }
 }
+
 
   
 function renderAIAnswer(intent, data) {
