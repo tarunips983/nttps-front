@@ -2302,82 +2302,87 @@ function closeAllSidebars() {
   });
 }
 
-window.showMainView = function(viewName){
-closeAllSidebars();
+window.showMainView = function (viewName) {
+  closeAllSidebars();
   updateMobileButtons(viewName);
 
-    document.querySelectorAll(".subnav-btn").forEach(btn => btn.classList.remove("active"));
-  document.getElementById("file-transfer-container").style.display = "none";
-  
+  document.querySelectorAll(".subnav-btn")
+    .forEach(btn => btn.classList.remove("active"));
 
-
+  // ---------- HIDE ALL VIEWS ----------
   pdfView.style.display = "none";
   progressView.style.display = "none";
   clbiodata.style.display = "none";
   estimatesContainer.style.display = "none";
+  document.getElementById("file-transfer-container").style.display = "none";
+  document.getElementById("smart-assistant-container").style.display = "none";
 
-
-// Hide all mobile filter buttons first
+  // ---------- HIDE MOBILE FILTERS ----------
   mobileFilterBtn.style.display = "none";
   mobileEstFilterBtn.style.display = "none";
   mobileDailyFilterBtn.style.display = "none";
-  
-  if (viewName === "pdf") {
-      pdfView.style.display = "flex";
-      mobileFilterBtn.style.display = "block";
-       scrollToTop();
-      document.getElementById("pdfHeader").textContent = "📄 All Stage-V Indents";  // RESET every time
-      document.querySelector("#subNavBar button:nth-child(1)").classList.add("active");
-  }
 
-// Always close modal when switching views
-if (productModal.classList.contains("active")) {
+  // ---------- CLOSE MODALS ----------
+  if (productModal.classList.contains("active")) {
     closeModal();
-}
+  }
 
+  // ---------- PDF ----------
+  if (viewName === "pdf") {
+    pdfView.style.display = "flex";
+    mobileFilterBtn.style.display = "block";
+    scrollToTop();
+    document.getElementById("pdfHeader").textContent = "📄 All Stage-V Indents";
+    document.querySelector("#subNavBar button:nth-child(1)").classList.add("active");
+  }
 
-  
+  // ---------- ESTIMATES ----------
   if (viewName === "estimates") {
-      estimatesContainer.style.display = "flex";
-      mobileEstFilterBtn.style.display = "block";
+    estimatesContainer.style.display = "flex";
+    mobileEstFilterBtn.style.display = "block";
     scrollToTop();
-      document.getElementById("estHeader").textContent = "📘 All Stage-V Estimates";
-      document.querySelector("#subNavBar button:nth-child(2)").classList.add("active");
+    document.getElementById("estHeader").textContent = "📘 All Stage-V Estimates";
+    document.querySelector("#subNavBar button:nth-child(2)").classList.add("active");
   }
 
+  // ---------- DAILY PROGRESS ----------
   if (viewName === "progress") {
-      progressView.style.display = "flex";
-      mobileDailyFilterBtn.style.display = "block";
+    progressView.style.display = "flex";
+    mobileDailyFilterBtn.style.display = "block";
     scrollToTop();
-      document.querySelector("#subNavBar button:nth-child(3)").classList.add("active");
+    document.querySelector("#subNavBar button:nth-child(3)").classList.add("active");
   }
 
+  // ---------- CL BIO DATA ----------
   if (viewName === "clbiodata") {
-      clbiodata.style.display = "block";
+    clbiodata.style.display = "block";
     scrollToTop();
-      document.querySelector("#subNavBar button:nth-child(4)").classList.add("active");
-      renderCLBioData();
+    document.querySelector("#subNavBar button:nth-child(4)").classList.add("active");
+    renderCLBioData();
   }
-  
+
+  // ---------- FILE TRANSFER ----------
   if (viewName === "files") {
-  document.getElementById("file-transfer-container").style.display = "flex";
-  document.querySelector("#subNavBar button:nth-child(5)").classList.add("active");
-  scrollToTop();
+    document.getElementById("file-transfer-container").style.display = "flex";
+    document.querySelector("#subNavBar button:nth-child(5)").classList.add("active");
+    scrollToTop();
 
-  loadFiles();                 // immediate load
-  updateFileLoginStatus();
+    loadFiles();
+    updateFileLoginStatus();
 
-  // ✅ Start auto refresh every 4 seconds
-  if (!fileAutoRefreshTimer) {
-    fileAutoRefreshTimer = setInterval(loadFiles, 4000);
+    if (!fileAutoRefreshTimer) {
+      fileAutoRefreshTimer = setInterval(loadFiles, 4000);
+    }
   }
-}
-if (viewName === "smart") {
-  document.body.classList.add("smart-ai-active");
-} else {
-  document.body.classList.remove("smart-ai-active");
-}
 
+  // ---------- SMART ASSISTANT ----------
+  if (viewName === "smart") {
+    document.getElementById("smart-assistant-container").style.display = "flex";
+    document.body.classList.add("smart-ai-active");
+    document.querySelector("#subNavBar button:nth-child(6)").classList.add("active");
+  } else {
+    document.body.classList.remove("smart-ai-active");
+  }
 };
 
 
@@ -3991,6 +3996,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
