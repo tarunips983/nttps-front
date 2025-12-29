@@ -2,8 +2,6 @@ if (!window.API) {
   window.API = "https://nttps-backend.onrender.com";
 }
 
-
-
 (function () {
 
   if (window.__SMART_AI_LOADED__) return;
