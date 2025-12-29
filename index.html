@@ -1887,12 +1887,7 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
   overflow: hidden;
 }
 
-.smart-mode #smartAssistantUI {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
+
 
 .smart-mode #aiChatWrapper {
   flex: 1;
@@ -2281,58 +2276,48 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
   </section>
 </div>
 <!-- SMART ASSISTANT VIEW -->
-<!-- SMART ASSISTANT VIEW -->
 <div id="smart-assistant-container" class="main-view smart-mode">
 
-  <!-- FULL CHAT LAYOUT ROOT -->
-  <div class="ai-layout">
+  <!-- THIS ID IS REQUIRED FOR JS -->
+  <div id="smartAssistantUI" style="display:none; width:100%; height:100%;">
 
-    <!-- LEFT SIDEBAR -->
-    <aside class="ai-sidebar">
+    <div class="ai-layout">
 
-      <!-- USER INFO -->
-      <div class="ai-user">
-        <div class="ai-avatar">👤</div>
-        <div class="ai-username" id="aiUsername">Logged User</div>
-      </div>
+      <!-- LEFT SIDEBAR -->
+      <aside class="ai-sidebar">
+        <div class="ai-user">
+          <div class="ai-avatar">👤</div>
+          <div class="ai-username" id="aiUsername">Logged User</div>
+        </div>
 
-      <!-- NEW CHAT -->
-      <button class="ai-new-chat" onclick="startNewChat()">➕ New chat</button>
+        <button class="ai-new-chat" onclick="startNewChat()">➕ New chat</button>
 
-      <!-- CHAT HISTORY -->
-      <div class="ai-chat-list" id="aiChatList">
-        <!-- populated by JS -->
-      </div>
+        <div class="ai-chat-list" id="aiChatList"></div>
 
-      <!-- LOGOUT (FIXED BOTTOM) -->
-      <button class="ai-logout" onclick="logoutAI()">Logout</button>
+        <button class="ai-logout" onclick="logoutAI()">Logout</button>
+      </aside>
 
-    </aside>
+      <!-- RIGHT CHAT -->
+      <main class="ai-main">
 
-    <!-- RIGHT CHAT PANEL -->
-    <main class="ai-main">
+        <div id="smartLoginBlock"
+             style="display:none;color:#dc3545;font-weight:600;padding:10px;">
+          🔒 Login required to use Smart Assistant
+        </div>
 
-      <!-- LOGIN WARNING -->
-      <div id="smartLoginBlock"
-           style="display:none;color:#dc3545;font-weight:600;padding:10px;">
-        🔒 Login required to use Smart Assistant
-      </div>
+        <div id="aiChatMessages" class="ai-chat-messages"></div>
 
-      <!-- MESSAGES (ONLY SCROLL AREA) -->
-      <div id="aiChatMessages" class="ai-chat-messages"></div>
+        <div class="ai-input-bar">
+          <input
+            id="aiChatInput"
+            placeholder="Ask anything…"
+            onkeydown="if(event.key==='Enter') handleAskAI()"
+          />
+          <button onclick="handleAskAI()">➤</button>
+        </div>
 
-      <!-- INPUT -->
-      <div class="ai-input-bar">
-        <input
-          id="aiChatInput"
-          placeholder="Ask anything…"
-          onkeydown="if(event.key==='Enter') handleAskAI()"
-        />
-        <button onclick="handleAskAI()">➤</button>
-      </div>
-
-    </main>
-
+      </main>
+    </div>
   </div>
 </div>
 
@@ -2554,17 +2539,24 @@ if (productModal.classList.contains("active")) {
   }
 }
 if (viewName === "smart") {
-  document.getElementById("smart-assistant-container").style.display = "flex";
-  document.querySelector("#subNavBar button:last-child").classList.add("active");
+  const container = document.getElementById("smart-assistant-container");
+  const ui = document.getElementById("smartAssistantUI");
+  const loginBlock = document.getElementById("smartLoginBlock");
+
+  container.style.display = "flex";
 
   const token = localStorage.getItem("adminToken");
 
   if (!token) {
-    document.getElementById("smartLoginBlock").style.display = "block";
-    document.getElementById("smartAssistantUI").style.display = "none";
+    loginBlock.style.display = "block";
+    ui.style.display = "none";
   } else {
-    document.getElementById("smartLoginBlock").style.display = "none";
-    document.getElementById("smartAssistantUI").style.display = "block";
+    loginBlock.style.display = "none";
+    ui.style.display = "block";
+
+    if (window.loadAIMemory) {
+      window.loadAIMemory();
+    }
   }
 }
 
@@ -4175,6 +4167,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
