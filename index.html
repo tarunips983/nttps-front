@@ -4432,6 +4432,16 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 });
 
+function handleSendMessage() {
+  const token = localStorage.getItem("adminToken");
+
+  if (!token) {
+    openLoginModal(); // 🔐 force login
+    return;
+  }
+
+  // proceed with AI call
+}
 
 function fixIOSViewport() {
   const vh = window.innerHeight * 0.01;
@@ -4493,6 +4503,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
