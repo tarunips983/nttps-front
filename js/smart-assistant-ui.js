@@ -5,13 +5,42 @@ document.addEventListener("DOMContentLoaded", () => {
   const input = document.getElementById("aiInput");
   const sendBtn = document.getElementById("aiSendBtn");
   const messages = document.getElementById("aiMessages");
-  const container = document.getElementById("smart-assistant-container");
 
   if (!input || !sendBtn || !messages) {
     console.warn("⚠️ Smart Assistant UI not ready");
     return;
   }
+  
+  // ================= CHAT MESSAGE HELPERS =================
 
+function addUserMessage(text) {
+  const messages = document.getElementById("aiMessages");
+  if (!messages) return;
+
+  const div = document.createElement("div");
+  div.className = "ai-msg ai-user";
+  div.textContent = text;
+
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function addBotMessage(text) {
+  const messages = document.getElementById("aiMessages");
+  if (!messages) return;
+
+  const div = document.createElement("div");
+  div.className = "ai-msg ai-bot";
+
+  // allow HTML for typing indicator
+  div.innerHTML = text;
+
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+  
+  
   // ---------- SEND HANDLER ----------
   function sendMessage() {
     const text = input.value.trim();
