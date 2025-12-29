@@ -5,9 +5,19 @@ window.__LAST_AI_INPUT__ = "";
 
 // ================== DOM READY ==================
 document.addEventListener("DOMContentLoaded", () => {
+  const chatInput = document.getElementById("aiChatInput");
+  const chatBox = document.getElementById("aiChatMessages");
+
+  // Chat-only mode
+  if (chatInput && chatBox) {
+    console.log("✅ Smart Assistant UI ready (chat mode)");
+    return;
+  }
+
+  // Fallback: legacy analyze mode
   const analyzeBtn = document.getElementById("aiAnalyzeBtn");
-  const saveBtn = document.getElementById("aiSaveBtn");
   const input = document.getElementById("aiInput");
+  const saveBtn = document.getElementById("aiSaveBtn");
 
   if (!analyzeBtn || !input) {
     console.warn("⚠️ Smart Assistant UI not ready");
@@ -22,40 +32,30 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // ✅ STORE INPUT FOR CORE
     window.__LAST_AI_INPUT__ = text;
-
-    // clear input AFTER storing
     input.value = "";
 
-    // switch layout to chat mode
     const wrapper = document.getElementById("aiChatWrapper");
     if (wrapper) {
       wrapper.classList.remove("center");
       wrapper.classList.add("chat");
     }
 
-    // show user message
     addUserMessage(text);
-saveChatMessage("user", text);
+    saveChatMessage("user", text);
 
-    // show analyzing message
     addBotMessage(`<span id="aiAnalyzingMsg">Analyzing…</span>`);
-    saveChatMessage("bot", text);
+    saveChatMessage("bot", "Analyzing…");
 
     if (typeof window.analyzeAI !== "function") {
       showToast("AI core not loaded", "error");
       return;
     }
-window.analyzeAI();
-    
-const analyzing = document.getElementById("aiAnalyzingMsg");
-if (analyzing) {
-  analyzing.closest(".ai-msg")?.remove();
-}
 
+    window.analyzeAI();
 
-    
+    const analyzing = document.getElementById("aiAnalyzingMsg");
+    if (analyzing) analyzing.closest(".ai-msg")?.remove();
   });
 
   // ---------- SAVE ----------
