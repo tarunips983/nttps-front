@@ -2035,19 +2035,26 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
         
     
         <!-- INPUT BAR -->
-        <div class="ai-chat-box">
+       <div style="display:flex; gap:10px; max-width:600px; margin:20px auto;">
+
   <input
     id="aiChatInput"
     type="text"
+    class="search-field"
     placeholder="Ask anything about PRs, Estimates, Daily Progress..."
     onkeydown="if(event.key==='Enter') handleAskAI()"
+    style="flex:1;"
   />
 
-  <button onclick="handleAskAI()">Ask</button>
+  <button
+    class="view-btn"
+    onclick="handleAskAI()"
+  >
+    Ask
+  </button>
+
 </div>
 
-
-      </div>
 
   
 
@@ -3874,6 +3881,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
