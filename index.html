@@ -1930,6 +1930,129 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
   font-size: 15px;
   border-radius: 10px;
 }
+/* ===============================
+   CHATGPT STYLE SMART ASSISTANT
+================================ */
+
+.ai-layout {
+  display: flex;
+  height: calc(100vh - 120px); /* header + tabs */
+  background: #f9fafb;
+}
+
+/* ---------- SIDEBAR ---------- */
+.ai-sidebar {
+  width: 260px;
+  background: #111827;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+}
+
+.ai-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #374151;
+}
+
+.ai-avatar {
+  background: #2563eb;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ai-new-chat {
+  margin: 12px 0;
+  padding: 10px;
+  background: #1f2937;
+  color: #fff;
+  border-radius: 8px;
+}
+
+.ai-chat-list {
+  flex: 1;
+  overflow-y: auto;
+  font-size: 14px;
+}
+
+.ai-chat-list div {
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.ai-chat-list div:hover {
+  background: #374151;
+}
+
+.ai-logout {
+  margin-top: auto;
+  background: #dc2626;
+  padding: 10px;
+  border-radius: 8px;
+  color: #fff;
+}
+
+/* ---------- CHAT PANEL ---------- */
+.ai-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+}
+
+.ai-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ai-msg.user {
+  align-self: flex-end;
+  background: #2563eb;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 14px;
+  max-width: 70%;
+}
+
+.ai-msg.bot {
+  align-self: flex-start;
+  background: #f3f4f6;
+  padding: 10px 14px;
+  border-radius: 14px;
+  max-width: 70%;
+}
+
+.ai-input-bar {
+  display: flex;
+  gap: 10px;
+  padding: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.ai-input-bar input {
+  flex: 1;
+  height: 44px;
+  border-radius: 12px;
+  padding: 0 14px;
+}
+
+.ai-input-bar button {
+  width: 44px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #fff;
+}
 
 </style>
 
@@ -2111,41 +2234,48 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
       🔒 Login required to use Smart Assistant
     </div>
 
-    <!-- AI UI -->
-   <!-- ================= SMART ASSISTANT UI ================= -->
-<div id="smartAssistantUI" style="display:block;">
+ <div id="smart-assistant-container" class="ai-layout">
 
-  <div id="aiChatWrapper" class="ai-chat-wrapper chat">
+  <!-- LEFT SIDEBAR -->
+  <aside class="ai-sidebar">
 
-    <h1 style="margin:10px 0;">🤖 Smart Assistant</h1>
-
-    <!-- CHAT AREA -->
-    <div id="aiChatArea">
-      <div id="aiChatMessages" class="ai-chat-messages"></div>
+    <!-- USER INFO -->
+    <div class="ai-user">
+      <div class="ai-avatar">👤</div>
+      <div class="ai-username" id="aiUsername">Logged User</div>
     </div>
 
-    <!-- PREVIEW (hidden by default) -->
-    <div id="aiPreview" style="display:none;margin:10px 0;"></div>
+    <!-- ACTIONS -->
+    <button class="ai-new-chat" onclick="startNewChat()">➕ New chat</button>
 
-    <!-- SAVE -->
-    <div id="aiSaveContainer" style="display:none;text-align:right;">
-      <button class="view-btn" id="aiSaveBtn">💾 Save</button>
+    <!-- CHAT HISTORY -->
+    <div class="ai-chat-list" id="aiChatList">
+      <!-- JS will populate -->
     </div>
 
-    <!-- INPUT BAR (FIXED BOTTOM) -->
-    <div id="aiChatInputBar">
+    <!-- LOGOUT -->
+    <button class="ai-logout" onclick="logoutAI()">Logout</button>
+
+  </aside>
+
+  <!-- RIGHT CHAT PANEL -->
+  <main class="ai-main">
+
+    <div id="aiChatMessages" class="ai-chat-messages"></div>
+
+    <div class="ai-input-bar">
       <input
         id="aiChatInput"
-        type="text"
-        class="ai-input-bar"
-        placeholder="Ask anything about PRs, Estimates, Daily Progress..."
+        placeholder="Ask anything…"
         onkeydown="if(event.key==='Enter') handleAskAI()"
       />
-      <button class="view-btn" onclick="handleAskAI()">Ask</button>
+      <button onclick="handleAskAI()">➤</button>
     </div>
 
-  </div>
+  </main>
+
 </div>
+
 
 <!-- ================= END SMART ASSISTANT UI ================= -->
 
@@ -3717,6 +3847,24 @@ if (pendingDownloadUrl) {
   }
 };
 
+function loadUser() {
+  const user = JSON.parse(localStorage.getItem("loggedUser"));
+  if (user) {
+    document.getElementById("aiUsername").innerText = user.name;
+  }
+}
+
+function startNewChat() {
+  localStorage.removeItem("smartChatHistory");
+  document.getElementById("aiChatMessages").innerHTML = "";
+}
+
+function logoutAI() {
+  localStorage.clear();
+  location.href = "login.html";
+}
+
+loadUser();
 
     // Mobile sidebar toggles (slide-in from LEFT)
     function toggleSidebar(buttonId, sidebarId){
@@ -3968,6 +4116,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
