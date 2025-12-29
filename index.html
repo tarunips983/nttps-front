@@ -2035,7 +2035,7 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
         
     
         <!-- INPUT BAR -->
-       <div style="display:flex; gap:10px; max-width:600px; margin:20px auto;">
+      <div class="nav-right" style="max-width:600px; margin:20px auto; display:flex; gap:10px;">
 
   <input
     id="aiChatInput"
@@ -2046,17 +2046,9 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
     style="flex:1;"
   />
 
-  <button
-    class="view-btn"
-    onclick="handleAskAI()"
-  >
-    Ask
-  </button>
+  <button class="view-btn" onclick="handleAskAI()">Ask</button>
 
-</div>
-
-
-  
+      </div>
 
     </div>
 
@@ -3881,6 +3873,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
