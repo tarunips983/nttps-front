@@ -2094,6 +2094,85 @@ body.smart-assistant-active {
 .smart-assistant-view:not(.ai-welcome) .ai-input-wrapper {
   margin: 0;
 }
+/* SMART ASSISTANT AUTH BAR */
+.smart-auth-bar {
+  position: absolute;
+  top: 10px;
+  right: 16px;
+  z-index: 3000;
+}
+
+.smart-user-menu {
+  position: relative;
+}
+
+.smart-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid #0d6efd;
+}
+
+.smart-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.smart-user-dropdown {
+  position: absolute;
+  right: 0;
+  top: 44px;
+  width: 200px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+  padding: 12px;
+  display: none;
+  animation: fadeDrop 0.25s ease;
+}
+
+.smart-user-dropdown.active {
+  display: block;
+}
+
+.smart-user-info {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+.smart-user-info strong {
+  display: block;
+  font-size: 14px;
+}
+
+.smart-user-info small {
+  font-size: 12px;
+  color: #666;
+}
+
+.smart-user-dropdown button {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  background: #0d6efd;
+  color: white;
+}
+
+.smart-user-dropdown button.logout {
+  background: #dc3545;
+}
+
+@keyframes fadeDrop {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
 </style>
 
@@ -2267,6 +2346,25 @@ body.smart-assistant-active {
 <div id="smart-assistant-container"
      class="main-view smart-assistant-view ai-welcome">
 
+<!-- SMART ASSISTANT TOP AUTH -->
+<div class="smart-auth-bar">
+  <div class="smart-user-menu">
+    <div id="smartAvatar" class="smart-avatar" onclick="toggleSmartUserMenu()">
+      <img src="https://ui-avatars.com/api/?name=User&background=0d6efd&color=fff">
+    </div>
+
+    <div id="smartUserDropdown" class="smart-user-dropdown">
+      <div class="smart-user-info">
+        <strong id="smartUserName">Guest</strong>
+        <small id="smartUserStatus">Login required</small>
+      </div>
+
+      <button id="smartAuthBtn" onclick="handleSmartAuth()">
+        🔐 Login
+      </button>
+    </div>
+  </div>
+</div>
 
   <aside class="left-bar">
    <!-- AI Welcome Screen -->
@@ -2281,19 +2379,7 @@ body.smart-assistant-active {
   </aside>
 
   <section class="right-panel smart-ai-panel">
-<!-- SMART ASSISTANT LOGIN BLOCK -->
-<!-- SMART ASSISTANT LOGIN BAR -->
-<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #ddd;background:#f9f9f9;">
-  <span id="smartLoginStatus" style="font-weight:600;color:#dc3545;">
-    🔒 Login required
-  </span>
 
-  <button id="smartAuthBtn"
-          class="view-btn"
-          style="min-width:110px;">
-    🔐 Login
-  </button>
-</div>
 
 
   <!-- HEADER -->
@@ -2556,7 +2642,8 @@ if (pm && pm.classList.contains("active")) {
 if (sa) {
   sa.style.display = "flex";
 }
-updateSmartAssistantLoginStatus(); // ✅ REQUIRED
+updateSmartUserMenu();
+
     document.body.classList.add("smart-assistant-active");
 
     // ALWAYS start clean
@@ -2573,6 +2660,59 @@ updateSmartAssistantLoginStatus(); // ✅ REQUIRED
   window.scrollTo({ top: saved, behavior: "instant" });
 };
 
+function toggleSmartUserMenu() {
+  document
+    .getElementById("smartUserDropdown")
+    .classList.toggle("active");
+}
+
+// Close on outside click
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".smart-user-menu")) {
+    document
+      .getElementById("smartUserDropdown")
+      ?.classList.remove("active");
+  }
+});
+
+function updateSmartUserMenu() {
+  const token = localStorage.getItem("adminToken");
+
+  const nameEl = document.getElementById("smartUserName");
+  const statusEl = document.getElementById("smartUserStatus");
+  const btn = document.getElementById("smartAuthBtn");
+
+  if (!nameEl || !statusEl || !btn) return;
+
+  if (token) {
+    nameEl.textContent = "Admin";
+    statusEl.textContent = "Logged in";
+    btn.textContent = "🚪 Logout";
+    btn.classList.add("logout");
+  } else {
+    nameEl.textContent = "Guest";
+    statusEl.textContent = "Login required";
+    btn.textContent = "🔐 Login";
+    btn.classList.remove("logout");
+  }
+}
+
+function handleSmartAuth() {
+  const token = localStorage.getItem("adminToken");
+
+  if (token) {
+    if (!confirm("Logout from Smart Assistant?")) return;
+
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("isAdmin");
+
+    updateSmartUserMenu();
+    updateFileLoginStatus();
+
+  } else {
+    openPasswordModal();
+  }
+}
 
 function collapseAllDropdowns(sidebarId) {
     const sidebar = document.getElementById(sidebarId);
@@ -3308,32 +3448,7 @@ function updateFileLoginStatus() {
     uploadSection.style.display = "none"; // ❌ HIDE UPLOAD
   }
 }
-function updateSmartAssistantLoginStatus() {
-  const statusEl = document.getElementById("smartLoginStatus");
-  const btn = document.getElementById("smartAuthBtn");
-  const assistantUI = document.getElementById("smartAssistantUI");
-  const token = localStorage.getItem("adminToken");
 
-  if (!statusEl || !btn || !assistantUI) return;
-
-  if (token) {
-    statusEl.innerHTML = "🟢 Logged in";
-    statusEl.style.color = "#198754";
-
-    btn.innerHTML = "🚪 Logout";
-    btn.style.background = "#dc3545";
-
-    assistantUI.style.display = "flex"; // ✅ SHOW CHAT
-  } else {
-    statusEl.innerHTML = "🔒 Login required";
-    statusEl.style.color = "#dc3545";
-
-    btn.innerHTML = "🔐 Login";
-    btn.style.background = "#007bff";
-
-    assistantUI.style.display = "none"; // ❌ HIDE CHAT
-  }
-}
 
 document.getElementById("smartAuthBtn").onclick = () => {
   const token = localStorage.getItem("adminToken");
@@ -3503,7 +3618,7 @@ function handleFileAuthClick() {
 
     updateFileLoginStatus();
     
-updateSmartAssistantLoginStatus();
+
     loadFiles(); // ✅ FORCE immediate refresh
   } else {
     openPasswordModal();
@@ -3982,7 +4097,7 @@ async function renderCLBioData() {
 
   closePasswordModal();
  updateFileLoginStatus();
-updateSmartAssistantLoginStatus();
+
       loadFiles();
 
 // ✅ Resume pending download after login
@@ -4297,6 +4412,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
