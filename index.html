@@ -2105,6 +2105,67 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
   color: white;
   cursor: pointer;
 }
+/* === SMART ASSISTANT LAYOUT FIX === */
+
+.smart-mode {
+  height: calc(100vh - 120px); /* header + tabs height */
+}
+
+.ai-layout {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.ai-sidebar {
+  width: 260px;
+  min-width: 260px;
+  background: #0f172a;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+.ai-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #f8fafc;
+  height: 100%;
+}
+
+/* CHAT MESSAGES */
+.ai-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+/* INPUT BAR FIXED AT BOTTOM */
+.ai-input-bar {
+  display: flex;
+  gap: 10px;
+  padding: 14px;
+  border-top: 1px solid #e5e7eb;
+  background: #ffffff;
+}
+
+.ai-input-bar input {
+  flex: 1;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+}
+
+.ai-input-bar button {
+  padding: 0 18px;
+  border-radius: 999px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
 
 </style>
 
@@ -2474,7 +2535,7 @@ closeAllSidebars();
 
     document.querySelectorAll(".subnav-btn").forEach(btn => btn.classList.remove("active"));
   document.getElementById("file-transfer-container").style.display = "none";
-  document.getElementById("smart-assistant-container").style.display = "none";
+  
 
 
   pdfView.style.display = "none";
@@ -2543,7 +2604,7 @@ if (viewName === "smart") {
   const ui = document.getElementById("smartAssistantUI");
   const loginBlock = document.getElementById("smartLoginBlock");
 
-  container.style.display = "flex";
+  container.style.display = "block";
 
   const token = localStorage.getItem("adminToken");
 
@@ -2559,7 +2620,6 @@ if (viewName === "smart") {
     }
   }
 }
-
 
 };
 
@@ -4167,6 +4227,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
