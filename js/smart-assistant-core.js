@@ -933,8 +933,7 @@ window.loadAIMemory = loadAIMemory;
 window.saveChatMessage = saveChatMessage;
 window.loadChatHistory = loadChatHistory;
 // 🔥 expose UI helpers to CORE
-window.addUserMessage = addUserMessage;
-window.addBotMessage = addBotMessage;
+
 
 // 🔥 ADD THIS LINE
 window.handleAskAI = handleAskAI;
