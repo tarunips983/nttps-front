@@ -15,6 +15,12 @@ let aiMemory = [];
 let aiMemoryLoaded = false;
 window.__LAST_AI_INPUT__ = "";
 let aiOriginalResult = null;
+let AI_MODE = "CHAT"; // CHAT | EDIT
+  
+function detectEditIntent(text) {
+  return /add|save|create|insert|update|edit/i.test(text);
+}
+
 
 function detectQueryIntent(text) {
   const t = text.toLowerCase();
@@ -466,7 +472,19 @@ if (aiTargetModule === "records") {
   };
 }
 
-renderAIPreview(aiTargetModule, aiResult);
+// Decide mode
+AI_MODE = detectEditIntent(text) ? "EDIT" : "CHAT";
+
+if (AI_MODE === "EDIT") {
+  renderAIPreview(aiTargetModule, aiResult);
+
+  const saveBtn = document.getElementById("aiSaveBtn");
+  if (saveBtn) saveBtn.style.display = "inline-flex";
+} else {
+  // CHAT MODE → TEXT RESPONSE ONLY
+  respondWithText(aiTargetModule, aiResult);
+}
+
 
 // ⚠️ If AI extracted nothing useful, warn user
 if (!Object.values(aiResult || {}).some(v => v && v.toString().trim())) {
@@ -487,6 +505,38 @@ if (saveBtn) {
   
 }
 
+function respondWithText(module, data) {
+  let msg = "";
+
+  if (module === "records") {
+    msg = `
+PR No: ${data.prNo || "N/A"}
+Work: ${data.workName || "Not available"}
+Firm: ${data.firmName || "N/A"}
+Amount: ${data.amount ? "₹" + data.amount : "N/A"}
+Status: ${data.status || "Unknown"}
+    `;
+  } 
+  else if (module === "estimates") {
+    msg = `
+Estimate No: ${data.estimateNo || "N/A"}
+Description: ${data.description || ""}
+Amount: ${data.amount || ""}
+    `;
+  }
+  else if (module === "daily") {
+    msg = `
+Date: ${data.date}
+Activity: ${data.activity}
+Status: ${data.status}
+    `;
+  }
+  else {
+    msg = "I found data, but could not format a response.";
+  }
+
+  addBotMessage(msg.trim());
+}
 
 function cleanDailyActivity(text) {
     return text
