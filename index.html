@@ -1716,41 +1716,7 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
 /* ===== SMART ASSISTANT – CHATGPT STYLE ===== */
 
 /* Chat wrapper */
-.ai-chat-wrapper {
-  height: calc(100vh - 220px);
-  max-width: 900px;
-  margin: auto;
-  display: flex;
-  flex-direction: column;
-  transition: all 0.4s ease;
-}
-.ai-chat-wrapper {
-  overflow: visible !important;
-  height: auto !important;
-}
 
-/* CENTER STATE (before analyze) */
-.ai-chat-wrapper.center {
-  justify-content: center;
-}
-
-/* CHAT STATE (after analyze) */
-.ai-chat-wrapper.chat {
-  justify-content: space-between;
-}
-
-/* Messages area */
-.ai-chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px;
-  display: none;            /* hidden initially */
-}
-.ai-chat-messages {
-  max-height: 180px;          /* adjust as you like */
-  overflow-y: auto;
-  padding-right: 6px;
-}
 #aiPreview {
   overflow: visible;
   margin-top: 12px;
@@ -1909,16 +1875,18 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
    SMART ASSISTANT LAYOUT FIX
    (SCOPED — DOES NOT AFFECT OTHER TABS)
 ================================ */
+/* ===============================
+   SMART ASSISTANT – FINAL CHAT FIX
+   (ISOLATED & SAFE)
+================================ */
 
-/* Only Smart Assistant right panel */
 .smart-mode .smart-right-panel {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 150px); /* header + tabs */
+  height: calc(100vh - 160px); /* header + tabs */
   overflow: hidden;
 }
 
-/* Smart Assistant UI fills panel */
 .smart-mode #smartAssistantUI {
   flex: 1;
   display: flex;
@@ -1926,26 +1894,41 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
   overflow: hidden;
 }
 
-/* Chat wrapper */
 .smart-mode #aiChatWrapper {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
-/* Messages scroll */
+/* Messages scroll area */
 .smart-mode #aiChatMessages {
   flex: 1;
   overflow-y: auto;
-  padding-bottom: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-/* Input always at bottom */
-.smart-mode .nav-right {
-  margin-top: auto;
-  padding-top: 10px;
-  background: #fff;
+/* Input bar fixed at bottom */
+.smart-mode #aiChatInputBar {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  border-top: 1px solid #e5e7eb;
+  background: #ffffff;
+}
+
+/* Input */
+.smart-mode #aiChatInput {
+  flex: 1;
+  height: 44px;
+  padding: 10px 14px;
+  font-size: 15px;
+  border-radius: 10px;
 }
 
 </style>
@@ -3985,6 +3968,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
