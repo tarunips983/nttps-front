@@ -1893,6 +1893,54 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
   100%{opacity:.2}
 }
 
+/* =====================================================
+   SMART ASSISTANT – FULL HEIGHT CHAT (NO PAGE SCROLL)
+===================================================== */
+
+/* Disable page scroll ONLY in Smart Assistant */
+.smart-assistant-view {
+  height: calc(100vh - 160px); /* header + subnav */
+  overflow: hidden;
+}
+
+/* Ensure main doesn't scroll */
+.smart-assistant-view .right-panel {
+  padding: 0 !important;
+  overflow: hidden !important;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Chat message area scrolls internally */
+.smart-assistant-view #aiMessages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background: #f6f8fb;
+}
+
+/* Input bar fixed at bottom of assistant view */
+.smart-assistant-view #aiInput {
+  height: 48px;
+}
+
+.smart-assistant-view textarea {
+  resize: none;
+}
+
+/* Hide footer ONLY in Smart Assistant */
+.smart-assistant-view ~ footer,
+.smart-assistant-view footer {
+  display: none !important;
+}
+
+/* Prevent body scroll bleed */
+body.smart-assistant-active {
+  overflow: hidden;
+}
+.smart-assistant-view .left-bar {
+  overflow: hidden !important;
+}
 
 </style>
 
@@ -2063,7 +2111,8 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
   </section>
 </div>
 <!-- SMART ASSISTANT VIEW -->
-<div id="smart-assistant-container" class="main-view">
+<div id="smart-assistant-container" class="main-view smart-assistant-view">
+
 
   <aside class="left-bar">
     <h3>Smart Assistant</h3>
@@ -2252,6 +2301,8 @@ window.showMainView = function (viewName) {
 
   document.querySelectorAll(".subnav-btn")
     .forEach(btn => btn.classList.remove("active"));
+  
+document.body.classList.remove("smart-assistant-active");
 
   // ---------- HIDE ALL VIEWS ----------
   pdfView.style.display = "none";
@@ -2318,10 +2369,10 @@ window.showMainView = function (viewName) {
       fileAutoRefreshTimer = setInterval(loadFiles, 4000);
     }
   }
-
- if (viewName === "assistant") {
+if (viewName === "assistant") {
   document.getElementById("smart-assistant-container").style.display = "flex";
-  scrollToTop();
+  document.body.classList.add("smart-assistant-active");
+  return;
 }
 
 }
@@ -3989,6 +4040,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
