@@ -1905,6 +1905,48 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
   margin-right: auto;
 }
 
+/* ===============================
+   SMART ASSISTANT LAYOUT FIX
+   (SCOPED — DOES NOT AFFECT OTHER TABS)
+================================ */
+
+/* Only Smart Assistant right panel */
+.smart-mode .smart-right-panel {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 150px); /* header + tabs */
+  overflow: hidden;
+}
+
+/* Smart Assistant UI fills panel */
+.smart-mode #smartAssistantUI {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Chat wrapper */
+.smart-mode #aiChatWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Messages scroll */
+.smart-mode #aiChatMessages {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 12px;
+}
+
+/* Input always at bottom */
+.smart-mode .nav-right {
+  margin-top: auto;
+  padding-top: 10px;
+  background: #fff;
+}
 
 </style>
 
@@ -2077,10 +2119,8 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
 </div>
 <!-- SMART ASSISTANT VIEW -->
 <!-- SMART ASSISTANT VIEW -->
-<div id="smart-assistant-container" class="main-view">
-  <section class="right-panel">
-
-    
+<div id="smart-assistant-container" class="main-view smart-mode">
+  <section class="right-panel smart-right-panel">
 
     <!-- LOGIN WARNING -->
     <div id="smartLoginBlock"
@@ -3945,6 +3985,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
