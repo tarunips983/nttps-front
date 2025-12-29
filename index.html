@@ -2006,6 +2006,82 @@ body.smart-assistant-active {
 .smart-assistant-view {
   overflow: hidden;
 }
+/* ================= FANCY CHAT INPUT (SMART ASSISTANT) ================= */
+
+.smart-ai-panel .ai-input-wrapper {
+  padding: 12px 16px;
+  background: #f6f8fb;
+  border-top: 1px solid #e1e5ea;
+}
+
+.smart-ai-panel .ai-input-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 8px 10px 8px 14px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.25s ease, transform 0.2s ease;
+}
+
+/* Lift on focus */
+.smart-ai-panel .ai-input-bar:focus-within {
+  box-shadow: 0 8px 22px rgba(0, 123, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+/* Textarea */
+.smart-ai-panel #aiInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  resize: none;
+  font-size: 14.5px;
+  line-height: 1.4;
+  background: transparent;
+  padding: 8px 0;
+  color: #222;
+}
+
+/* Placeholder */
+.smart-ai-panel #aiInput::placeholder {
+  color: #9aa3af;
+}
+
+/* Send button */
+.smart-ai-panel #aiSendBtn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #007bff, #0056d6);
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Hover / active */
+.smart-ai-panel #aiSendBtn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 16px rgba(0, 123, 255, 0.55);
+}
+
+.smart-ai-panel #aiSendBtn:active {
+  transform: scale(0.95);
+}
+
+/* Mobile polish */
+@media (max-width: 600px) {
+  .smart-ai-panel .ai-input-wrapper {
+    padding: 10px;
+  }
+}
 
 </style>
 
@@ -2202,10 +2278,15 @@ body.smart-assistant-active {
   </div>
 
   <!-- INPUT -->
+  <div class="ai-input-wrapper">
   <div class="ai-input-bar">
     <textarea id="aiInput" placeholder="Type your question..."></textarea>
-    <button id="aiSendBtn">➤</button>
+    <button id="aiSendBtn" title="Send">
+      ➤
+    </button>
   </div>
+</div>
+
 
 </section>
 
@@ -2499,6 +2580,11 @@ function activateSmartAssistant() {
 function deactivateSmartAssistant() {
   document.body.classList.remove("smart-ai-active");
 }
+// Auto-grow textarea
+aiInput.addEventListener("input", () => {
+  aiInput.style.height = "auto";
+  aiInput.style.height = Math.min(aiInput.scrollHeight, 120) + "px";
+});
 
     // summary helper
     function summarize(text){
@@ -4096,6 +4182,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
