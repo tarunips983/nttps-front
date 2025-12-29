@@ -135,24 +135,34 @@ Status: ${data.status}`
 
 
 async function loadAIMemory() {
-    const token = localStorage.getItem("adminToken");
-    if (!token || !window.API) {
-  console.warn("AI memory skipped: missing token or API");
-  return;
+  const token = localStorage.getItem("adminToken");
+
+  // Chat-only mode: memory is optional
+  if (!token || !window.API) {
+    console.warn("AI memory skipped: missing token or API");
+    aiMemoryLoaded = true;
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API}/ai/memory`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (res.ok) {
+      aiMemory = await res.json();
+    } else {
+      aiMemory = [];
+      console.warn("AI memory not accessible:", res.status);
+    }
+  } catch (err) {
+    console.warn("AI memory load failed:", err.message);
+    aiMemory = [];
+  }
+
+  aiMemoryLoaded = true;
 }
 
-    try {
-  const res = await fetch(`${API}/ai/memory`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  if (res.ok) aiMemory = await res.json();
-} catch (e) {
-  console.warn("AI memory load skipped");
-}
-
-    aiMemory = res.ok ? await res.json() : [];
-    aiMemoryLoaded = true; // ✅ ADD THIS LINE
-}
 
 const RECORD_COLUMNS = [
   "prNo",
