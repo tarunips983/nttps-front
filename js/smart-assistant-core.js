@@ -366,6 +366,18 @@ function normalizeText(text) {
     .trim();
 }
 
+
+function showTyping() {
+  const t = document.getElementById("aiTyping");
+  if (t) t.style.display = "block";
+}
+
+function hideTyping() {
+  const t = document.getElementById("aiTyping");
+  if (t) t.style.display = "none";
+}
+
+  
 function findLearnedMatch(text, module) {
     const normalize = s =>
         s
