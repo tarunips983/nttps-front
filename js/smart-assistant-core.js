@@ -70,13 +70,43 @@ async function askAIQuestion(question) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`
     },
-    body: JSON.stringify({
-      text: question,
-      module,
-      identifier,
-      intent: "DETAILS"
-    })
-  });
+    const prMatch = question.match(/\b\d{10}\b/);
+const aadhaarMatch = question.match(/\b\d{12}\b/);
+
+let module = "records";
+let identifier = {};
+
+if (aadhaarMatch) {
+  module = "cl";
+  identifier.aadhar = aadhaarMatch[0];
+} 
+else if (prMatch) {
+  module = "records";
+  identifier.prNo = prMatch[0];
+}
+else if (/estimate/i.test(question)) {
+  module = "estimates";
+}
+else if (/daily|progress/i.test(question)) {
+  module = "daily";
+}
+
+const payload = {
+  module,
+  identifier,
+  intent: "DETAILS",
+  text: question
+};
+
+await fetch(`${API}/ai/query`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`
+  },
+  body: JSON.stringify(payload)
+});
+
 
   const data = await res.json();
 
@@ -593,6 +623,7 @@ if (saveBtn) {
 function respondWithText(module, data) {
   let msg = "";
 
+  /* ================= RECORDS ================= */
   if (module === "records") {
     msg = `
 PR No: ${data.prNo || "N/A"}
@@ -601,29 +632,54 @@ Firm: ${data.firmName || "N/A"}
 Amount: ${data.amount ? "₹" + data.amount : "N/A"}
 Status: ${data.status || "Unknown"}
     `;
-  } 
+  }
+
+  /* ================= ESTIMATES ================= */
   else if (module === "estimates") {
     msg = `
 Estimate No: ${data.estimateNo || "N/A"}
-Description: ${data.description || ""}
-Amount: ${data.amount || ""}
+Description: ${data.description || "N/A"}
+Division: ${data.divisionLabel || "N/A"}
+Status: ${data.status || "N/A"}
     `;
   }
+
+  /* ================= DAILY PROGRESS ================= */
   else if (module === "daily") {
     msg = `
-Date: ${data.date}
-Activity: ${data.activity}
-Status: ${data.status}
+Date: ${data.date || "N/A"}
+Activity: ${data.activity || "N/A"}
+Manpower: ${data.manpower || "N/A"}
+Status: ${data.status || "N/A"}
     `;
   }
+
+  /* ================= CL BIO DATA (🔥 MISSING PART) ================= */
+  else if (module === "cl") {
+    msg = `
+CL Bio Data
+
+Name: ${data.name || "N/A"}
+Gender: ${data.gender || "N/A"}
+Aadhaar: ${data.aadhar || "N/A"}
+Phone: ${data.phone || "N/A"}
+Station: ${data.station || "N/A"}
+Division: ${data.divisionLabel || "N/A"}
+DOJ: ${data.doj || "N/A"}
+Wages: ${data.wages || "N/A"}
+Nominee: ${data.nominee || "N/A"}
+Relation: ${data.relation || "N/A"}
+    `;
+  }
+
+  /* ================= FALLBACK ================= */
   else {
     msg = "I found data, but could not format a response.";
   }
 
   if (typeof window.addBotMessage === "function") {
-  window.addBotMessage(msg.trim());
-}
-
+    window.addBotMessage(msg.trim());
+  }
 }
 
 function cleanDailyActivity(text) {
