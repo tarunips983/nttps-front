@@ -72,22 +72,28 @@ async function askAIQuestion(question) {
   const data = await res.json();
   renderAIAnswer(intent, data.result);
 }
+
+  
 async function handleAskAI() {
   const input = getAIInputElement();
-if (!input) {
-  console.error("AI input not found");
-  return;
-}
+  if (!input) {
+    console.error("AI input not found");
+    return;
+  }
 
-const question = input.value.trim();
+  const question = input.value.trim();
+  if (!question) return;
+
+  addUserMessage(question);
+  saveChatMessage("user", question);
 
   input.value = "";
 
   const intent = detectQueryIntent(question);
-
   const token = localStorage.getItem("adminToken");
+
   if (!token) {
-    safeAddMessage("Please login to ask database questions.");
+    addBotMessage("Please login to ask database questions.");
     return;
   }
 
@@ -98,20 +104,13 @@ const question = input.value.trim();
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`
       },
-      body: JSON.stringify({
-        intent,
-        text: question
-      })
+      body: JSON.stringify({ intent, text: question })
     });
 
-    
-if (typeof safeAddMessage !== "function") {
-  console.error("Chat UI helpers not loaded");
-  return;
-}
-const data = await res.json();
+    const data = await res.json();
+
     if (!data.success || !data.result) {
-      safeAddMessage("I could not find matching data in the database.");
+      addBotMessage("I could not find matching data in the database.");
       return;
     }
 
@@ -119,11 +118,21 @@ const data = await res.json();
 
   } catch (err) {
     console.error(err);
-    safeAddMessage("Error while processing your question.");
+    addBotMessage("Error while processing your question.");
   }
 }
 
-function safeAddMessage(role, text) {
+
+  function addUserMessage(text) {
+  safeAddMessage(text, "user");
+}
+
+function addBotMessage(text) {
+  safeAddMessage(text, "bot");
+}
+
+
+function safeAddMessage(text, role = "bot") {
   const container = getAIMessagesElement();
   if (!container) return;
 
@@ -134,6 +143,7 @@ function safeAddMessage(role, text) {
   container.appendChild(msg);
   container.scrollTop = container.scrollHeight;
 }
+
 
 
   
