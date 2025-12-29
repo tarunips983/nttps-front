@@ -1842,6 +1842,68 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
   }
 }
 
+/* ===== SMART ASSISTANT CHAT LAYOUT ===== */
+
+#aiChatWrapper {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 180px); /* adjust if header height changes */
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Chat scroll area */
+#aiChatArea {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 0;
+}
+
+/* Messages container */
+.ai-chat-messages {
+  padding: 0 10px;
+}
+
+/* Input bar fixed at bottom */
+#aiChatInputBar {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  border-top: 1px solid #e5e7eb;
+  background: #ffffff;
+  position: sticky;
+  bottom: 0;
+}
+
+/* Input */
+#aiChatInput {
+  flex: 1;
+  height: 44px;
+  padding: 10px 14px;
+  font-size: 15px;
+  border-radius: 10px;
+}
+
+/* Chat bubbles */
+.ai-msg {
+  margin: 8px 0;
+  padding: 10px 14px;
+  border-radius: 14px;
+  max-width: 75%;
+  line-height: 1.4;
+}
+
+.ai-msg.user {
+  background: #2563eb;
+  color: #fff;
+  margin-left: auto;
+}
+
+.ai-msg.bot {
+  background: #e5e7eb;
+  color: #111;
+  margin-right: auto;
+}
 
 
 </style>
@@ -2030,49 +2092,38 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
    <!-- ================= SMART ASSISTANT UI ================= -->
 <div id="smartAssistantUI" style="display:block;">
 
-  <!-- CHAT WRAPPER -->
-  <div id="aiChatWrapper" class="ai-chat-wrapper center">
+  <div id="aiChatWrapper" class="ai-chat-wrapper chat">
 
-    <h1 style="margin-bottom:12px;">🤖 Smart Assistant</h1>
+    <h1 style="margin:10px 0;">🤖 Smart Assistant</h1>
 
-    <!-- ================= CHAT MESSAGES ================= -->
-    <div id="aiChatMessages" class="ai-chat-messages"></div>
-
-    <!-- ================= AI PREVIEW (OPTIONAL / LEGACY) ================= -->
-    <div id="aiPreview" style="margin:20px 0;"></div>
-
-    <!-- ================= SAVE BUTTON (LEGACY) ================= -->
-    <div id="aiSaveContainer" style="text-align:right;">
-      <button class="view-btn" id="aiSaveBtn" style="display:none">💾 Save</button>
+    <!-- CHAT AREA -->
+    <div id="aiChatArea">
+      <div id="aiChatMessages" class="ai-chat-messages"></div>
     </div>
 
-    <!-- ================= TARGET INFO ================= -->
-    <div id="aiTarget" style="margin:8px 0;font-weight:600;color:#007bff;"></div>
+    <!-- PREVIEW (hidden by default) -->
+    <div id="aiPreview" style="display:none;margin:10px 0;"></div>
 
-    <!-- ================= INPUT BAR ================= -->
-    <div class="nav-right" style="display:flex; gap:10px;">
+    <!-- SAVE -->
+    <div id="aiSaveContainer" style="display:none;text-align:right;">
+      <button class="view-btn" id="aiSaveBtn">💾 Save</button>
+    </div>
 
+    <!-- INPUT BAR (FIXED BOTTOM) -->
+    <div id="aiChatInputBar">
       <input
         id="aiChatInput"
         type="text"
         class="ai-input-bar"
         placeholder="Ask anything about PRs, Estimates, Daily Progress..."
         onkeydown="if(event.key==='Enter') handleAskAI()"
-        style="flex:1; width:auto; min-width:300px;"
       />
-
-      <button
-        class="view-btn"
-        style="padding:16px; border-radius:31px; width:86px; font-size:19px;"
-        onclick="handleAskAI()"
-      >
-        Ask
-      </button>
-
+      <button class="view-btn" onclick="handleAskAI()">Ask</button>
     </div>
 
   </div>
 </div>
+
 <!-- ================= END SMART ASSISTANT UI ================= -->
 
 
@@ -3894,6 +3945,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
