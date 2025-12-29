@@ -80,24 +80,31 @@ async function handleAskAI() {
   const question = input.value.trim();
   if (!question) return;
 
+  // ✅ ENTER CHAT MODE
+  if (typeof window.enterChatMode === "function") {
+    window.enterChatMode();
+  }
 
+  // ✅ SHOW USER MESSAGE
+  if (typeof addUserMessage === "function") {
+    addUserMessage(question);
+    saveChatMessage("user", question);
+  }
 
   input.value = "";
   window.__LAST_AI_INPUT__ = question;
 
   const token = localStorage.getItem("adminToken");
   if (!token) {
-  if (typeof addBotMessage === "function") {
     addBotMessage("🔒 Please login to chat with Smart Assistant.");
+    return;
   }
-  return;
-}
 
   try {
     await analyzeAI(question);
   } catch (err) {
     console.error(err);
-    addBotMessage("❌ Error while processing your request.");
+    addBotMessage("❌ Error while processing request.");
   }
 }
 
