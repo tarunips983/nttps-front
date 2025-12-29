@@ -78,8 +78,12 @@ async function handleAskAI() {
       })
     });
 
-    const data = await res.json();
-
+    
+if (typeof addUserMessage !== "function") {
+  console.error("Chat UI helpers not loaded");
+  return;
+}
+const data = await res.json();
     if (!data.success || !data.result) {
       addBotMessage("I could not find matching data in the database.");
       return;
