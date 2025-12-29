@@ -2675,10 +2675,14 @@ if (sa) {
 
     document.querySelector("#subNavBar button:nth-child(6)").classList.add("active");
 
-updateSmartUserMenu();
+    updateSmartUserMenu();
 
     document.body.classList.add("smart-assistant-active");
-
+setTimeout(() => {
+  if (window.bindSmartAssistantUI) {
+    window.bindSmartAssistantUI();
+  }
+}, 50);
     // ALWAYS start clean
     window.scrollTo({ top: 0, behavior: "instant" });
 
@@ -4456,6 +4460,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
