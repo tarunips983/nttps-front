@@ -1941,6 +1941,73 @@ body.smart-assistant-active {
 .smart-assistant-view .left-bar {
   overflow: hidden !important;
 }
+/* ================= SMART ASSISTANT LAYOUT FIX ================= */
+
+/* Right panel full height */
+.smart-ai-panel {
+  height: calc(100vh - 155px); /* header + subnav height */
+  display: flex;
+  flex-direction: column;
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+/* Header fixed */
+.smart-ai-panel .ai-header {
+  padding: 14px 18px;
+  font-weight: bold;
+  background: #f9f9f9;
+  border-bottom: 1px solid #ddd;
+  flex-shrink: 0;
+}
+
+/* Messages scroll here */
+.smart-ai-panel .ai-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background: #f6f8fb;
+}
+
+/* Typing */
+.smart-ai-panel .ai-typing {
+  padding: 8px 16px;
+  flex-shrink: 0;
+}
+
+/* Input always visible */
+.smart-ai-panel .ai-input-bar {
+  display: flex;
+  border-top: 1px solid #ddd;
+  background: white;
+  flex-shrink: 0;
+}
+
+.smart-ai-panel textarea {
+  flex: 1;
+  height: 52px;
+  border: none;
+  padding: 14px;
+  resize: none;
+}
+
+.smart-ai-panel button {
+  width: 60px;
+  border: none;
+  background: #007bff;
+  color: white;
+  font-size: 18px;
+}
+.smart-assistant-view .right-panel {
+  height: auto !important;
+}
+.smart-assistant-view footer {
+  display: none !important;
+}
+
+.smart-assistant-view {
+  overflow: hidden;
+}
 
 </style>
 
@@ -2121,38 +2188,29 @@ body.smart-assistant-active {
     </p>
   </aside>
 
-  <section class="right-panel" style="display:flex;flex-direction:column;padding:0">
+  <section class="right-panel smart-ai-panel">
 
-    <div style="
-      padding:14px 18px;
-      border-bottom:1px solid #ddd;
-      font-weight:bold;
-      background:#f9f9f9;">
-      🤖 Smart Assistant
-    </div>
+  <!-- HEADER -->
+  <div class="ai-header">
+    🤖 Smart Assistant
+  </div>
 
-    <div id="aiMessages"
-         style="flex:1;padding:16px;overflow-y:auto;background:#f6f8fb">
-    </div>
+  <!-- CHAT MESSAGES -->
+  <div id="aiMessages" class="ai-messages"></div>
 
-    <div id="aiTyping" style="padding:10px 16px;display:none">
-      <span class="dot"></span>
-      <span class="dot"></span>
-      <span class="dot"></span>
-    </div>
+  <!-- TYPING -->
+  <div id="aiTyping" class="ai-typing" style="display:none">
+    <span></span><span></span><span></span>
+  </div>
 
-    <div style="display:flex;border-top:1px solid #ddd">
-      <textarea id="aiInput"
-        placeholder="Type your question..."
-        style="flex:1;border:none;padding:14px;resize:none"></textarea>
+  <!-- INPUT -->
+  <div class="ai-input-bar">
+    <textarea id="aiInput" placeholder="Type your question..."></textarea>
+    <button id="aiSendBtn">➤</button>
+  </div>
 
-      <button id="aiSendBtn"
-        style="width:60px;border:none;background:#007bff;color:white;font-size:18px">
-        ➤
-      </button>
-    </div>
+</section>
 
-  </section>
 </div>
 
   </main>
@@ -4040,6 +4098,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
