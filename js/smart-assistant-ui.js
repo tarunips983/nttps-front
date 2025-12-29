@@ -73,5 +73,8 @@ input.addEventListener("keydown", (e) => {
     if (m.role === "user") addUserMessage(m.text);
     else addBotMessage(m.text);
   });
+// 🔥 expose UI helpers globally
+window.addUserMessage = addUserMessage;
+window.addBotMessage = addBotMessage;
 
 });
