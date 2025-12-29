@@ -101,12 +101,6 @@ async function handleAskAI() {
   }
 }
 
-
-
-
-
-
-
   
 function renderAIAnswer(intent, data) {
 
@@ -494,7 +488,7 @@ if (AI_MODE === "EDIT") {
 
 // ⚠️ If AI extracted nothing useful, warn user
 if (!Object.values(aiResult || {}).some(v => v && v.toString().trim())) {
-    if (typeof addBotMessage === "function") {
+    if (typeof addUserMessage === "function") {
         addBotMessage(
           "I could not confidently extract fields. Please paste structured text (table / PR format) or edit the preview manually."
         );
