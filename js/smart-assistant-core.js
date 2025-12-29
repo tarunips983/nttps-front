@@ -16,6 +16,122 @@ let aiMemoryLoaded = false;
 window.__LAST_AI_INPUT__ = "";
 let aiOriginalResult = null;
 
+function detectQueryIntent(text) {
+  const t = text.toLowerCase();
+
+  if (/pr\s*no|what\s+is\s+the\s+pr/.test(t)) return "FIND_PR";
+  if (/above|below|greater|less|amount/.test(t)) return "FILTER_RECORDS";
+  if (/pending|completed|status/.test(t)) return "STATUS";
+  if (/summary|total|count/.test(t)) return "SUMMARY";
+  if (/\b\d{10}\b/.test(t)) return "DETAILS";
+
+  return "UNKNOWN";
+}
+async function askAIQuestion(question) {
+  const intent = detectQueryIntent(question);
+
+  const token = localStorage.getItem("adminToken");
+  if (!token) {
+    addBotMessage("Please login to ask database questions.");
+    return;
+  }
+
+  const res = await fetch(`${API}/ai/query`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ intent, text: question })
+  });
+
+  const data = await res.json();
+  renderAIAnswer(intent, data.result);
+}
+async function handleAskAI() {
+  const input = document.getElementById("aiChatInput");
+  const question = input.value.trim();
+
+  if (!question) return;
+
+  addUserMessage(question); // show user message
+  input.value = "";
+
+  const intent = detectQueryIntent(question);
+
+  const token = localStorage.getItem("adminToken");
+  if (!token) {
+    addBotMessage("Please login to ask database questions.");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API}/ai/query`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        intent,
+        text: question
+      })
+    });
+
+    const data = await res.json();
+
+    if (!data.success || !data.result) {
+      addBotMessage("I could not find matching data in the database.");
+      return;
+    }
+
+    renderAIAnswer(intent, data.result);
+
+  } catch (err) {
+    console.error(err);
+    addBotMessage("Error while processing your question.");
+  }
+}
+function renderAIAnswer(intent, data) {
+
+  if (intent === "FIND_PR") {
+    addBotMessage(
+      `PR No for "${data.work_name}" is ${data.pr_no}.
+Firm: ${data.firm_name || "N/A"}
+Amount: ₹${data.amount || "N/A"}`
+    );
+  }
+
+  else if (intent === "FILTER_RECORDS") {
+    let msg = "Here are matching PRs:\n";
+    data.forEach(r => {
+      msg += `• ${r.pr_no} – ${r.work_name} (₹${r.amount})\n`;
+    });
+    addBotMessage(msg);
+  }
+
+  else if (intent === "STATUS") {
+    let msg = "Pending PRs:\n";
+    data.forEach(r => {
+      msg += `• ${r.pr_no} – ${r.work_name}\n`;
+    });
+    addBotMessage(msg);
+  }
+
+  else if (intent === "DETAILS") {
+    addBotMessage(
+      `Details for PR ${data.pr_no}:
+Work: ${data.work_name}
+Firm: ${data.firm_name}
+Amount: ₹${data.amount}
+Status: ${data.status}`
+    );
+  }
+
+  else {
+    addBotMessage("I understood your question but no answer was found.");
+  }
+}
 
 
 async function loadAIMemory() {
