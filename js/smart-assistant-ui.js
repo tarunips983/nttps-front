@@ -26,17 +26,18 @@ window.addUserMessage = function (text) {
 
 /* ===== DOM BINDING ===== */
 
-document.addEventListener("DOMContentLoaded", () => {
-
+window.bindSmartAssistantUI = function () {
   const container = document.querySelector(".smart-assistant");
   const input = document.getElementById("aiInput");
   const sendBtn = document.getElementById("aiSendBtn");
   const messages = document.getElementById("aiMessages");
 
   if (!container || !input || !sendBtn || !messages) {
-    console.warn("⚠️ Smart Assistant UI not ready");
+    console.warn("⚠️ Smart Assistant UI still not ready");
     return;
   }
+
+  console.log("✅ Smart Assistant UI bound");
 
   function enterChatMode() {
     container.classList.remove("ai-welcome");
@@ -45,17 +46,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.enterChatMode = enterChatMode;
 
-  sendBtn.addEventListener("click", () => {
+  sendBtn.onclick = () => {
     if (window.handleAskAI) window.handleAskAI();
-  });
+  };
 
-  input.addEventListener("keydown", e => {
+  input.onkeydown = e => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       window.handleAskAI();
     }
-  });
-
+  };
   if (window.loadChatHistory) {
     loadChatHistory().forEach(m => {
       m.role === "user"
@@ -63,6 +63,8 @@ document.addEventListener("DOMContentLoaded", () => {
         : window.addBotMessage(m.text);
     });
   }
-});
+
+};
+
 
 
