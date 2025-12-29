@@ -43,27 +43,69 @@ function detectQueryIntent(text) {
   return "UNKNOWN";
 }
 async function askAIQuestion(question) {
-  const intent = detectQueryIntent(question);
-
   const token = localStorage.getItem("adminToken");
-  if (!token) {
-    if (typeof window.addBotMessage === "function") {
-    window.addBotMessage("Please login to ask database questions.");
-  }
-    return;
-  }
+  if (!token) return;
 
+  // 1️⃣ Detect module
+  let module = "records";
+  if (/aadhaar|aadhar|cl\b/i.test(question)) module = "cl";
+  else if (/estimate/i.test(question)) module = "estimates";
+  else if (/daily|progress/i.test(question)) module = "daily";
+
+  // 2️⃣ Detect identifiers
+  let identifier = {};
+
+  const prMatch = question.match(/\b\d{10}\b/);
+  const aadhaarMatch = question.match(/\b\d{12}\b/);
+  const estimateMatch = question.match(/\b13\d{8}\b/);
+
+  if (prMatch) identifier.prNo = prMatch[0];
+  if (aadhaarMatch) identifier.aadhar = aadhaarMatch[0];
+  if (estimateMatch) identifier.estimateNo = estimateMatch[0];
+
+  // 3️⃣ Send structured query
   const res = await fetch(`${API}/ai/query`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`
     },
-    body: JSON.stringify({ intent, text: question })
+    body: JSON.stringify({
+      text: question,
+      module,
+      identifier,
+      intent: "DETAILS"
+    })
   });
 
   const data = await res.json();
-  renderAIAnswer(intent, data.result);
+
+  if (!data.result) {
+    window.addBotMessage("No matching data found.");
+    return;
+  }
+
+  // 4️⃣ Render ALL fields
+  window.addBotMessage(renderObject(data.result));
+}
+
+  function renderObject(obj) {
+  let html = `<table style="width:100%;border-collapse:collapse">`;
+
+  for (const key in obj) {
+    html += `
+      <tr>
+        <th style="border:1px solid #ccc;padding:6px;background:#f5f5f5;text-align:left">
+          ${key}
+        </th>
+        <td style="border:1px solid #ccc;padding:6px">
+          ${obj[key] ?? ""}
+        </td>
+      </tr>`;
+  }
+
+  html += "</table>";
+  return html;
 }
 
   
