@@ -2734,14 +2734,15 @@ function handleSmartAuth() {
     localStorage.removeItem("adminToken");
     localStorage.removeItem("isAdmin");
 
-    updateSmartUserMenu();
+    updateSmartAssistantLoginStatus();
     updateFileLoginStatus();
-
   } else {
     openPasswordModal();
   }
+
   document.getElementById("smartUserDropdown")?.classList.remove("active");
 }
+
 
 function collapseAllDropdowns(sidebarId) {
     const sidebar = document.getElementById(sidebarId);
@@ -3138,17 +3139,13 @@ async function sendAI() {
   const token = localStorage.getItem("adminToken");
 
   // 🚫 BLOCK CHAT IF NOT LOGGED IN
- if (!token) {
+if (!token) {
   pendingAIMessage = aiInput.value.trim();
   showAILoginOverlay();
   return;
 }
 
-if (pendingAIMessage) {
-  aiInput.value = pendingAIMessage;
-  pendingAIMessage = null;
-  sendAI();
-}
+
 
   const container = document.getElementById("smart-assistant-container");
 
@@ -3501,15 +3498,6 @@ function updateFileLoginStatus() {
     uploadSection.style.display = "none"; // ❌ HIDE UPLOAD
   }
 }
-
-
-document.getElementById("smartAuthBtn").onclick = () => {
-  const token = localStorage.getItem("adminToken");
-  if (token) {
-    logout();   // existing global logout
-  } else {
-    openLogin(); // existing login modal/page
-  }
 };
 
 async function deleteFile(id) {
@@ -4065,6 +4053,30 @@ goBottomBtn.onclick = () => {
 };
 
 
+function updateSmartAssistantLoginStatus() {
+  const token = localStorage.getItem("adminToken");
+
+  const nameEl = document.getElementById("smartUserName");
+  const statusEl = document.getElementById("smartUserStatus");
+  const btn = document.getElementById("smartAuthBtn");
+  const overlay = document.getElementById("aiLoginOverlay");
+
+  if (!nameEl || !statusEl || !btn) return;
+
+  if (token) {
+    nameEl.textContent = "Admin";
+    statusEl.textContent = "Logged in";
+    btn.textContent = "🚪 Logout";
+    btn.classList.add("logout");
+
+    if (overlay) overlay.style.display = "none";
+  } else {
+    nameEl.textContent = "Guest";
+    statusEl.textContent = "Login required";
+    btn.textContent = "🔐 Login";
+    btn.classList.remove("logout");
+  }
+}
 
     
 async function renderCLBioData() {
@@ -4151,10 +4163,10 @@ async function renderCLBioData() {
   closePasswordModal();
 
   updateFileLoginStatus();
-  updateSmartAssistantLoginStatus();
-  updateSmartUserMenu();   // ⭐ THIS WAS MISSING
-  loadFiles();
- hideAILoginOverlay();
+updateSmartAssistantLoginStatus(); // 🔥 NOW EXISTS
+updateSmartUserMenu();
+hideAILoginOverlay();
+loadFiles();
 
 // ✅ Resume pending download after login
 if (pendingDownloadUrl) {
@@ -4165,6 +4177,11 @@ if (pendingDownloadUrl) {
   pendingDownloadUrl = null;
 }
 
+if (pendingAIMessage) {
+  aiInput.value = pendingAIMessage;
+  pendingAIMessage = null;
+  sendAI();
+}
 
       
   // ✅ If upload was pending, continue upload
@@ -4470,6 +4487,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
