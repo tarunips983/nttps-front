@@ -26,13 +26,8 @@ function detectEditIntent(text) {
 }
   
 function getAIMessagesElement() {
-  return (
-    document.getElementById("aiMessages") ||
-    document.querySelector(".ai-messages") ||
-    document.querySelector(".smart-assistant-messages") ||
-    document.querySelector(".right-panel") ||
-    document.body
-  );
+  return document.getElementById("aiMessages");
+  
 }
 
 
