@@ -761,7 +761,7 @@ main {
 /* Right panel */
 .right-panel {
     flex: 1;
-    overflow-y: auto;     /* allows scrolling */
+         /* allows scrolling */
     overflow-x: hidden;   /* prevents blocking dropdown */
     height: auto;
     display: flex;
@@ -2053,6 +2053,117 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
   background: #2563eb;
   color: #fff;
 }
+/* ===== CHATGPT-STYLE SMART ASSISTANT ===== */
+
+.smart-mode {
+  overflow: hidden;
+}
+
+/* Root layout */
+.ai-layout {
+  height: calc(100vh - 150px); /* header + tabs */
+  display: flex;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.ai-sidebar {
+  width: 260px;
+  background: #0f172a;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* User */
+.ai-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.ai-avatar {
+  width: 36px;
+  height: 36px;
+  background: #2563eb;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* New chat */
+.ai-new-chat {
+  margin: 12px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #1e293b;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+/* Chat history scroll */
+.ai-chat-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+/* Logout fixed bottom */
+.ai-logout {
+  margin: 12px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+/* Chat panel */
+.ai-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+/* Messages ONLY scroll */
+.ai-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+/* Input bar */
+.ai-input-bar {
+  display: flex;
+  gap: 10px;
+  padding: 14px;
+  border-top: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+.ai-input-bar input {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+}
+
+.ai-input-bar button {
+  padding: 0 18px;
+  border-radius: 10px;
+  border: none;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+}
 
 </style>
 
@@ -2226,56 +2337,58 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
 <!-- SMART ASSISTANT VIEW -->
 <!-- SMART ASSISTANT VIEW -->
 <div id="smart-assistant-container" class="main-view smart-mode">
-  <section class="right-panel smart-right-panel">
 
-    <!-- LOGIN WARNING -->
-    <div id="smartLoginBlock"
-         style="display:none;color:#dc3545;font-weight:600;margin-bottom:12px;">
-      🔒 Login required to use Smart Assistant
-    </div>
+  <!-- FULL CHAT LAYOUT ROOT -->
+  <div class="ai-layout">
 
- <div id="smart-assistant-container" class="ai-layout">
+    <!-- LEFT SIDEBAR -->
+    <aside class="ai-sidebar">
 
-  <!-- LEFT SIDEBAR -->
-  <aside class="ai-sidebar">
+      <!-- USER INFO -->
+      <div class="ai-user">
+        <div class="ai-avatar">👤</div>
+        <div class="ai-username" id="aiUsername">Logged User</div>
+      </div>
 
-    <!-- USER INFO -->
-    <div class="ai-user">
-      <div class="ai-avatar">👤</div>
-      <div class="ai-username" id="aiUsername">Logged User</div>
-    </div>
+      <!-- NEW CHAT -->
+      <button class="ai-new-chat" onclick="startNewChat()">➕ New chat</button>
 
-    <!-- ACTIONS -->
-    <button class="ai-new-chat" onclick="startNewChat()">➕ New chat</button>
+      <!-- CHAT HISTORY -->
+      <div class="ai-chat-list" id="aiChatList">
+        <!-- populated by JS -->
+      </div>
 
-    <!-- CHAT HISTORY -->
-    <div class="ai-chat-list" id="aiChatList">
-      <!-- JS will populate -->
-    </div>
+      <!-- LOGOUT (FIXED BOTTOM) -->
+      <button class="ai-logout" onclick="logoutAI()">Logout</button>
 
-    <!-- LOGOUT -->
-    <button class="ai-logout" onclick="logoutAI()">Logout</button>
+    </aside>
 
-  </aside>
+    <!-- RIGHT CHAT PANEL -->
+    <main class="ai-main">
 
-  <!-- RIGHT CHAT PANEL -->
-  <main class="ai-main">
+      <!-- LOGIN WARNING -->
+      <div id="smartLoginBlock"
+           style="display:none;color:#dc3545;font-weight:600;padding:10px;">
+        🔒 Login required to use Smart Assistant
+      </div>
 
-    <div id="aiChatMessages" class="ai-chat-messages"></div>
+      <!-- MESSAGES (ONLY SCROLL AREA) -->
+      <div id="aiChatMessages" class="ai-chat-messages"></div>
 
-    <div class="ai-input-bar">
-      <input
-        id="aiChatInput"
-        placeholder="Ask anything…"
-        onkeydown="if(event.key==='Enter') handleAskAI()"
-      />
-      <button onclick="handleAskAI()">➤</button>
-    </div>
+      <!-- INPUT -->
+      <div class="ai-input-bar">
+        <input
+          id="aiChatInput"
+          placeholder="Ask anything…"
+          onkeydown="if(event.key==='Enter') handleAskAI()"
+        />
+        <button onclick="handleAskAI()">➤</button>
+      </div>
 
-  </main>
+    </main>
 
+  </div>
 </div>
-
 
 <!-- ================= END SMART ASSISTANT UI ================= -->
 
@@ -4116,6 +4229,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
