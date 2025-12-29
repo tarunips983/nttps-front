@@ -2536,7 +2536,11 @@ window.showMainView = function (viewName) {
 
   // ---------- SMART ASSISTANT ----------
   if (viewName === "assistant") {
-    document.getElementById("smart-assistant-container").style.display = "flex";
+    const sa = document.getElementById("smart-assistant-container");
+if (sa) {
+  sa.style.display = "flex";
+}
+
     document.body.classList.add("smart-assistant-active");
 
     // ALWAYS start clean
@@ -4225,6 +4229,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
