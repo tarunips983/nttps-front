@@ -2035,15 +2035,17 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
         
     
         <!-- INPUT BAR -->
-        <div id="aiInputBar" class="ai-input-bar">
-          <textarea
-            id="aiInput"
-            placeholder="Paste PR / Estimate / Daily Progress / CL text here…"
-            rows="2"></textarea>
+        <div class="ai-chat-box">
+  <input
+    id="aiChatInput"
+    type="text"
+    placeholder="Ask anything about PRs, Estimates, Daily Progress..."
+    onkeydown="if(event.key==='Enter') handleAskAI()"
+  />
 
-          <button class="view-btn" id="aiAnalyzeBtn">Analyze</button>
-          
-        </div>
+  <button onclick="handleAskAI()">Ask</button>
+</div>
+
 
       </div>
 
@@ -3872,6 +3874,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
