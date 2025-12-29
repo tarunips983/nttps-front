@@ -5,68 +5,74 @@ window.__LAST_AI_INPUT__ = "";
 
 // ================== DOM READY ==================
 document.addEventListener("DOMContentLoaded", () => {
+
   const chatInput = document.getElementById("aiChatInput");
   const chatBox = document.getElementById("aiChatMessages");
+  const wrapper = document.getElementById("aiChatWrapper");
 
-  // Chat-only mode
-  if (chatInput && chatBox) {
-    console.log("✅ Smart Assistant UI ready (chat mode)");
-    return;
-  }
-
-  // Fallback: legacy analyze mode
-  const analyzeBtn = document.getElementById("aiAnalyzeBtn");
-  const input = document.getElementById("aiInput");
-  const saveBtn = document.getElementById("aiSaveBtn");
-
-  if (!analyzeBtn || !input) {
+  if (!chatInput || !chatBox) {
     console.warn("⚠️ Smart Assistant UI not ready");
     return;
   }
 
-  // ---------- ANALYZE ----------
-  analyzeBtn.addEventListener("click", () => {
-    const text = input.value.trim();
-    if (!text) {
-      showToast("Please enter text", "error");
-      return;
-    }
+  console.log("✅ Smart Assistant UI ready (chat mode)");
 
+  // ---------- ASK HANDLER ----------
+  window.handleAskAI = async function () {
+    const text = chatInput.value.trim();
+    if (!text) return;
+
+    // store input
     window.__LAST_AI_INPUT__ = text;
-    input.value = "";
 
-    const wrapper = document.getElementById("aiChatWrapper");
-    if (wrapper) {
-      wrapper.classList.remove("center");
-      wrapper.classList.add("chat");
-    }
+    // show chat area
+    wrapper.classList.remove("center");
+    wrapper.classList.add("chat");
 
+    // show user message
     addUserMessage(text);
     saveChatMessage("user", text);
 
-    addBotMessage(`<span id="aiAnalyzingMsg">Analyzing…</span>`);
-    saveChatMessage("bot", "Analyzing…");
+    chatInput.value = "";
 
-    if (typeof window.analyzeAI !== "function") {
-      showToast("AI core not loaded", "error");
-      return;
+    // typing indicator
+    const typingId = "typing-" + Date.now();
+    addBotMessage(`<span id="${typingId}">Typing…</span>`);
+
+    try {
+      if (typeof window.askAIQuestion === "function") {
+        await window.askAIQuestion(text);
+      } else if (typeof window.analyzeAI === "function") {
+        await window.analyzeAI(text);
+      } else {
+        addBotMessage("AI engine not available.");
+      }
+    } catch (err) {
+      console.error(err);
+      addBotMessage("❌ Error while processing your request.");
+    } finally {
+      document.getElementById(typingId)?.remove();
     }
+  };
 
-    window.analyzeAI();
-
-    const analyzing = document.getElementById("aiAnalyzingMsg");
-    if (analyzing) analyzing.closest(".ai-msg")?.remove();
+  // ---------- ENTER KEY ----------
+  chatInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      window.handleAskAI();
+    }
   });
 
-  // ---------- SAVE ----------
-  if (saveBtn) {
-    saveBtn.addEventListener("click", () => {
-      if (typeof window.saveAIData !== "function") {
-        showToast("Save function not ready", "error");
-        return;
-      }
-      window.saveAIData();
-    });
+  // ---------- LOAD CHAT HISTORY ----------
+  const history = loadChatHistory();
+  history.forEach(m => {
+    if (m.role === "user") addUserMessage(m.text);
+    else addBotMessage(m.text);
+  });
+
+  if (history.length) {
+    wrapper.classList.remove("center");
+    wrapper.classList.add("chat");
   }
 });
 
@@ -79,7 +85,6 @@ function addUserMessage(text) {
     "beforeend",
     `<div class="ai-msg user">${escapeHtml(text)}</div>`
   );
-
   box.scrollTop = box.scrollHeight;
 }
 
@@ -91,30 +96,20 @@ function addBotMessage(html) {
     "beforeend",
     `<div class="ai-msg bot">${html}</div>`
   );
-
   box.scrollTop = box.scrollHeight;
 }
 
-// ================== TOAST ==================
-function showToast(message, type = "info") {
-  const toast = document.createElement("div");
-  toast.textContent = message;
+// ================== STORAGE ==================
+const CHAT_KEY = "smartChatHistory";
 
-  toast.style.position = "fixed";
-  toast.style.bottom = "20px";
-  toast.style.right = "20px";
-  toast.style.padding = "10px 14px";
-  toast.style.borderRadius = "8px";
-  toast.style.fontWeight = "600";
-  toast.style.color = "#fff";
-  toast.style.zIndex = "9999";
-  toast.style.background =
-    type === "success" ? "#16a34a" :
-    type === "error" ? "#dc2626" :
-    "#2563eb";
+function saveChatMessage(role, text) {
+  const history = JSON.parse(localStorage.getItem(CHAT_KEY) || "[]");
+  history.push({ role, text, time: Date.now() });
+  localStorage.setItem(CHAT_KEY, JSON.stringify(history));
+}
 
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 2500);
+function loadChatHistory() {
+  return JSON.parse(localStorage.getItem(CHAT_KEY) || "[]");
 }
 
 // ================== SAFE HTML ==================
@@ -124,31 +119,3 @@ function escapeHtml(str) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
 }
-
-function collectCorrectedAIData() {
-  const rows = document.querySelectorAll("#aiPreview td[data-key]");
-  const corrected = {};
-
-  rows.forEach(td => {
-    const key = td.dataset.key;
-    corrected[key] = td.innerText.trim();
-  });
-
-  return corrected;
-}
-document.addEventListener("DOMContentLoaded", () => {
-  const messages = loadChatHistory();
-  const box = document.getElementById("aiChatMessages");
-
-  messages.forEach(m => {
-    if (m.role === "user") addUserMessage(m.text);
-    else addBotMessage(m.text);
-  });
-
-  if (messages.length) {
-    document.getElementById("aiChatWrapper")
-      .classList.replace("center", "chat");
-  }
-});
-
-
