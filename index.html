@@ -2281,6 +2281,17 @@ body.smart-assistant-active {
   </aside>
 
   <section class="right-panel smart-ai-panel">
+<!-- SMART ASSISTANT LOGIN BLOCK -->
+<div id="smartLoginBlock" style="display:none; padding:20px; text-align:center;">
+  <h3>🔐 Login Required</h3>
+  <p>Please login to use Smart Assistant.</p>
+  <button class="btn-primary" onclick="openLogin()">Login</button>
+</div>
+
+<!-- SMART ASSISTANT UI BLOCK -->
+<div id="smartAssistantUI" style="display:none;">
+  <!-- ✅ EXISTING SMART ASSISTANT CHAT UI GOES HERE -->
+</div>
 
   <!-- HEADER -->
   <div class="ai-welcome-screen">
@@ -2540,7 +2551,7 @@ window.showMainView = function (viewName) {
 if (sa) {
   sa.style.display = "flex";
 }
-
+updateSmartAssistantLoginStatus(); // ✅ REQUIRED
     document.body.classList.add("smart-assistant-active");
 
     // ALWAYS start clean
@@ -3292,7 +3303,41 @@ function updateFileLoginStatus() {
     uploadSection.style.display = "none"; // ❌ HIDE UPLOAD
   }
 }
+function updateSmartAssistantLoginStatus() {
+  const statusEl = document.getElementById("smartLoginStatus");
+  const btn = document.getElementById("smartAuthBtn");
+  const assistantUI = document.getElementById("smartAssistantUI");
+  const token = localStorage.getItem("adminToken");
 
+  if (!statusEl || !btn || !assistantUI) return;
+
+  if (token) {
+    statusEl.innerHTML = "🟢 Logged in";
+    statusEl.style.color = "#198754";
+
+    btn.innerHTML = "🚪 Logout";
+    btn.style.background = "#dc3545";
+
+    assistantUI.style.display = "flex"; // ✅ SHOW CHAT
+  } else {
+    statusEl.innerHTML = "🔒 Login required";
+    statusEl.style.color = "#dc3545";
+
+    btn.innerHTML = "🔐 Login";
+    btn.style.background = "#007bff";
+
+    assistantUI.style.display = "none"; // ❌ HIDE CHAT
+  }
+}
+
+document.getElementById("smartAuthBtn").onclick = () => {
+  const token = localStorage.getItem("adminToken");
+  if (token) {
+    logout();   // existing global logout
+  } else {
+    openLogin(); // existing login modal/page
+  }
+};
 
 async function deleteFile(id) {
   if (!confirm("Delete this file permanently?")) return;
@@ -3452,6 +3497,8 @@ function handleFileAuthClick() {
     localStorage.removeItem("isAdmin");
 
     updateFileLoginStatus();
+    
+updateSmartAssistantLoginStatus();
     loadFiles(); // ✅ FORCE immediate refresh
   } else {
     openPasswordModal();
@@ -3929,7 +3976,8 @@ async function renderCLBioData() {
   localStorage.setItem("isAdmin", "true");
 
   closePasswordModal();
-  updateFileLoginStatus();
+ updateFileLoginStatus();
+updateSmartAssistantLoginStatus();
       loadFiles();
 
 // ✅ Resume pending download after login
@@ -4229,6 +4277,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
