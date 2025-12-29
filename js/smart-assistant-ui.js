@@ -2,31 +2,12 @@ console.log("✅ Smart Assistant UI loaded");
 
 /* ===== GLOBAL HELPERS (ALWAYS AVAILABLE) ===== */
 
-window.addBotMessage = function (text) {
-  const messages = document.getElementById("aiMessages");
-  if (!messages) return;
-
-  const div = document.createElement("div");
-  div.className = "ai-msg ai-bot";
-  div.innerHTML = text;
-  messages.appendChild(div);
-  messages.scrollTop = messages.scrollHeight;
-};
-
-window.addUserMessage = function (text) {
-  const messages = document.getElementById("aiMessages");
-  if (!messages) return;
-
-  const div = document.createElement("div");
-  div.className = "ai-msg ai-user";
-  div.textContent = text;
-  messages.appendChild(div);
-  messages.scrollTop = messages.scrollHeight;
-};
-
-/* ===== DOM BINDING ===== */
-
 window.bindSmartAssistantUI = function () {
+
+  if (window.__SMART_ASSISTANT_BOUND__) {
+    return;
+  }
+
   const container = document.querySelector(".smart-assistant");
   const input = document.getElementById("aiInput");
   const sendBtn = document.getElementById("aiSendBtn");
@@ -37,6 +18,7 @@ window.bindSmartAssistantUI = function () {
     return;
   }
 
+  window.__SMART_ASSISTANT_BOUND__ = true;
   console.log("✅ Smart Assistant UI bound");
 
   function enterChatMode() {
