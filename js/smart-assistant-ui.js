@@ -2,9 +2,21 @@ console.log("✅ Smart Assistant UI loaded");
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  const input = document.getElementById("aiInput");
-  const sendBtn = document.getElementById("aiSendBtn");
-  const messages = document.getElementById("aiMessages");
+  const container = document.getElementById("smart-assistant-container");
+
+
+  const input =
+  document.getElementById("aiInput") ||
+  document.getElementById("aiChatInput") ||
+  document.querySelector("textarea");
+
+const sendBtn =
+  document.getElementById("aiSendBtn") ||
+  document.querySelector("button");
+
+const messages =
+  document.getElementById("aiMessages");
+
 
   if (!input || !sendBtn || !messages) {
     console.warn("⚠️ Smart Assistant UI not ready");
@@ -31,13 +43,14 @@ function addBotMessage(text) {
 
   const div = document.createElement("div");
   div.className = "ai-msg ai-bot";
-
-  // allow HTML for typing indicator
   div.innerHTML = text;
 
   messages.appendChild(div);
   messages.scrollTop = messages.scrollHeight;
+
+  saveChatMessage("bot", div.innerText);
 }
+
 
   
   
