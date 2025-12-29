@@ -56,7 +56,7 @@ async function askAIQuestion(question) {
 
   const token = localStorage.getItem("adminToken");
   if (!token) {
-    safeAddMessage("Please login to ask database questions.");
+    addBotMessage("Please login to ask database questions.");
     return;
   }
 
@@ -84,65 +84,32 @@ async function handleAskAI() {
   const question = input.value.trim();
   if (!question) return;
 
-  addUserMessage(question);
-  saveChatMessage("user", question);
+  // show user message
+  if (typeof addUserMessage === "function") {
+    addUserMessage(question);
+    saveChatMessage("user", question);
+  }
 
   input.value = "";
+  window.__LAST_AI_INPUT__ = question;
 
-  const intent = detectQueryIntent(question);
   const token = localStorage.getItem("adminToken");
-
   if (!token) {
-    addBotMessage("Please login to ask database questions.");
+    addBotMessage("🔒 Please login to chat with AI.");
     return;
   }
 
   try {
-    const res = await fetch(`${API}/ai/query`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({ intent, text: question })
-    });
-
-    const data = await res.json();
-
-    if (!data.success || !data.result) {
-      addBotMessage("I could not find matching data in the database.");
-      return;
-    }
-
-    renderAIAnswer(intent, data.result);
-
+    await analyzeAI(question);
   } catch (err) {
     console.error(err);
-    addBotMessage("Error while processing your question.");
+    addBotMessage("❌ Error while processing your request.");
   }
 }
 
 
-  function addUserMessage(text) {
-  safeAddMessage(text, "user");
-}
-
-function addBotMessage(text) {
-  safeAddMessage(text, "bot");
-}
 
 
-function safeAddMessage(text, role = "bot") {
-  const container = getAIMessagesElement();
-  if (!container) return;
-
-  const msg = document.createElement("div");
-  msg.className = role === "user" ? "ai-user-msg" : "ai-bot-msg";
-  msg.innerText = text;
-
-  container.appendChild(msg);
-  container.scrollTop = container.scrollHeight;
-}
 
 
 
@@ -150,7 +117,7 @@ function safeAddMessage(text, role = "bot") {
 function renderAIAnswer(intent, data) {
 
   if (intent === "FIND_PR") {
-    safeAddMessage(
+    addBotMessage(
       `PR No for "${data.work_name}" is ${data.pr_no}.
 Firm: ${data.firm_name || "N/A"}
 Amount: ₹${data.amount || "N/A"}`
@@ -162,7 +129,7 @@ Amount: ₹${data.amount || "N/A"}`
     data.forEach(r => {
       msg += `• ${r.pr_no} – ${r.work_name} (₹${r.amount})\n`;
     });
-    safeAddMessage(msg);
+    addBotMessage(msg);
   }
 
   else if (intent === "STATUS") {
@@ -170,11 +137,11 @@ Amount: ₹${data.amount || "N/A"}`
     data.forEach(r => {
       msg += `• ${r.pr_no} – ${r.work_name}\n`;
     });
-    safeAddMessage(msg);
+    addBotMessage(msg);
   }
 
   else if (intent === "DETAILS") {
-    safeAddMessage(
+    addBotMessage(
       `Details for PR ${data.pr_no}:
 Work: ${data.work_name}
 Firm: ${data.firm_name}
@@ -184,7 +151,7 @@ Status: ${data.status}`
   }
 
   else {
-    safeAddMessage("I understood your question but no answer was found.");
+    addBotMessage("I understood your question but no answer was found.");
   }
 }
 
@@ -461,7 +428,7 @@ async function analyzeAI(passedText) {
 
   const text = (passedText || window.__LAST_AI_INPUT__ || "").trim();
 if (!text) {
-  safeAddMessage("⚠️ No input text received.");
+  addBotMessage("⚠️ No input text received.");
   return;
 }
 
@@ -534,7 +501,7 @@ if (AI_MODE === "EDIT") {
 // ⚠️ If AI extracted nothing useful, warn user
 if (!Object.values(aiResult || {}).some(v => v && v.toString().trim())) {
     if (typeof safeAddMessage === "function") {
-        safeAddMessage(
+        addBotMessage(
           "I could not confidently extract fields. Please paste structured text (table / PR format) or edit the preview manually."
         );
     }
@@ -580,7 +547,7 @@ Status: ${data.status}
     msg = "I found data, but could not format a response.";
   }
 
-  safeAddMessage(msg.trim());
+  addBotMessage(msg.trim());
 }
 
 function cleanDailyActivity(text) {
