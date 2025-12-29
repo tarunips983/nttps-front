@@ -70,15 +70,9 @@ window.bindSmartAssistantUI = function () {
       window.handleAskAI();
     }
   };
-  if (window.loadChatHistory) {
-    loadChatHistory().forEach(m => {
-      m.role === "user"
-        ? window.addUserMessage(m.text)
-        : window.addBotMessage(m.text);
-    });
+  
   }
 
-};
 
 
 
