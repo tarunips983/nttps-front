@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="style.css">
   <link rel="icon" style="border-radius: 25px;" href="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg">
-  <script src="js/smart-assistant-core.js"></script>
   <style>
 /* ---------- RESTORED: Desktop + Shared styles (unchanged) ---------- */
 body {
@@ -3142,55 +3141,33 @@ function addAI(role, text) {
   aiMessages.scrollTop = aiMessages.scrollHeight;
 }
 
-async function sendAI() {
+aiSendBtn.onclick = () => {
   const token = localStorage.getItem("adminToken");
 
-  // 🚫 BLOCK CHAT IF NOT LOGGED IN
-if (!token) {
-  pendingAIMessage = aiInput.value.trim();
-  showAILoginOverlay();
-  return;
-}
-
-
-
-  const container = document.getElementById("smart-assistant-container");
-
-  // Exit welcome mode
-  container.classList.remove("ai-welcome");
+  if (!token) {
+    pendingAIMessage = aiInput.value.trim();
+    showAILoginOverlay();
+    return;
+  }
 
   const text = aiInput.value.trim();
   if (!text) return;
 
   addAI("user", text);
   aiInput.value = "";
+
+  window.__LAST_AI_INPUT__ = text;
+
   aiTyping.style.display = "block";
 
-  try {
-    const res = await fetch(`${window.API}/ai/query`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({ text })
-    });
+  // ✅ USE CORE ENGINE
+  window.handleAskAI();
+};
 
-    const data = await res.json();
-    aiTyping.style.display = "none";
-    addAI("bot", data.result || "No response.");
-  } catch {
-    aiTyping.style.display = "none";
-    addAI("bot", "AI service error.");
-  }
-}
-
-
-aiSendBtn.onclick = sendAI;
 aiInput.addEventListener("keydown", e => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
-    sendAI();
+    aiSendBtn.click();
   }
 });
 
@@ -4504,6 +4481,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
