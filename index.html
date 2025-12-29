@@ -1869,14 +1869,17 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
   overflow: hidden !important;
   display: flex;
   flex-direction: column;
+  background: #f6f8fb;
 }
 
 /* Chat message area scrolls internally */
 .smart-assistant-view #aiMessages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px;
-  background: #f6f8fb;
+     flex: 1;
+    overflow-y: auto;
+    padding: 25px;
+    background: #f6f8fb;
+    width: 66%;
+    align-self: center;
 }
 
 /* Input bar fixed at bottom of assistant view */
@@ -4486,6 +4489,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
