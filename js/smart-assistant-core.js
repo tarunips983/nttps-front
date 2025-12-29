@@ -141,9 +141,14 @@ async function loadAIMemory() {
   return;
 }
 
-    const res = await fetch(`${API}/ai/memory`, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
+    try {
+  const res = await fetch(`${API}/ai/memory`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (res.ok) aiMemory = await res.json();
+} catch (e) {
+  console.warn("AI memory load skipped");
+}
 
     aiMemory = res.ok ? await res.json() : [];
     aiMemoryLoaded = true; // ✅ ADD THIS LINE
@@ -844,7 +849,7 @@ function clearChatHistory() {
   // expose core functions safely
 
 // ================== GLOBAL API ==================
-// ================== GLOBAL API ==================
+
 window.analyzeAI = analyzeAI;
 window.saveAIData = saveAIData;
 window.loadAIMemory = loadAIMemory;
@@ -852,8 +857,10 @@ window.loadAIMemory = loadAIMemory;
 window.saveChatMessage = saveChatMessage;
 window.loadChatHistory = loadChatHistory;
 
+// 🔥 ADD THIS LINE
+window.handleAskAI = handleAskAI;
 
 console.log("✅ Smart Assistant Core loaded");
 
-
 })();
+
