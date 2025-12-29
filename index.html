@@ -2582,23 +2582,6 @@ function deactivateSmartAssistant() {
 }
 
 
-    document.addEventListener("DOMContentLoaded", () => {
-
-  const aiInput = document.getElementById("aiInput");
-  const aiSendBtn = document.getElementById("aiSendBtn");
-  const aiMessages = document.getElementById("aiMessages");
-  const aiTyping = document.getElementById("aiTyping");
-
-  if (!aiInput) {
-    console.warn("Smart Assistant UI not ready");
-    return;
-  }
-
-aiInput.addEventListener("input", () => {
-  aiInput.style.height = "auto";
-  aiInput.style.height = Math.min(aiInput.scrollHeight, 120) + "px";
-});
-
     // summary helper
     function summarize(text){
       if(!text) return "Untitled Record";
@@ -4195,6 +4178,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
