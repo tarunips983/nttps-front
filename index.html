@@ -2420,6 +2420,9 @@ body.smart-assistant-active {
     const userRole = localStorage.getItem("role") || "viewer";
 
     let fileAutoRefreshTimer = null;
+    const viewScrollMemory = {};
+    let lastViewName = null;
+
 
 
     // DOM refs
@@ -2455,13 +2458,20 @@ function closeAllSidebars() {
 }
 
 window.showMainView = function (viewName) {
+
+  // ✅ SAVE scroll of previous view
+  if (lastViewName) {
+    viewScrollMemory[lastViewName] = window.scrollY;
+  }
+  lastViewName = viewName;
+
   closeAllSidebars();
   updateMobileButtons(viewName);
 
   document.querySelectorAll(".subnav-btn")
     .forEach(btn => btn.classList.remove("active"));
-  
-document.body.classList.remove("smart-assistant-active");
+
+  document.body.classList.remove("smart-assistant-active");
 
   // ---------- HIDE ALL VIEWS ----------
   pdfView.style.display = "none";
@@ -2485,7 +2495,6 @@ document.body.classList.remove("smart-assistant-active");
   if (viewName === "pdf") {
     pdfView.style.display = "flex";
     mobileFilterBtn.style.display = "block";
-    scrollToTop();
     document.getElementById("pdfHeader").textContent = "📄 All Stage-V Indents";
     document.querySelector("#subNavBar button:nth-child(1)").classList.add("active");
   }
@@ -2494,7 +2503,6 @@ document.body.classList.remove("smart-assistant-active");
   if (viewName === "estimates") {
     estimatesContainer.style.display = "flex";
     mobileEstFilterBtn.style.display = "block";
-    scrollToTop();
     document.getElementById("estHeader").textContent = "📘 All Stage-V Estimates";
     document.querySelector("#subNavBar button:nth-child(2)").classList.add("active");
   }
@@ -2503,14 +2511,12 @@ document.body.classList.remove("smart-assistant-active");
   if (viewName === "progress") {
     progressView.style.display = "flex";
     mobileDailyFilterBtn.style.display = "block";
-    scrollToTop();
     document.querySelector("#subNavBar button:nth-child(3)").classList.add("active");
   }
 
   // ---------- CL BIO DATA ----------
   if (viewName === "clbiodata") {
     clbiodata.style.display = "block";
-    scrollToTop();
     document.querySelector("#subNavBar button:nth-child(4)").classList.add("active");
     renderCLBioData();
   }
@@ -2519,7 +2525,6 @@ document.body.classList.remove("smart-assistant-active");
   if (viewName === "files") {
     document.getElementById("file-transfer-container").style.display = "flex";
     document.querySelector("#subNavBar button:nth-child(5)").classList.add("active");
-    scrollToTop();
 
     loadFiles();
     updateFileLoginStatus();
@@ -2528,13 +2533,25 @@ document.body.classList.remove("smart-assistant-active");
       fileAutoRefreshTimer = setInterval(loadFiles, 4000);
     }
   }
-if (viewName === "assistant") {
-  document.getElementById("smart-assistant-container").style.display = "flex";
-  document.body.classList.add("smart-assistant-active");
-  return;
-}
 
-}
+  // ---------- SMART ASSISTANT ----------
+  if (viewName === "assistant") {
+    document.getElementById("smart-assistant-container").style.display = "flex";
+    document.body.classList.add("smart-assistant-active");
+
+    // ALWAYS start clean
+    window.scrollTo({ top: 0, behavior: "instant" });
+
+    const msgs = document.getElementById("aiMessages");
+    if (msgs) msgs.scrollTop = msgs.scrollHeight;
+
+    return; // ✅ correct place for return
+  }
+
+  // ---------- RESTORE SCROLL FOR OTHER VIEWS ----------
+  const saved = viewScrollMemory[viewName] || 0;
+  window.scrollTo({ top: saved, behavior: "instant" });
+};
 
 
 function collapseAllDropdowns(sidebarId) {
@@ -4208,6 +4225,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
