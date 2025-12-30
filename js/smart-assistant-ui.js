@@ -61,11 +61,6 @@ window.bindSmartAssistantUI = function () {
   window.enterChatMode = enterChatMode;
 
   
-
-window.showAITyping = showTyping;
-window.hideAITyping = hideTyping;
-
-
   sendBtn.onclick = () => {
     if (window.handleAskAI) window.handleAskAI();
   };
