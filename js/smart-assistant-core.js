@@ -106,10 +106,11 @@ function renderTable(columns, rows) {
   const module = detectModule(columns);
 
   let importantCols = [];
-
   if (module === "RECORD") importantCols = RECORD_FIELDS;
   else if (module === "ESTIMATE") importantCols = ESTIMATE_FIELDS;
-  else importantCols = columns; // fallback
+  else if (module === "CL") importantCols = CL_FIELDS;
+  else if (module === "DAILY") importantCols = DAILY_FIELDS;
+  else importantCols = columns;
 
   function pretty(col) {
     return col.replace(/_/g, " ").toUpperCase();
@@ -120,19 +121,35 @@ function renderTable(columns, rows) {
   rows.forEach(row => {
     html += `<div class="ai-card"><div class="ai-card-main">`;
 
-    /* MAIN SUMMARY */
+    /* ================= MAIN SUMMARY ================= */
     importantCols.forEach(col => {
-      if (row[col] !== undefined && row[col] !== null) {
+      if (row[col] === undefined || row[col] === null) return;
+
+      // ✅ CLICKABLE ESTIMATE NO
+      if (module === "ESTIMATE" && col === "estimate_no") {
         html += `
           <div class="ai-field">
             <span class="label">${pretty(col)}</span>
-            <span class="value">${row[col]}</span>
+            <span class="value">
+              <a href="estimate.html?estimate_no=${row[col]}" target="_blank">
+                ${row[col]}
+              </a>
+            </span>
           </div>
         `;
+        return;
       }
+
+      // normal field
+      html += `
+        <div class="ai-field">
+          <span class="label">${pretty(col)}</span>
+          <span class="value">${row[col]}</span>
+        </div>
+      `;
     });
 
-    /* DETAILS */
+    /* ================= DETAILS ================= */
     html += `
       </div>
       <details class="ai-details">
@@ -141,20 +158,20 @@ function renderTable(columns, rows) {
     `;
 
     columns.forEach(col => {
-      if (!importantCols.includes(col)) {
-        let val = row[col] ?? "";
+      if (importantCols.includes(col)) return;
 
-        if (typeof val === "string" && val.startsWith("http")) {
-          val = `<a href="${val}" target="_blank">Open</a>`;
-        }
+      let val = row[col] ?? "";
 
-        html += `
-          <tr>
-            <th>${pretty(col)}</th>
-            <td>${val}</td>
-          </tr>
-        `;
+      if (typeof val === "string" && val.startsWith("http")) {
+        val = `<a href="${val}" target="_blank">Open</a>`;
       }
+
+      html += `
+        <tr>
+          <th>${pretty(col)}</th>
+          <td>${val}</td>
+        </tr>
+      `;
     });
 
     html += `
@@ -168,23 +185,9 @@ function renderTable(columns, rows) {
       <button onclick="exportTable()">Export CSV</button>
       <button onclick="window.print()">Print</button>
     </div>
-  </div>`;
-
-if (col === "estimate_no") {
-  html += `
-    <div class="ai-field">
-      <span class="label">ESTIMATE NO</span>
-      <span class="value">
-        <a href="estimate.html?estimate_no=${row[col]}" target="_blank">
-          ${row[col]}
-        </a>
-      </span>
-    </div>
+  </div>
   `;
-  return;
-}
 
-  
   addBotMessage(html);
 }
 
