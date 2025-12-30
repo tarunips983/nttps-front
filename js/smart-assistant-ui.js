@@ -60,6 +60,20 @@ window.bindSmartAssistantUI = function () {
 
   window.enterChatMode = enterChatMode;
 
+  function showTyping() {
+  const t = document.getElementById("aiTyping");
+  if (t) t.style.display = "block";
+}
+
+function hideTyping() {
+  const t = document.getElementById("aiTyping");
+  if (t) t.style.display = "none";
+}
+
+window.showAITyping = showTyping;
+window.hideAITyping = hideTyping;
+
+
   sendBtn.onclick = () => {
     if (window.handleAskAI) window.handleAskAI();
   };
