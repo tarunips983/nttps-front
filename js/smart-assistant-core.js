@@ -43,7 +43,7 @@ function detectQueryIntent(text) {
 async function askAIQuestion(question) {
   const token = localStorage.getItem("adminToken");
   if (!token) return;
-
+ 
   /* ================= DETECT IDENTIFIERS ================= */
   const prMatch = question.match(/\b\d{10}\b/);
   const aadhaarMatch = question.match(/\b\d{12}\b/);
@@ -51,6 +51,7 @@ async function askAIQuestion(question) {
   let module = "records";
   let identifier = {};
 
+  
   if (aadhaarMatch) {
     module = "cl";
     identifier.aadhar = aadhaarMatch[0];
