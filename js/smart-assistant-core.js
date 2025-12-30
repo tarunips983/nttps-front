@@ -69,38 +69,93 @@ if (!window.API) {
 
 
   /* ================= RENDERERS ================= */
+function renderTable(columns, rows) {
+  if (!rows.length) {
+    addBotMessage("No data found.");
+    return;
+  }
 
-  function renderTable(columns, rows) {
-    if (!rows.length) {
-      addBotMessage("No data found.");
-      return;
-    }
+  const importantCols = [
+    "pr_no",
+    "work_name",
+    "estimate_no",
+    "name",
+    "amount",
+    "status",
+    "division_label"
+  ];
 
-    let html = `<table style="width:100%;border-collapse:collapse">`;
-    html += "<tr>";
-    columns.forEach(c => {
-      html += `<th style="border:1px solid #ccc;padding:6px">${c}</th>`;
-    });
-    html += "</tr>";
+  function pretty(col) {
+    return col.replace(/_/g, " ").toUpperCase();
+  }
 
-    rows.forEach(row => {
-      html += "<tr>";
-      columns.forEach(c => {
-        html += `<td style="border:1px solid #ccc;padding:6px">${row[c] ?? ""}</td>`;
-      });
-      html += "</tr>";
-    });
+  let html = `<div class="ai-table-wrapper">`;
 
-    html += "</table>";
+  rows.forEach((row, idx) => {
     html += `
-      <div style="margin-top:6px">
-        <button onclick="exportTable()">Export</button>
-        <button onclick="window.print()">Print</button>
-      </div>
+      <div class="ai-card">
+        <div class="ai-card-main">
     `;
 
-    addBotMessage(html);
-  }
+    // 🔹 Main important fields
+    importantCols.forEach(col => {
+      if (row[col] !== undefined && row[col] !== null) {
+        html += `
+          <div class="ai-field">
+            <span class="label">${pretty(col)}</span>
+            <span class="value">${row[col]}</span>
+          </div>
+        `;
+      }
+    });
+
+    html += `
+        </div>
+
+        <details class="ai-details">
+          <summary>More details</summary>
+          <table class="ai-table">
+            <tbody>
+    `;
+
+    // 🔹 Remaining fields
+    columns.forEach(col => {
+      if (!importantCols.includes(col)) {
+        let val = row[col] ?? "";
+
+        // clickable PDF
+        if (typeof val === "string" && val.startsWith("http")) {
+          val = `<a href="${val}" target="_blank">Open</a>`;
+        }
+
+        html += `
+          <tr>
+            <th>${pretty(col)}</th>
+            <td>${val}</td>
+          </tr>
+        `;
+      }
+    });
+
+    html += `
+            </tbody>
+          </table>
+        </details>
+
+      </div>
+    `;
+  });
+
+  html += `
+    <div class="ai-actions">
+      <button onclick="exportTable()">Export CSV</button>
+      <button onclick="window.print()">Print</button>
+    </div>
+  </div>
+  `;
+
+  addBotMessage(html);
+}
 
   /* ================= EXPORT ================= */
 
