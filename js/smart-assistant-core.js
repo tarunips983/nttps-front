@@ -15,53 +15,58 @@ if (!window.API) {
   /* ================= CHAT HANDLERS ================= */
 
   async function handleAskAI() {
-    const input = el("aiInput");
-    const msgBox = el("aiMessages");
+  const input = el("aiInput");
+  const msgBox = el("aiMessages");
 
-    if (!input || !msgBox) return;
+  if (!input || !msgBox) return;
 
-    const text = input.value.trim();
-    if (!text) return;
+  const text = input.value.trim();
+  if (!text) return;
 
-    // Show user message
-    addUserMessage(text);
-    input.value = "";
-
-    const token = localStorage.getItem("adminToken");
-    if (!token) {
-      addBotMessage("🔒 Please login to use Smart Assistant.");
-      return;
-    }
-
-    showTyping();
-
-    try {
-      const res = await fetch(`${API}/ai/query`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ query: text })
-      });
-
-      const result = await res.json();
-      hideTyping();
-
-      if (result.reply) {
-        addBotMessage(result.reply);
-      }
-
-      if (result.columns && result.data) {
-        renderTable(result.columns, result.data);
-      }
-
-    } catch (err) {
-      hideTyping();
-      console.error(err);
-      addBotMessage("❌ Unable to process request.");
-    }
+  // 🔑 EXIT WELCOME MODE
+  if (typeof window.enterChatMode === "function") {
+    window.enterChatMode();
   }
+
+  addUserMessage(text);
+  input.value = "";
+
+  const token = localStorage.getItem("adminToken");
+  if (!token) {
+    addBotMessage("🔒 Please login to use Smart Assistant.");
+    return;
+  }
+
+  showTyping();
+
+  try {
+    const res = await fetch(`${API}/ai/query`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ query: text })
+    });
+
+    const result = await res.json();
+    hideTyping();
+
+    if (result.reply) {
+      addBotMessage(result.reply);
+    }
+
+    if (result.columns && result.data) {
+      renderTable(result.columns, result.data);
+    }
+
+  } catch (err) {
+    hideTyping();
+    console.error(err);
+    addBotMessage("❌ Unable to process request.");
+  }
+}
+
 
   /* ================= RENDERERS ================= */
 
