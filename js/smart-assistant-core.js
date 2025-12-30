@@ -29,73 +29,35 @@ function getAIMessagesElement() {
 }
 
 
-function detectQueryIntent(text) {
-  const t = text.toLowerCase();
 
-  if (/pr\s*no|what\s+is\s+the\s+pr/.test(t)) return "FIND_PR";
-  if (/above|below|greater|less|amount/.test(t)) return "FILTER_RECORDS";
-  if (/pending|completed|status/.test(t)) return "STATUS";
-  if (/summary|total|count/.test(t)) return "SUMMARY";
-  if (/\b\d{10}\b/.test(t)) return "DETAILS";
+function renderAIData(table, rows) {
+  rows.forEach(row => {
+    switch (table) {
+      case "records":
+        addBotMessage(formatRecordRow(row));
+        break;
 
-  return "UNKNOWN";
-}
-async function askAIQuestion(question) {
-  const token = localStorage.getItem("adminToken");
-  if (!token) return;
- 
-  /* ================= DETECT IDENTIFIERS ================= */
-  const prMatch = question.match(/\b\d{10}\b/);
-  const aadhaarMatch = question.match(/\b\d{12}\b/);
+      case "estimates":
+        addBotMessage(formatEstimateRow(row));
+        break;
 
-  let module = "records";
-  let identifier = {};
+      case "daily_progress":
+        addBotMessage(formatDailyRow(row));
+        break;
 
-  
-  if (aadhaarMatch) {
-    module = "cl";
-    identifier.aadhar = aadhaarMatch[0];
-  } 
-  else if (prMatch) {
-    module = "records";
-    identifier.prNo = prMatch[0];
-  }
-  else if (/estimate/i.test(question)) {
-    module = "estimates";
-  }
-  else if (/daily|progress/i.test(question)) {
-    module = "daily";
-  }
+      case "cl_biodata":
+        addBotMessage(formatCLRow(row));
+        break;
 
-  /* ================= BUILD PAYLOAD ================= */
-  const payload = {
-    module,
-    identifier,
-    intent: "DETAILS",
-    text: question
-  };
+      case "pending_users":
+        addBotMessage(formatPendingUserRow(row));
+        break;
 
-  /* ================= SEND TO BACKEND ================= */
-  const res = await fetch(`${API}/ai/query`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify(payload)
+      default:
+        addBotMessage(`<pre>${JSON.stringify(row, null, 2)}</pre>`);
+    }
   });
-
-  const data = await res.json();
-
-  if (!data || !data.result) {
-    window.addBotMessage("No matching data found.");
-    return;
-  }
-
-  /* ================= RENDER ALL FIELDS ================= */
-  window.addBotMessage(renderObject(data.result));
 }
-
 
   function renderObject(obj) {
   let html = `<table style="width:100%;border-collapse:collapse">`;
@@ -159,65 +121,86 @@ async function handleAskAI() {
   }
 }
 
+async function analyzeAI(text) {
+  showTyping();
 
-  
-function renderAIAnswer(intent, data) {
-
-  if (intent === "FIND_PR") {
-
-    if (typeof window.addBotMessage === "function") {
-      window.addBotMessage(
-        `PR No for "${data.work_name}" is ${data.pr_no}.
-Firm: ${data.firm_name || "N/A"}
-Amount: ₹${data.amount || "N/A"}`
-      );
-    }
-
-  } 
-  else if (intent === "FILTER_RECORDS") {
-
-    let msg = "Here are matching PRs:\n";
-    data.forEach(r => {
-      msg += `• ${r.pr_no} – ${r.work_name} (₹${r.amount})\n`;
-    });
-
-    if (typeof window.addBotMessage === "function") {
-      window.addBotMessage(msg);
-    }
-
-  } 
-  else if (intent === "STATUS") {
-
-    let msg = "Pending PRs:\n";
-    data.forEach(r => {
-      msg += `• ${r.pr_no} – ${r.work_name}\n`;
-    });
-
-    if (typeof window.addBotMessage === "function") {
-      window.addBotMessage(msg);
-    }
-
-  } 
-  else if (intent === "DETAILS") {
-
-    if (typeof window.addBotMessage === "function") {
-      window.addBotMessage(
-        `Details for PR ${data.pr_no}:
-Work: ${data.work_name}
-Firm: ${data.firm_name}
-Amount: ₹${data.amount}
-Status: ${data.status}`
-      );
-    }
-
-  } 
-  else {
-
-    if (typeof window.addBotMessage === "function") {
-      window.addBotMessage("I understood your question but no answer was found.");
-    }
-
+  const token = localStorage.getItem("adminToken");
+  if (!token) {
+    hideTyping();
+    addBotMessage("🔒 Please login to use Smart Assistant.");
+    return;
   }
+
+  try {
+    const res = await fetch(`${API}/ai/query`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ query: text })
+    });
+
+    const result = await res.json();
+    hideTyping();
+
+    /*
+      Expected backend response format:
+      {
+        reply: string,
+        table?: string,
+        columns?: string[],
+        data?: array
+      }
+    */
+
+    if (result.reply) {
+      addBotMessage(result.reply);
+    }
+
+    if (result.data && result.columns) {
+      renderAIResult(result.columns, result.data);
+    }
+
+  } catch (err) {
+    hideTyping();
+    console.error(err);
+    addBotMessage("❌ AI service error. Please try again.");
+  }
+}
+
+  function renderAIResult(columns, rows) {
+  if (!rows || !rows.length) {
+    addBotMessage("No data found.");
+    return;
+  }
+
+  // 🔹 Single value → natural reply
+  if (columns.length === 1) {
+    const col = columns[0];
+    addBotMessage(`<b>${col.replace(/_/g, " ")}:</b> ${rows[0][col] ?? "N/A"}`);
+    return;
+  }
+
+  // 🔹 Multiple columns → table
+  let html = `<table style="width:100%;border-collapse:collapse">`;
+
+  html += "<tr>";
+  columns.forEach(c => {
+    html += `<th style="border:1px solid #ccc;padding:6px">${c}</th>`;
+  });
+  html += "</tr>";
+
+  rows.forEach(row => {
+    html += "<tr>";
+    columns.forEach(c => {
+      html += `<td style="border:1px solid #ccc;padding:6px">${row[c] ?? ""}</td>`;
+    });
+    html += "</tr>";
+  });
+
+  html += "</table>";
+  addBotMessage(html);
 }
 
 
@@ -229,77 +212,6 @@ async function loadAIMemory() {
 }
 
 
-
-const RECORD_COLUMNS = [
-  "prNo",
-  "prDate",
-  "workName",
-  "amount",
-  "budgetHead",
-  "poNo",
-  "poDate",
-  "firmName",
-  "divisionLabel",
-  "pageNo",
-  "remarks",
-  "status",
-  "highValueSpares"
-];
-
-const RECORD_SCHEMA = {
-  prNo: "",
-  prDate: "",
-  workName: "",
-  amount: "",
-  budgetHead: "",
-  poNo: "",
-  poDate: "",
-  firmName: "",
-  divisionLabel: "",
-  pageNo: "",
-  remarks: "",
-  status: "",
-  highValueSpares: ""
-};
-
-  
-const ESTIMATE_COLUMNS = [
-  "description",
-  "divisionLabel",
-  "prNo",
-  "estimateNo",
-  "tSpecNo",
-  "firmContractor",
-  "poNo",
-  "grossAmount",
-  "amount",
-  "loaNo",
-  "sapBillingDoc",
-  "mbNo",
-  "pageNo",
-  "backCharging",
-  "startDate"
-];
-const DAILY_COLUMNS = [
-  "date",
-  "divisionLabel",
-  "subDivision",
-  "activity",
-  "manpower",
-  "status",
-  "remarks",
-  "location"
-];
-const CL_COLUMNS = [
-  "name",
-  "gender",
-  "aadhar",
-  "doj",
-  "wages",
-  "nominee",
-  "relation",
-  "divisionLabel"
-];
 function parseTabularRow(text, columns) {
   const cells = text
     .replace(/\r?\n/g, "")
@@ -379,39 +291,8 @@ function cleanWorkName(text) {
 let aiResult = null;
 let aiTargetModule = "records"; // default
 
-function detectModuleSmart(text) {
-    const lower = text.toLowerCase();
 
-    let score = {
-        cl: 0,
-        daily: 0,
-        records: 0,
-        estimates: 0
-    };
 
-    // ---------- CL SCORING ----------
-    if (/\b(male|female)\b/.test(lower)) score.cl += 2;
-    if (/\b\d{12}\b/.test(text)) score.cl += 3;          // Aadhaar
-    if (/\b\d{2}[./-]\d{2}[./-]\d{4}\b/.test(text)) score.cl += 2; // DOB
-    if (/\b(mother|father|wife|husband)\b/.test(lower)) score.cl += 2;
-    if (text.split(/\s+/).length > 8) score.cl += 1;     // tabular row
-
-    // ---------- DAILY SCORING ----------
-    if (/today|progress|completed|carried out|manpower/.test(lower)) score.daily += 3;
-
-    // ---------- RECORDS / ESTIMATES ----------
-    const numbers = text.match(/\b\d{10}\b/g) || [];
-    numbers.forEach(n => {
-        if (n.startsWith("10")) score.records += 4;
-        if (n.startsWith("13") || n.startsWith("21")) score.estimates += 4;
-    });
-
-    // ---------- FINAL DECISION ----------
-    const sorted = Object.entries(score).sort((a,b)=>b[1]-a[1]);
-if (sorted[0][1] < 3) return "records"; // safe default
-return sorted[0][0];
-
-}
 function normalizeText(text) {
   return text
     .toLowerCase()
@@ -475,117 +356,7 @@ function findLearnedMatch(text, module) {
 
 
 
-async function analyzeAI(text) {
-  showTyping();
 
-  const token = localStorage.getItem("adminToken");
-  if (!token) {
-    hideTyping();
-    window.addBotMessage("🔒 Please login to use Smart Assistant.");
-    return;
-  }
-
-  try {
-    const res = await fetch(`${API}/ai/query`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      body: JSON.stringify({ text })
-    });
-
-    const data = await res.json();
-
-    hideTyping();
-
-    // 🔑 ALWAYS reply like a real AI
-    window.addBotMessage(
-      data.reply || "I’m here. How can I help you?"
-    );
-
-    // OPTIONAL: AI may say editable preview exists
-    if (data.editable && data.module && data.data) {
-      aiTargetModule = data.module;
-      aiResult = data.data;
-      aiOriginalResult = JSON.parse(JSON.stringify(data.data));
-      renderAIPreview(aiTargetModule, aiResult);
-
-      const saveBtn = document.getElementById("aiSaveBtn");
-      if (saveBtn) saveBtn.style.display = "inline-flex";
-    }
-
-  } catch (err) {
-    hideTyping();
-    console.error(err);
-    window.addBotMessage(
-      "Sorry, I had trouble understanding that. Please try again."
-    );
-  }
-}
-
-
-function respondWithText(module, data) {
-  let msg = "";
-
-  /* ================= RECORDS ================= */
-  if (module === "records") {
-    msg = `
-PR No: ${data.prNo || "N/A"}
-Work: ${data.workName || "Not available"}
-Firm: ${data.firmName || "N/A"}
-Amount: ${data.amount ? "₹" + data.amount : "N/A"}
-Status: ${data.status || "Unknown"}
-    `;
-  }
-
-  /* ================= ESTIMATES ================= */
-  else if (module === "estimates") {
-    msg = `
-Estimate No: ${data.estimateNo || "N/A"}
-Description: ${data.description || "N/A"}
-Division: ${data.divisionLabel || "N/A"}
-Status: ${data.status || "N/A"}
-    `;
-  }
-
-  /* ================= DAILY PROGRESS ================= */
-  else if (module === "daily") {
-    msg = `
-Date: ${data.date || "N/A"}
-Activity: ${data.activity || "N/A"}
-Manpower: ${data.manpower || "N/A"}
-Status: ${data.status || "N/A"}
-    `;
-  }
-
-  /* ================= CL BIO DATA (🔥 MISSING PART) ================= */
-  else if (module === "cl") {
-    msg = `
-CL Bio Data
-
-Name: ${data.name || "N/A"}
-Gender: ${data.gender || "N/A"}
-Aadhaar: ${data.aadhar || "N/A"}
-Phone: ${data.phone || "N/A"}
-Station: ${data.station || "N/A"}
-Division: ${data.divisionLabel || "N/A"}
-DOJ: ${data.doj || "N/A"}
-Wages: ${data.wages || "N/A"}
-Nominee: ${data.nominee || "N/A"}
-Relation: ${data.relation || "N/A"}
-    `;
-  }
-
-  /* ================= FALLBACK ================= */
-  else {
-    msg = "I found data, but could not format a response.";
-  }
-
-  if (typeof window.addBotMessage === "function") {
-    window.addBotMessage(msg.trim());
-  }
-}
 
 function cleanDailyActivity(text) {
     return text
