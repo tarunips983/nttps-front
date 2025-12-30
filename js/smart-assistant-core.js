@@ -67,23 +67,49 @@ if (!window.API) {
   }
 }
 
+function detectModule(columns) {
+  if (columns.includes("estimate_no")) return "ESTIMATE";
+  if (columns.includes("pr_no")) return "RECORD";
+  if (columns.includes("aadhar")) return "CL";
+  if (columns.includes("date") && columns.includes("activity")) return "DAILY";
+  return "UNKNOWN";
+}
+const RECORD_FIELDS = [
+  "pr_no",
+  "work_name",
+  "amount",
+  "status",
+  "pr_status",
+  "division_label",
+  "send_to"
+];
+const ESTIMATE_FIELDS = [
+  "estimate_no",
+  "pr_no",
+  "description",
+  "gross_amount",
+  "net_amount",
+  "loa_no",
+  "status",
+  "division_label"
+];
+const CL_FIELDS = ["name","aadhar","phone","division","station"];
+const DAILY_FIELDS = ["date","activity","status","division_label"];
 
   /* ================= RENDERERS ================= */
 function renderTable(columns, rows) {
-  if (!rows.length) {
+  if (!rows || !rows.length) {
     addBotMessage("No data found.");
     return;
   }
 
-  const importantCols = [
-    "pr_no",
-    "work_name",
-    "estimate_no",
-    "name",
-    "amount",
-    "status",
-    "division_label"
-  ];
+  const module = detectModule(columns);
+
+  let importantCols = [];
+
+  if (module === "RECORD") importantCols = RECORD_FIELDS;
+  else if (module === "ESTIMATE") importantCols = ESTIMATE_FIELDS;
+  else importantCols = columns; // fallback
 
   function pretty(col) {
     return col.replace(/_/g, " ").toUpperCase();
@@ -91,13 +117,10 @@ function renderTable(columns, rows) {
 
   let html = `<div class="ai-table-wrapper">`;
 
-  rows.forEach((row, idx) => {
-    html += `
-      <div class="ai-card">
-        <div class="ai-card-main">
-    `;
+  rows.forEach(row => {
+    html += `<div class="ai-card"><div class="ai-card-main">`;
 
-    // 🔹 Main important fields
+    /* MAIN SUMMARY */
     importantCols.forEach(col => {
       if (row[col] !== undefined && row[col] !== null) {
         html += `
@@ -109,21 +132,18 @@ function renderTable(columns, rows) {
       }
     });
 
+    /* DETAILS */
     html += `
-        </div>
-
-        <details class="ai-details">
-          <summary>More details</summary>
-          <table class="ai-table">
-            <tbody>
+      </div>
+      <details class="ai-details">
+        <summary>More details</summary>
+        <table class="ai-table"><tbody>
     `;
 
-    // 🔹 Remaining fields
     columns.forEach(col => {
       if (!importantCols.includes(col)) {
         let val = row[col] ?? "";
 
-        // clickable PDF
         if (typeof val === "string" && val.startsWith("http")) {
           val = `<a href="${val}" target="_blank">Open</a>`;
         }
@@ -138,12 +158,9 @@ function renderTable(columns, rows) {
     });
 
     html += `
-            </tbody>
-          </table>
-        </details>
-
-      </div>
-    `;
+        </tbody></table>
+      </details>
+    </div>`;
   });
 
   html += `
@@ -151,9 +168,23 @@ function renderTable(columns, rows) {
       <button onclick="exportTable()">Export CSV</button>
       <button onclick="window.print()">Print</button>
     </div>
-  </div>
-  `;
+  </div>`;
 
+if (col === "estimate_no") {
+  html += `
+    <div class="ai-field">
+      <span class="label">ESTIMATE NO</span>
+      <span class="value">
+        <a href="estimate.html?estimate_no=${row[col]}" target="_blank">
+          ${row[col]}
+        </a>
+      </span>
+    </div>
+  `;
+  return;
+}
+
+  
   addBotMessage(html);
 }
 
