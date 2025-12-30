@@ -223,33 +223,11 @@ Status: ${data.status}`
 
 
 async function loadAIMemory() {
-  const token = localStorage.getItem("adminToken");
-
-  // Chat-only mode: memory is optional
-  if (!token || !window.API) {
-    console.warn("AI memory skipped: missing token or API");
-    aiMemoryLoaded = true;
-    return;
-  }
-
-  try {
-    const res = await fetch(`${API}/ai/memory`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-
-    if (res.ok) {
-      aiMemory = await res.json();
-    } else {
-      aiMemory = [];
-      console.warn("AI memory not accessible:", res.status);
-    }
-  } catch (err) {
-    console.warn("AI memory load failed:", err.message);
-    aiMemory = [];
-  }
-
+  // 🔒 Disable memory – real AI will query DB live
+  aiMemory = [];
   aiMemoryLoaded = true;
 }
+
 
 
 const RECORD_COLUMNS = [
@@ -497,106 +475,55 @@ function findLearnedMatch(text, module) {
 
 
 
-async function analyzeAI(passedText) {
+async function analyzeAI(text) {
+  showTyping();
 
-
- if (!aiMemoryLoaded) {
-  await loadAIMemory();
-}
-
-  const text = (passedText || window.__LAST_AI_INPUT__ || "").trim();
-if (!text) {
-  if (typeof window.addBotMessage === "function") {
-    window.addBotMessage("⚠️ No input text received.");
-  }
-  return;
-}
-
-
-  aiTargetModule = detectModuleSmart(text);
-
-  /* ======================================================
-     1️⃣ TABULAR DATA → DIRECT COLUMN MAPPING (BEST)
-     ====================================================== */
-  if (isTabularPaste(text)) {
-    if (aiTargetModule === "records")
-      aiResult = parseTabularRow(text, RECORD_COLUMNS);
-
-    else if (aiTargetModule === "estimates")
-      aiResult = parseTabularRow(text, ESTIMATE_COLUMNS);
-
-    else if (aiTargetModule === "daily")
-      aiResult = parseTabularRow(text, DAILY_COLUMNS);
-
-    else if (aiTargetModule === "cl")
-      aiResult = parseTabularRow(text, CL_COLUMNS);
+  const token = localStorage.getItem("adminToken");
+  if (!token) {
+    hideTyping();
+    window.addBotMessage("🔒 Please login to use Smart Assistant.");
+    return;
   }
 
-  /* ======================================================
-     2️⃣ EXISTING SUPABASE DATA MATCH
-     ====================================================== */
-  else {
-    const dbMatch = await searchExistingData(aiTargetModule, text);
-    if (dbMatch) {
-      aiResult = dbMatch;
-    } else {
-      /* ==================================================
-         3️⃣ AI LEARNING MEMORY
-         ================================================== */
-      const learned = findLearnedMatch(text, aiTargetModule);
-      if (learned) {
-        aiResult = learned;
-      } else {
-        /* ==============================================
-           4️⃣ REGEX FALLBACK (LAST OPTION)
-           ============================================== */
-        aiResult = parseTextToData(text, aiTargetModule);
-      }
-    }
-  }
+  try {
+    const res = await fetch(`${API}/ai/query`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ text })
+    });
 
-  aiOriginalResult = JSON.parse(JSON.stringify(aiResult));
+    const data = await res.json();
 
-if (aiTargetModule === "records") {
-  aiResult = {
-    ...RECORD_SCHEMA,
-    ...aiResult   // AI-filled values override blanks
-  };
-}
+    hideTyping();
 
-// Decide mode
-AI_MODE = detectEditIntent(text) ? "EDIT" : "CHAT";
-
-if (AI_MODE === "EDIT") {
-  renderAIPreview(aiTargetModule, aiResult);
-
-  const saveBtn = document.getElementById("aiSaveBtn");
-  if (saveBtn) saveBtn.style.display = "inline-flex";
-} else {
-  // CHAT MODE → TEXT RESPONSE ONLY
-  respondWithText(aiTargetModule, aiResult);
-}
-
-
-// ⚠️ If AI extracted nothing useful, warn user
-if (!Object.values(aiResult || {}).some(v => v && v.toString().trim())) {
-  if (typeof window.addBotMessage === "function") {
+    // 🔑 ALWAYS reply like a real AI
     window.addBotMessage(
-      "I could not confidently extract fields. Please paste structured text (table / PR format) or edit the preview manually."
+      data.reply || "I’m here. How can I help you?"
+    );
+
+    // OPTIONAL: AI may say editable preview exists
+    if (data.editable && data.module && data.data) {
+      aiTargetModule = data.module;
+      aiResult = data.data;
+      aiOriginalResult = JSON.parse(JSON.stringify(data.data));
+      renderAIPreview(aiTargetModule, aiResult);
+
+      const saveBtn = document.getElementById("aiSaveBtn");
+      if (saveBtn) saveBtn.style.display = "inline-flex";
+    }
+
+  } catch (err) {
+    hideTyping();
+    console.error(err);
+    window.addBotMessage(
+      "Sorry, I had trouble understanding that. Please try again."
     );
   }
 }
 
-
-  
-  const saveBtn = document.getElementById("aiSaveBtn");
-if (saveBtn) {
-  saveBtn.style.display = "inline-flex";
-  saveBtn.disabled = false;
-}
-
-  
-}
 
 function respondWithText(module, data) {
   let msg = "";
