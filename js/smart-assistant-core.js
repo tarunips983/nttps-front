@@ -138,7 +138,7 @@ async function analyzeAI(text) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`
       },
-      body: JSON.stringify({ query: text })
+      body: JSON.stringify({ text })
     });
 
     const result = await res.json();
