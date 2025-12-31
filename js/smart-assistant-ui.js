@@ -117,20 +117,36 @@ window.renderChatHistory = function () {
       list.appendChild(div);
     });
 };
-window.loadConversation = function (id) {
+window.loadConversation = async function (id) {
   window.currentConversationId = id;
   clearChatUI();
 
   const conv = window.conversations[id];
   if (!conv) return;
 
-  conv.messages.forEach(m => {
-    if (m.role === "user") window.addUserMessage(m.content);
-    else window.addBotMessage(m.content);
-  });
+  for (const m of conv.messages) {
+    if (m.role === "user") {
+      addUserMessage(m.content);
+    } 
+    else if (m.role === "assistant") {
+      // 🔑 STRUCTURED REPLAY
+      if (typeof m.content === "object") {
+        addBotMessage(m.content.text);
 
-  window.renderChatHistory();
+        // Re-render UI elements
+        if (m.content.type === "PR_TABLE" && window.renderTable) {
+          window.renderTable(m.content.payload.columns, m.content.payload.rows);
+        }
+      } 
+      else {
+        addBotMessage(m.content);
+      }
+    }
+  }
+
+  renderChatHistory();
 };
+
 
 function clearChatUI() {
   const messages = document.getElementById("aiMessages");
