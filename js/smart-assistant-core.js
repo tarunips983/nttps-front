@@ -21,7 +21,6 @@ function saveMessage(role, content) {
     time: Date.now()
   });
 
-  // Auto title from first user message
   if (
     role === "user" &&
     conversations[currentConversationId].messages.length === 1
@@ -30,8 +29,8 @@ function saveMessage(role, content) {
   }
 
   saveConversations();
-  renderChatHistory();
 }
+
 function saveConversations() {
   localStorage.setItem("ai_conversations", JSON.stringify(conversations));
 
@@ -66,19 +65,8 @@ function saveConversations() {
   }
 
   addUserMessage(text);
-    if (!currentConversationId) createNewChat();
+saveMessage("user", text);
 
-conversations[currentConversationId].messages.push({
-  role: "user",
-  content: text,
-  time: Date.now()
-});
-
-if (conversations[currentConversationId].messages.length === 1) {
-  conversations[currentConversationId].title = text.slice(0, 30);
-}
-
-saveConversations();
 
   input.value = "";
 
@@ -104,22 +92,19 @@ saveConversations();
     hideTyping();
 
     if (result.reply) {
-      addBotMessage(result.reply);
-      conversations[currentConversationId].messages.push({
-  role: "assistant",
-  content: result.reply,
-  time: Date.now()
-});
+  addBotMessage(result.reply);
 
-saveConversations();
+  saveMessage("assistant", {
+    text: result.reply,
+    type: result.columns && result.data ? "TABLE" : "TEXT",
+    payload: result.columns && result.data
+      ? { columns: result.columns, rows: result.data }
+      : null
+  });
+}
 
-    }
 
-    if (result.columns && result.data) {
-      renderTable(result.columns, result.data);
-    }
-
-  } catch (err) {
+   } catch (err) {
     hideTyping();
     console.error(err);
     addBotMessage("❌ Unable to process request.");
