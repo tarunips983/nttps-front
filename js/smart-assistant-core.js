@@ -5,8 +5,39 @@ if (!window.API) {
 (function () {
   if (window.__SMART_ASSISTANT_LOADED__) return;
   window.__SMART_ASSISTANT_LOADED__ = true;
+   const API = window.API;
+let currentConversationId = null;
 
-  const API = window.API;
+   
+let conversations = JSON.parse(localStorage.getItem("ai_conversations") || "{}");
+
+
+function saveMessage(role, content) {
+  if (!currentConversationId) createNewChat();
+
+  conversations[currentConversationId].messages.push({
+    role,
+    content,
+    time: Date.now()
+  });
+
+  // Auto title from first user message
+  if (
+    role === "user" &&
+    conversations[currentConversationId].messages.length === 1
+  ) {
+    conversations[currentConversationId].title = content.slice(0, 30);
+  }
+
+  saveConversations();
+  renderChatHistory();
+}
+function saveConversations() {
+  localStorage.setItem("ai_conversations", JSON.stringify(conversations));
+}
+
+  
+
 
   function el(id) {
     return document.getElementById(id);
@@ -29,6 +60,20 @@ if (!window.API) {
   }
 
   addUserMessage(text);
+    if (!currentConversationId) createNewChat();
+
+conversations[currentConversationId].messages.push({
+  role: "user",
+  content: text,
+  time: Date.now()
+});
+
+if (conversations[currentConversationId].messages.length === 1) {
+  conversations[currentConversationId].title = text.slice(0, 30);
+}
+
+saveConversations();
+
   input.value = "";
 
   const token = localStorage.getItem("adminToken");
@@ -54,6 +99,14 @@ if (!window.API) {
 
     if (result.reply) {
       addBotMessage(result.reply);
+      conversations[currentConversationId].messages.push({
+  role: "assistant",
+  content: result.reply,
+  time: Date.now()
+});
+
+saveConversations();
+
     }
 
     if (result.columns && result.data) {
@@ -220,6 +273,25 @@ function renderTable(columns, rows) {
     const t = el("aiTyping");
     if (t) t.style.display = "none";
   }
+window.createNewChat = function () {
+  currentConversationId = "conv_" + Date.now();
+
+  conversations[currentConversationId] = {
+    id: currentConversationId,
+    title: "New Conversation",
+    createdAt: Date.now(),
+    messages: []
+  };
+
+  saveConversations();
+
+  const msgBox = document.getElementById("aiMessages");
+  if (msgBox) msgBox.innerHTML = "";
+
+  if (window.renderChatHistory) {
+    window.renderChatHistory();
+  }
+};
 
   window.handleAskAI = handleAskAI;
 
