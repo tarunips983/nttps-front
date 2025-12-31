@@ -94,14 +94,19 @@ saveMessage("user", text);
     if (result.reply) {
   addBotMessage(result.reply);
 
+  if (result.columns && result.data) {
+    renderTable(result.columns, result.data);
+  }
+
   saveMessage("assistant", {
     text: result.reply,
-    type: result.columns && result.data ? "TABLE" : "TEXT",
+    type: result.columns && result.data ? "PR_TABLE" : "TEXT",
     payload: result.columns && result.data
       ? { columns: result.columns, rows: result.data }
       : null
   });
 }
+
 
 
    } catch (err) {
@@ -234,7 +239,7 @@ function renderTable(columns, rows) {
 
   addBotMessage(html);
 }
-
+window.renderTable = renderTable;
   /* ================= EXPORT ================= */
 
   window.exportTable = function () {
