@@ -2760,17 +2760,18 @@ if (pm && pm.classList.contains("active")) {
   }
 
   // ---------- FILE TRANSFER ----------
-  if (viewName === "files") {
-    document.getElementById("file-transfer-container").style.display = "flex";
-    document.querySelector("#subNavBar button:nth-child(5)").classList.add("active");
+ if (viewName === "files") {
+  document.getElementById("file-transfer-container").style.display = "flex";
 
-    loadFiles();
-    updateFileLoginStatus();
-
-    if (!fileAutoRefreshTimer) {
-      fileAutoRefreshTimer = setInterval(loadFiles, 4000);
-    }
+  if (fileAutoRefreshTimer) {
+    clearInterval(fileAutoRefreshTimer);
   }
+
+  loadFiles();
+  updateFileLoginStatus();
+
+  fileAutoRefreshTimer = setInterval(loadFiles, 5000);
+}
 
   // ---------- SMART ASSISTANT ----------
   if (viewName === "assistant") {
@@ -3429,14 +3430,18 @@ async function uploadFile() {
   };
 
   xhr.onload = () => {
-    progressBar.style.width = "100%";
-    setTimeout(() => {
-      progressBox.style.display = "none";
-      preview.style.display = "none";
-      fileInput.value = "";
-      loadFiles(); // ✅ refresh list instantly
-    }, 500);
-  };
+  progressBar.style.width = "100%";
+
+  setTimeout(() => {
+    progressBox.style.display = "none";
+    preview.style.display = "none";
+    fileInput.value = "";
+
+    // 🔥 FORCE refresh
+    showMainView("files");
+    setTimeout(loadFiles, 300);
+  }, 700);
+};
 
   xhr.send(fd);
 }
@@ -3500,45 +3505,47 @@ async function loadFiles() {
 
     const loggedIn = isFileUserLoggedIn();
     
- document.getElementById("fileList").innerHTML = `
-<tr>
-  <td colspan="5" style="text-align:center;padding:20px;">
-    🔄 Syncing files…
-  </td>
-</tr>
-`;
-document.getElementById("fileList").innerHTML = files.map(f => `
-<tr>
-  <td style="cursor:pointer;color:#0d6efd;font-weight:600"
-      onclick="requireFileLogin() && openFilePreview(${JSON.stringify(f).replace(/"/g, '&quot;')})">
-    ${f.file_name}
-  </td>
+ const tbody = document.getElementById("fileList");
 
-  <td>${(f.file_size / 1024).toFixed(1)} KB</td>
+if (!files || files.length === 0) {
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="5" style="text-align:center;padding:20px;">
+        📂 No files uploaded yet
+      </td>
+    </tr>
+  `;
+  return;
+}
 
-  <td>${new Date(f.uploaded_at).toLocaleString()}</td>
-
-  <td>${new Date(f.expires_at).toLocaleString()}</td>
-
-  <td>
-    ${
-      isFileUserLoggedIn()
-        ? `
-          <button class="view-btn"
-            onclick="handleFileDownload('${f.file_url}','${f.file_name}')">
-            ⬇ Download
-          </button>
-
-          <button class="view-btn" style="background:#dc3545"
-            onclick="deleteFile(${f.id})">
-            🗑 Delete
-          </button>
-        `
-        : `<span style="color:#dc3545;font-weight:600;">🔒 Login required</span>`
-    }
-  </td>
-</tr>
+tbody.innerHTML = files.map(f => `
+  <tr>
+    <td style="cursor:pointer;color:#0d6efd;font-weight:600"
+        onclick="requireFileLogin() && openFilePreview(${JSON.stringify(f).replace(/"/g,'&quot;')})">
+      ${f.file_name}
+    </td>
+    <td>${(f.file_size / 1024).toFixed(1)} KB</td>
+    <td>${new Date(f.uploaded_at).toLocaleString()}</td>
+    <td>${new Date(f.expires_at).toLocaleString()}</td>
+    <td>
+      ${
+        isFileUserLoggedIn()
+          ? `
+            <button class="view-btn"
+              onclick="handleFileDownload('${f.file_url}','${f.file_name}')">
+              ⬇ Download
+            </button>
+            <button class="view-btn" style="background:#dc3545"
+              onclick="deleteFile(${f.id})">
+              🗑 Delete
+            </button>
+          `
+          : `<span style="color:#dc3545;font-weight:600;">🔒 Login required</span>`
+      }
+    </td>
+  </tr>
 `).join("");
+
   } catch (err) {
     console.error("loadFiles failed:", err);
   }
@@ -4566,6 +4573,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
