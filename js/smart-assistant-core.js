@@ -34,7 +34,13 @@ function saveMessage(role, content) {
 }
 function saveConversations() {
   localStorage.setItem("ai_conversations", JSON.stringify(conversations));
+
+  // 🔁 sync UI after every save
+  if (window.syncChatUI) {
+    window.syncChatUI();
+  }
 }
+
 
   
 
