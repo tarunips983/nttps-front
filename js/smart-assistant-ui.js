@@ -1,8 +1,11 @@
 console.log("✅ Smart Assistant UI loaded");
 
-/* ===== GLOBAL HELPERS (ALWAYS AVAILABLE) ===== */
+// ================= CHAT STATE ACCESS =================
+window.conversations = window.conversations || JSON.parse(
+  localStorage.getItem("ai_conversations") || "{}"
+);
 
-/* ===== GLOBAL CHAT HELPERS (REQUIRED) ===== */
+window.currentConversationId = window.currentConversationId || null;
 
 window.addBotMessage = function (text) {
   const messages = document.getElementById("aiMessages");
@@ -71,7 +74,12 @@ window.bindSmartAssistantUI = function () {
       window.handleAskAI();
     }
   };
-  
+  if (!window.createNewChat) {
+  window.createNewChat = function () {
+    alert("Chat system not ready yet");
+  };
+}
+
   }
 
 
@@ -79,6 +87,61 @@ document.addEventListener("DOMContentLoaded", () => {
   if (window.bindSmartAssistantUI) {
     window.bindSmartAssistantUI();
   }
+
+  if (window.renderChatHistory) {
+    window.renderChatHistory();
+  }
+
+  const ids = Object.keys(window.conversations || {});
+  if (ids.length) {
+    window.loadConversation(ids[0]);
+  }
 });
 
 
+window.renderChatHistory = function () {
+  const list = document.getElementById("chatHistoryList");
+  if (!list) return;
+
+  list.innerHTML = "";
+
+  Object.values(window.conversations)
+    .sort((a, b) => b.createdAt - a.createdAt)
+    .forEach(conv => {
+      const div = document.createElement("div");
+      div.className =
+        "chat-item" +
+        (conv.id === window.currentConversationId ? " active" : "");
+      div.textContent = conv.title;
+      div.onclick = () => window.loadConversation(conv.id);
+      list.appendChild(div);
+    });
+};
+window.loadConversation = function (id) {
+  window.currentConversationId = id;
+  clearChatUI();
+
+  const conv = window.conversations[id];
+  if (!conv) return;
+
+  conv.messages.forEach(m => {
+    if (m.role === "user") window.addUserMessage(m.content);
+    else window.addBotMessage(m.content);
+  });
+
+  window.renderChatHistory();
+};
+
+function clearChatUI() {
+  const messages = document.getElementById("aiMessages");
+  if (messages) messages.innerHTML = "";
+}
+// Sync UI when conversations change
+window.syncChatUI = function () {
+  window.conversations = JSON.parse(
+    localStorage.getItem("ai_conversations") || "{}"
+  );
+  if (window.renderChatHistory) {
+    window.renderChatHistory();
+  }
+};
