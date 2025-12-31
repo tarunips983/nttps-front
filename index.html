@@ -2241,6 +2241,40 @@ body.smart-assistant-active {
   from { opacity: 0; transform: translateY(-6px); }
   to { opacity: 1; transform: translateY(0); }
 }
+#chatHistory {
+  margin-top: 15px;
+}
+
+.chat-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+#chatHistoryList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chat-item {
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #e9eef5;
+  font-size: 13px;
+}
+
+.chat-item.active {
+  background: #007bff;
+  color: #fff;
+}
+
+.chat-item:hover {
+  background: #dbe7ff;
+}
 
 </style>
 
@@ -2443,6 +2477,13 @@ body.smart-assistant-active {
     Daily Progress and Records.
   </p>
 
+<div id="chatHistory">
+  <div class="chat-history-header">
+    <span>💬 Conversations</span>
+    <button onclick="createNewChat()">＋</button>
+  </div>
+  <div id="chatHistoryList"></div>
+</div>
 
   </aside>
 
@@ -4525,6 +4566,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
