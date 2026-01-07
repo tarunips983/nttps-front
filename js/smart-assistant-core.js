@@ -92,10 +92,20 @@ saveMessage("user", text);
     hideTyping();
 
     if (result.reply) {
-  addBotMessage(result.reply);
 
+  // 🔹 Create empty bot message bubble
+  const msgDiv = document.createElement("div");
+  msgDiv.className = "ai-message";
+  el("aiMessages").appendChild(msgDiv);
+
+  // 🔹 Typewriter animation here
+  typeWriter(msgDiv, result.reply, 15);
+
+  // 🔹 If table exists, render AFTER text finishes
   if (result.columns && result.data) {
-    renderTable(result.columns, result.data);
+    setTimeout(() => {
+      renderTable(result.columns, result.data);
+    }, Math.min(2000, result.reply.length * 15));
   }
 
   saveMessage("assistant", {
@@ -106,6 +116,7 @@ saveMessage("user", text);
       : null
   });
 }
+
 
 
 
@@ -259,6 +270,28 @@ window.renderTable = renderTable;
   };
 
   /* ================= UI HELPERS ================= */
+function typeWriter(element, text, speed = 20) {
+  element.innerHTML = "";
+  let i = 0;
+
+  function typing() {
+    if (i < text.length) {
+      element.innerHTML += text.charAt(i);
+      i++;
+
+      // ✅ Auto-scroll while typing
+      const box = el("aiMessages");
+      if (box) box.scrollTop = box.scrollHeight;
+
+      requestAnimationFrame(() => {
+        setTimeout(typing, speed);
+      });
+    }
+  }
+
+  typing();
+}
+
 
   function showTyping() {
     const t = el("aiTyping");
