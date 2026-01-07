@@ -66,6 +66,33 @@ height: 44px;
 #aiSaveContainer {
   display: none;
 }
+/* ================================
+   Slim & Modern Scrollbar (Chat)
+================================ */
+
+/* For Chrome, Edge, Brave, Safari */
+#chatHistoryList::-webkit-scrollbar {
+  width: 6px;              /* 👈 scrollbar thickness */
+}
+
+#chatHistoryList::-webkit-scrollbar-track {
+  background: transparent; /* or #f1f1f1 */
+}
+
+#chatHistoryList::-webkit-scrollbar-thumb {
+  background: #b0b0b0;
+  border-radius: 10px;
+}
+
+#chatHistoryList::-webkit-scrollbar-thumb:hover {
+  background: #888;
+}
+
+/* For Firefox */
+#chatHistoryList {
+  scrollbar-width: thin;
+  scrollbar-color: #b0b0b0 transparent;
+}
 
 .nav-right a {
     color:white;
@@ -4612,6 +4639,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
