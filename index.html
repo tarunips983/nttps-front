@@ -2430,58 +2430,65 @@ body.smart-assistant-active {
 /* =========================================================
    🔥 SMART ASSISTANT – FINAL CHAT LAYOUT FIX (MOBILE + DESKTOP)
    ========================================================= */
+/* =========================================================
+   ✅ SMART ASSISTANT – FINAL STABLE LAYOUT FIX (DESKTOP + MOBILE)
+   ========================================================= */
 
-/* The whole assistant view must not scroll */
+/* The assistant main container must NEVER scroll */
 #smart-assistant-container {
-  height: calc(var(--vh, 1vh) * 100);
+  height: 100%;
   overflow: hidden !important;
 }
 
-/* Right panel = flex column full height */
-#smart-assistant-container .smart-ai-panel {
+/* Right panel = fixed flex column */
+#smart-assistant-container .right-panel.smart-ai-panel {
   height: 100% !important;
   display: flex !important;
   flex-direction: column !important;
-  padding: 0 !important;
   overflow: hidden !important;
-  background: #f6f8fb;
 }
 
-/* Messages area = ONLY SCROLL AREA */
+/* Messages area = ONLY scrollable area */
 #smart-assistant-container #aiMessages {
   flex: 1 1 auto !important;
   overflow-y: auto !important;
+  overflow-x: hidden !important;
   padding: 16px !important;
-  -webkit-overflow-scrolling: touch;
 }
 
-/* Typing bar never scrolls away */
+/* Typing bar should not scroll */
 #smart-assistant-container #aiTyping {
   flex-shrink: 0 !important;
 }
 
-/* Input wrapper NEVER moves */
+/* Input wrapper should never move */
 #smart-assistant-container .ai-input-wrapper {
   flex-shrink: 0 !important;
-  padding: 10px !important;
+  padding: 12px !important;
   background: #f6f8fb;
+  border-top: 1px solid #e0e0e0;
 }
 
-/* Input bar */
-#smart-assistant-container .ai-input-bar {
-  width: 100% !important;
-}
-
-/* Kill any height hacks that push UI */
+/* Kill ALL height hacks */
 .smart-ai-panel,
-.smart-assistant-view {
+.smart-assistant-view,
+.right-panel {
   min-height: 0 !important;
 }
 
-/* Prevent body scrolling while assistant is open */
-body.smart-assistant-active {
+/* Prevent page scroll when assistant is open */
+body.smart-assistant-open {
   overflow: hidden !important;
 }
+/* Welcome mode centering */
+#smart-assistant-container.ai-welcome .right-panel.smart-ai-panel {
+  justify-content: center;
+}
+
+#smart-assistant-container.ai-welcome #aiMessages {
+  display: none;
+}
+
 
 </style>
 
@@ -4780,6 +4787,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
