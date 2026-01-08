@@ -1,6 +1,9 @@
 if (!window.API) {
   window.API = "https://nttps-backend.onrender.com";
 }
+// 🔥 Wake up Render backend on page load
+fetch("https://nttps-ai.onrender.com/health")
+  .catch(() => console.log("Waking backend server..."));
 
 (function () {
   if (window.__SMART_ASSISTANT_LOADED__) return;
