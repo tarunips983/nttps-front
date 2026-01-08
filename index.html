@@ -2035,7 +2035,15 @@ body.smart-assistant-active {
   overflow: hidden !important;
 }
 /* ================= SMART ASSISTANT LAYOUT FIX ================= */
+@media (max-width: 768px){
 
+.smart-ai-panel {
+height: calc(100vh - 355px);
+
+}
+
+
+}
 /* Right panel full height */
 .smart-ai-panel {
   height: calc(100vh - 155px); /* header + subnav height */
@@ -2540,7 +2548,7 @@ body.smart-assistant-active {
 
   <h2>🤖 Smart Assistant</h2>
   <p>
-    Ask questions about PRs, Estimates,<br>
+    Ask anything questions or about PRs, Estimates,<br>
     Daily Progress and Records.
   </p>
 
@@ -4640,6 +4648,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
