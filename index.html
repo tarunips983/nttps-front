@@ -1989,7 +1989,7 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
 
 /* Disable page scroll ONLY in Smart Assistant */
 .smart-assistant-view {
-  height: calc(100vh - 160px); /* header + subnav */
+  /* header + subnav */
   overflow: hidden;
 }
 
@@ -2034,19 +2034,13 @@ body.smart-assistant-active {
 .smart-assistant-view .left-bar {
   overflow: hidden !important;
 }
-/* ================= SMART ASSISTANT LAYOUT FIX ================= */
-@media (max-width: 768px){
 
-.smart-ai-panel {
-height: calc(100vh - 355px);
-
-}
 
 
 }
 /* Right panel full height */
 .smart-ai-panel {
-  height: calc(100vh - 155px); /* header + subnav height */
+
   display: flex;
   flex-direction: column;
   padding: 0 !important;
@@ -2432,6 +2426,61 @@ height: calc(100vh - 355px);
     top: 6px !important;
     right: 8px !important;
   }
+}
+/* =========================================================
+   🔥 SMART ASSISTANT – FINAL CHAT LAYOUT FIX (MOBILE + DESKTOP)
+   ========================================================= */
+
+/* The whole assistant view must not scroll */
+#smart-assistant-container {
+  height: calc(var(--vh, 1vh) * 100);
+  overflow: hidden !important;
+}
+
+/* Right panel = flex column full height */
+#smart-assistant-container .smart-ai-panel {
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: #f6f8fb;
+}
+
+/* Messages area = ONLY SCROLL AREA */
+#smart-assistant-container #aiMessages {
+  flex: 1 1 auto !important;
+  overflow-y: auto !important;
+  padding: 16px !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Typing bar never scrolls away */
+#smart-assistant-container #aiTyping {
+  flex-shrink: 0 !important;
+}
+
+/* Input wrapper NEVER moves */
+#smart-assistant-container .ai-input-wrapper {
+  flex-shrink: 0 !important;
+  padding: 10px !important;
+  background: #f6f8fb;
+}
+
+/* Input bar */
+#smart-assistant-container .ai-input-bar {
+  width: 100% !important;
+}
+
+/* Kill any height hacks that push UI */
+.smart-ai-panel,
+.smart-assistant-view {
+  min-height: 0 !important;
+}
+
+/* Prevent body scrolling while assistant is open */
+body.smart-assistant-active {
+  overflow: hidden !important;
 }
 
 </style>
@@ -4731,6 +4780,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
