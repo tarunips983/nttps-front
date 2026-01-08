@@ -55,7 +55,7 @@ header h1 { margin: 0; font-size: 22px; }
 #aiInput {
   width: auto !important;      /* override 220px */
   flex: 1 1 auto;
-  min-width: 400px;
+  min-width: 0 !important;
 height: 44px;
     padding: 10px 14px;
     font-size: 15px;
@@ -2349,6 +2349,89 @@ height: calc(100vh - 355px);
 
 .chat-item:hover {
   background: #dbe7ff;
+}
+/* =========================================================
+   🔥 SMART ASSISTANT – HARD MOBILE FIX (DO NOT REMOVE)
+   ========================================================= */
+@media (max-width: 768px) {
+
+  /* Main container */
+  #smart-assistant-container {
+    height: calc(var(--vh, 1vh) * 100) !important;
+  }
+
+  /* Kill left history sidebar on mobile */
+  #smart-assistant-container > aside.left-bar {
+    display: none !important;
+  }
+
+  /* Right panel = full screen */
+  #smart-assistant-container .right-panel.smart-ai-panel {
+    width: 100% !important;
+    height: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Messages area */
+  #smart-assistant-container #aiMessages {
+    flex: 1 !important;
+    width: 100% !important;
+    padding: 12px !important;
+    overflow-y: auto !important;
+  }
+
+  /* Welcome screen */
+  #smart-assistant-container .ai-welcome-screen {
+    padding: 20px 14px !important;
+    text-align: center;
+  }
+
+  /* Input wrapper */
+  #smart-assistant-container .ai-input-wrapper {
+    width: 100% !important;
+    padding: 10px !important;
+    margin: 0 !important;
+  }
+
+  /* Input bar */
+  #smart-assistant-container .ai-input-bar {
+    width: 100% !important;
+    border-radius: 14px !important;
+    padding: 8px 10px !important;
+  }
+
+  /* Textarea */
+  #smart-assistant-container #aiInput {
+    min-width: 0 !important;
+    width: 100% !important;
+    font-size: 16px !important;
+    height: 44px !important;
+    padding: 10px !important;
+  }
+
+  /* SEND BUTTON — FORCE VISIBLE */
+  #smart-assistant-container #aiSendBtn {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    flex-shrink: 0 !important;
+    border-radius: 50% !important;
+    font-size: 18px !important;
+  }
+
+  /* Typing bar */
+  #smart-assistant-container #aiTyping {
+    padding: 6px 12px !important;
+  }
+
+  /* Auth avatar position fix */
+  .smart-auth-bar {
+    top: 6px !important;
+    right: 8px !important;
+  }
 }
 
 </style>
@@ -4648,6 +4731,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
