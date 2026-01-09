@@ -1,9 +1,7 @@
 if (!window.API) {
   window.API = "https://nttps-backend.onrender.com";
 }
-// 🔥 Wake up Render backend on page load
-fetch("https://nttps-ai.onrender.com/health")
-  .catch(() => console.log("Waking backend server..."));
+
 
 (function () {
   if (window.__SMART_ASSISTANT_LOADED__) return;
@@ -334,7 +332,15 @@ window.loadConversation = async function (id) {
     headers: { Authorization: `Bearer ${token}` }
   });
 
-  const messages = await res.json();
+const messages = await res.json();
+
+if (!Array.isArray(messages)) {
+  console.error("Invalid messages response:", messages);
+  addBotMessage("⚠️ Failed to load messages.");
+  return;
+}
+
+
 
   messages.forEach(m => {
     if (m.role === "user") addUserMessage(m.content);
