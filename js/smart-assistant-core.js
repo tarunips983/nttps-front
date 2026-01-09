@@ -383,28 +383,54 @@ async function loadConversationList() {
     const div = document.createElement("div");
     div.className = "chat-item" + (c.id === currentConversationId ? " active" : "");
     div.textContent = c.title;
+
     div.onclick = () => loadConversation(c.id);
+
+    // 🗑️ Delete button
+    const del = document.createElement("span");
+    del.innerHTML = " 🗑️";
+    del.style.float = "right";
+    del.style.cursor = "pointer";
+
+    del.onclick = async (e) => {
+      e.stopPropagation();
+      if (!confirm("Delete this chat?")) return;
+
+      await fetch(`${API}/ai/conversations/${c.id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (currentConversationId === c.id) {
+        currentConversationId = null;
+        clearChatUI();
+      }
+
+      loadConversationList();
+    };
+
+    // ✏️ Rename on double click
+    div.ondblclick = async () => {
+      const newTitle = prompt("Rename chat:", c.title);
+      if (!newTitle) return;
+
+      await fetch(`${API}/ai/conversations/${c.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ title: newTitle })
+      });
+
+      loadConversationList();
+    };
+
+    div.appendChild(del);
     ui.appendChild(div);
   });
-  
-  const del = document.createElement("span");
-del.innerHTML = "🗑️";
-del.onclick = async (e) => {
-  e.stopPropagation();
-  if (!confirm("Delete this chat?")) return;
-
-  await fetch(`${API}/ai/conversations/${c.id}`, {
-    method: "DELETE",
-    headers: { Authorization: `Bearer ${token}` }
-  });
-
-  loadConversationList();
-  clearChatUI();
-};
-
-div.appendChild(del);
-
 }
+
 window.loadConversation = async function (id) {
   currentConversationId = id;
   clearChatUI();
@@ -438,21 +464,6 @@ if (!Array.isArray(messages)) {
 
   loadConversationList();
 
-};
-div.ondblclick = async () => {
-  const newTitle = prompt("Rename chat:", c.title);
-  if (!newTitle) return;
-
-  await fetch(`${API}/ai/conversations/${c.id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify({ title: newTitle })
-  });
-
-  loadConversationList();
 };
 
   
