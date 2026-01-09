@@ -27,25 +27,24 @@ let currentConversationId = null;
   const text = input.value.trim();
   if (!text) return;
 
+  if (typeof window.enterChatMode === "function") {
+    window.enterChatMode();
+  }
+
+  addUserMessage(text);
+  input.value = "";
+
   const token = localStorage.getItem("adminToken");
   if (!token) {
     addBotMessage("🔒 Please login to use Smart Assistant.");
     return;
   }
 
-  // ✅ Ensure conversation exists FIRST
   if (!currentConversationId) {
     await window.createNewChat();
   }
 
-  // UI
-  if (typeof window.enterChatMode === "function") {
-    window.enterChatMode();
-  }
-
-  addUserMessage(text);
-
-  // 💾 Save USER message to DB
+  // Save user message to DB
   await fetch(`${API}/ai/messages`, {
     method: "POST",
     headers: {
@@ -58,8 +57,6 @@ let currentConversationId = null;
       content: text
     })
   });
-
-  input.value = "";
 
   showTyping();
 
@@ -76,37 +73,38 @@ let currentConversationId = null;
     const result = await res.json();
     hideTyping();
 
-    if (result.reply) {
+    if (!result.reply) {
+      addBotMessage("No response.");
+      return;
+    }
 
-  // 🔹 Create empty bot message bubble
-  const msgDiv = document.createElement("div");
-  msgDiv.className = "ai-message";
-  el("aiMessages").appendChild(msgDiv);
+    const msgDiv = document.createElement("div");
+    msgDiv.className = "ai-message";
+    el("aiMessages").appendChild(msgDiv);
 
-  // 🔹 Typewriter animation here
-  typeWriter(msgDiv, result.reply, 15);
-// 💾 Save ASSISTANT message to DB
-await fetch(`${API}/ai/messages`, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`
-  },
-  body: JSON.stringify({
-    conversation_id: currentConversationId,
-    role: "assistant",
-    content: result.reply
-  })
-});
-;
+    typeWriter(msgDiv, result.reply, 15);
 
-  // 🔹 If table exists, render AFTER text finishes
-  if (result.columns && result.data) {
-    setTimeout(() => {
-      renderTable(result.columns, result.data);
-    }, Math.min(2000, result.reply.length * 15));
-  }
-   } catch (err) {
+    // Save assistant message to DB
+    await fetch(`${API}/ai/messages`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        conversation_id: currentConversationId,
+        role: "assistant",
+        content: result.reply
+      })
+    });
+
+    if (result.columns && result.data) {
+      setTimeout(() => {
+        renderTable(result.columns, result.data);
+      }, Math.min(2000, result.reply.length * 15));
+    }
+
+  } catch (err) {
     hideTyping();
     console.error(err);
     addBotMessage("❌ Unable to process request.");
