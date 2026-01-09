@@ -68,6 +68,20 @@ function saveConversations() {
   }
 
   addUserMessage(text);
+    // 💾 Save USER message to DB
+await fetch(`${API}/ai/messages`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`
+  },
+  body: JSON.stringify({
+    conversation_id: currentConversationId,
+    role: "user",
+    content: text
+  })
+});
+
 saveMessage("user", text);
 
 
@@ -78,6 +92,9 @@ saveMessage("user", text);
     addBotMessage("🔒 Please login to use Smart Assistant.");
     return;
   }
+if (!currentConversationId) {
+  await window.createNewChat();
+}
 
   showTyping();
 
@@ -103,6 +120,19 @@ saveMessage("user", text);
 
   // 🔹 Typewriter animation here
   typeWriter(msgDiv, result.reply, 15);
+// 💾 Save ASSISTANT message to DB
+await fetch(`${API}/ai/messages`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`
+  },
+  body: JSON.stringify({
+    conversation_id: currentConversationId,
+    role: "assistant",
+    content: result.reply
+  })
+});
 
   // 🔹 If table exists, render AFTER text finishes
   if (result.columns && result.data) {
@@ -305,25 +335,62 @@ function typeWriter(element, text, speed = 20) {
     const t = el("aiTyping");
     if (t) t.style.display = "none";
   }
-window.createNewChat = function () {
-  currentConversationId = "conv_" + Date.now();
+window.createNewChat = async function () {
+  const token = localStorage.getItem("adminToken");
 
-  conversations[currentConversationId] = {
-    id: currentConversationId,
-    title: "New Conversation",
-    createdAt: Date.now(),
-    messages: []
-  };
+  const res = await fetch(`${API}/ai/conversations`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ title: "New Chat" })
+  });
 
-  saveConversations();
+  const conv = await res.json();
+  currentConversationId = conv.id;
 
-  const msgBox = document.getElementById("aiMessages");
-  if (msgBox) msgBox.innerHTML = "";
-
-  if (window.renderChatHistory) {
-    window.renderChatHistory();
-  }
+  clearChatUI();
+  loadConversationList();
 };
+async function loadConversationList() {
+  const token = localStorage.getItem("adminToken");
+
+  const res = await fetch(`${API}/ai/conversations`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  const list = await res.json();
+
+  const ui = document.getElementById("chatHistoryList");
+  ui.innerHTML = "";
+
+  list.forEach(c => {
+    const div = document.createElement("div");
+    div.className = "chat-item";
+    div.textContent = c.title;
+    div.onclick = () => loadConversation(c.id);
+    ui.appendChild(div);
+  });
+}
+window.loadConversation = async function (id) {
+  currentConversationId = id;
+  clearChatUI();
+
+  const token = localStorage.getItem("adminToken");
+
+  const res = await fetch(`${API}/ai/conversations/${id}/messages`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  const messages = await res.json();
+
+  messages.forEach(m => {
+    if (m.role === "user") addUserMessage(m.content);
+    else addBotMessage(m.content);
+  });
+};
+
 
   window.handleAskAI = handleAskAI;
 
