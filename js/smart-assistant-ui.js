@@ -45,7 +45,9 @@ window.bindSmartAssistantUI = function () {
   const attachBtn = document.getElementById("attachBtn");
 const fileInput = document.getElementById("chatFile");
 
-attachBtn.onclick = () => fileInput.click();
+if (attachBtn && fileInput) {
+  attachBtn.onclick = () => fileInput.click();
+}
 
   const messages = document.getElementById("aiMessages");
 
