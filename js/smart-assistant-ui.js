@@ -1,10 +1,11 @@
 console.log("✅ Smart Assistant UI loaded");
 
+let selectedFile = null;
 
-
+const messages = document.getElementById("aiMessages");
 
 window.addBotMessage = function (text) {
-  const messages = document.getElementById("aiMessages");
+  
   if (!messages) {
     console.warn("addBotMessage: aiMessages not found");
     return;
@@ -17,19 +18,26 @@ window.addBotMessage = function (text) {
   messages.scrollTop = messages.scrollHeight;
 };
 
-window.addUserMessage = function (text) {
-  const messages = document.getElementById("aiMessages");
-  if (!messages) {
-    console.warn("addUserMessage: aiMessages not found");
-    return;
-  }
-
+function addUserMessage(text, file) {
   const div = document.createElement("div");
   div.className = "ai-msg ai-user";
-  div.textContent = text;
-  messages.appendChild(div);
+
+  if (file && file.type.startsWith("image/")) {
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(file);
+    img.className = "chat-image-preview";
+    div.appendChild(img);
+  }
+
+  if (text) {
+    const p = document.createElement("div");
+    p.textContent = text;
+    div.appendChild(p);
+  }
+
+  aiMessages.appendChild(div);
   messages.scrollTop = messages.scrollHeight;
-};
+}
 
 
 
@@ -38,28 +46,30 @@ const fileInput = document.getElementById("chatFile");
 const previewBox = document.getElementById("filePreview");
 
 if (fileInput && previewBox) {
-  fileInput.onchange = () => {
-    const file = fileInput.files[0];
-    if (!file) return;
+ fileInput.onchange = () => {
+  const file = fileInput.files[0];
+  if (!file) return;
 
-    previewBox.style.display = "block";
+  selectedFile = file;   // ✅ THIS IS REQUIRED
 
-    if (file.type.startsWith("image/")) {
-      const url = URL.createObjectURL(file);
-      previewBox.innerHTML = `<img src="${url}" style="max-width:200px;border-radius:8px;border-radius:8px">`;
-    } 
-    else if (file.type === "application/pdf") {
-      previewBox.innerHTML = `
-        <div style="padding:8px;border:1px solid #ccc;border-radius:6px">
-          📄 ${file.name}
-        </div>
-      `;
-    } 
-    else {
-      previewBox.innerHTML = `📎 ${file.name}`;
-    }
-  };
-}
+  previewBox.style.display = "block";
+
+  if (file.type.startsWith("image/")) {
+    const url = URL.createObjectURL(file);
+    previewBox.innerHTML = `<img src="${url}" style="max-width:200px;border-radius:8px">`;
+  } 
+  else if (file.type === "application/pdf") {
+    previewBox.innerHTML = `
+      <div style="padding:8px;border:1px solid #ccc;border-radius:6px">
+        📄 ${file.name}
+      </div>
+    `;
+  } 
+  else {
+    previewBox.innerHTML = `📎 ${file.name}`;
+  }
+};
+
 
   if (window.__SMART_ASSISTANT_BOUND__) {
     return;
@@ -93,21 +103,84 @@ if (attachBtn && fileInput) {
   window.enterChatMode = enterChatMode;
 
   
- sendBtn.onclick = () => {
-  if (window.isAITyping) {
-    window.stopAIResponse();
-  } else {
-    window.handleAskAI();
+let extractedFileText = "";
+
+
+function hidePreview() {
+  const previewBox = document.getElementById("filePreview");
+  if (previewBox) {
+    previewBox.style.display = "none";
+    previewBox.innerHTML = "";
   }
-};
-;
+}
+
+  
+sendBtn.onclick = handleSend;
+
+  
+async function handleSend() {
+  const text = input.value.trim();
+
+  if (!text && !selectedFile) return;
+
+  // 1. If file exists → analyze it first
+  if (selectedFile) {
+  try {
+    const fd = new FormData();
+    fd.append("file", selectedFile);
+
+    const res = await fetch(API + "/ai/analyze-file", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("adminToken")
+      },
+      body: fd
+    });
+
+    const data = await res.json();
+    extractedFileText = data.text || "";
+  } catch (err) {
+    console.error("File analyze failed:", err);
+    extractedFileText = "";
+  }
+}
+
+
+  // 2. Show message in chat (WITH IMAGE PREVIEW)
+  addUserMessage(text, selectedFile);
+
+  // 3. Send to AI
+  const res = await fetch(API + "/ai/query", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + localStorage.getItem("adminToken")
+    },
+    body: JSON.stringify({
+      query: text,
+      fileText: extractedFileText
+    })
+  });
+
+  const data = await res.json();
+  addBotMessage(data.reply);
+
+  // 4. CLEAR INPUT + FILE
+  input.value = "";
+  selectedFile = null;
+  extractedFileText = "";
+  fileInput.value = "";
+  hidePreview();
+}
+
 
   input.onkeydown = e => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      window.handleAskAI();
-    }
-  };
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    handleSend();   // ✅ CALL NEW FUNCTION
+  }
+};
+
   if (!window.createNewChat) {
   window.createNewChat = function () {
     alert("Chat system not ready yet");
