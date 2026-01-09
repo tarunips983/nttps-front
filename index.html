@@ -1778,6 +1778,13 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
     -webkit-overflow-scrolling: touch;
   }
 }
+    #attachBtn {
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  cursor: pointer;
+}
+
 @media (max-width: 768px) {
 
   .drop-zone {
@@ -2684,8 +2691,14 @@ padding: 10px;
   <!-- INPUT -->
   <div class="ai-input-wrapper">
   <div class="ai-input-bar">
+    <input type="file" id="chatFile" style="display:none" />
+
+<button id="attachBtn">📎</button>
     <textarea id="aiInput" placeholder="Type your question..."></textarea>
-    <button id="aiSendBtn"> ➤ </button>
+    <button id="aiSendBtn">
+  <span id="sendIcon">▶️</span>
+</button>
+
 
     
   </div>
@@ -4746,6 +4759,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
