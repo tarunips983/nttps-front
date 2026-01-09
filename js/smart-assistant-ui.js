@@ -1,11 +1,7 @@
 console.log("✅ Smart Assistant UI loaded");
 
-// ================= CHAT STATE ACCESS =================
-window.conversations = window.conversations || JSON.parse(
-  localStorage.getItem("ai_conversations") || "{}"
-);
 
-window.currentConversationId = window.currentConversationId || null;
+
 
 window.addBotMessage = function (text) {
   const messages = document.getElementById("aiMessages");
@@ -81,72 +77,14 @@ window.bindSmartAssistantUI = function () {
 }
 
   }
-
-
 document.addEventListener("DOMContentLoaded", () => {
   if (window.bindSmartAssistantUI) {
     window.bindSmartAssistantUI();
   }
 
-  if (window.renderChatHistory) {
-    window.renderChatHistory();
-  }
-
-  const ids = Object.keys(window.conversations || {});
-  if (ids.length) {
-    window.loadConversation(ids[0]);
-  }
+  // ✅ Load chats from DATABASE
+  loadConversationList();
 });
-
-
-window.renderChatHistory = function () {
-  const list = document.getElementById("chatHistoryList");
-  if (!list) return;
-
-  list.innerHTML = "";
-
-  Object.values(window.conversations)
-    .sort((a, b) => b.createdAt - a.createdAt)
-    .forEach(conv => {
-      const div = document.createElement("div");
-      div.className =
-        "chat-item" +
-        (conv.id === window.currentConversationId ? " active" : "");
-      div.textContent = conv.title;
-      div.onclick = () => window.loadConversation(conv.id);
-      list.appendChild(div);
-    });
-};
-window.loadConversation = async function (id) {
-  window.currentConversationId = id;
-  clearChatUI();
-
-  const conv = window.conversations[id];
-  if (!conv) return;
-
-  for (const m of conv.messages) {
-    if (m.role === "user") {
-      addUserMessage(m.content);
-    } 
-    else if (m.role === "assistant") {
-      // 🔑 STRUCTURED REPLAY
-      if (typeof m.content === "object") {
-        addBotMessage(m.content.text);
-
-        // Re-render UI elements
-        if (m.content.type === "PR_TABLE" && window.renderTable) {
-          window.renderTable(m.content.payload.columns, m.content.payload.rows);
-        }
-      } 
-      else {
-        addBotMessage(m.content);
-      }
-    }
-  }
-
-  renderChatHistory();
-};
-
 
 function clearChatUI() {
   const messages = document.getElementById("aiMessages");
