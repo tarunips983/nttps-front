@@ -2456,6 +2456,24 @@ padding: 10px;
   background: #e9e9e9;
   margin-bottom: 10px;
 }
+
+    .ai-formatted {
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+.ai-formatted p {
+  margin-bottom: 10px;
+}
+
+.ai-formatted ul {
+  margin-left: 20px;
+}
+
+.ai-formatted b {
+  color: #222;
+}
+
 </style>
 
 </head>
@@ -2692,6 +2710,7 @@ padding: 10px;
   <div class="ai-input-wrapper">
   <div class="ai-input-bar">
     <input type="file" id="chatFile" style="display:none" />
+<div id="filePreview" style="display:none;margin:8px 0;"></div>
 
 <button id="attachBtn">📎</button>
     <textarea id="aiInput" placeholder="Type your question..."></textarea>
@@ -4759,6 +4778,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
