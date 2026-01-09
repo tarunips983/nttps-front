@@ -22,6 +22,8 @@ let typingInterval = null;
   async function handleAskAI() {
   const input = el("aiInput");
   const msgBox = el("aiMessages");
+const fileInput = document.getElementById("chatFile");
+const file = fileInput ? fileInput.files[0] : null;
 
   if (!input || !msgBox) return;
 
@@ -45,6 +47,26 @@ if (!token) {
   if (!currentConversationId) {
     await window.createNewChat();
   }
+let uploadedFileUrl = null;
+
+if (file) {
+  const fd = new FormData();
+  fd.append("file", file);
+
+  const uploadRes = await fetch(`${API}/ai/upload-chat-file`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`
+    },
+    body: fd
+  });
+
+  const uploadResult = await uploadRes.json();
+  uploadedFileUrl = uploadResult.url || null;
+
+  // clear file input
+  fileInput.value = "";
+}
 
   // Save user message to DB
   await fetch(`${API}/ai/messages`, {
@@ -54,10 +76,12 @@ if (!token) {
       Authorization: `Bearer ${token}`
     },
     body: JSON.stringify({
-      conversation_id: currentConversationId,
-      role: "user",
-      content: text
-    })
+  conversation_id: currentConversationId,
+  role: "user",
+  content: text,
+  file_url: uploadedFileUrl
+})
+
   });
 
   showTyping();
@@ -401,10 +425,17 @@ if (!Array.isArray(messages)) {
 
 
 
-  messages.forEach(m => {
-    if (m.role === "user") addUserMessage(m.content);
-    else addBotMessage(m.content);
-  });
+ messages.forEach(m => {
+  let text = m.content || "";
+
+  if (m.file_url) {
+    text += `<br><a href="${m.file_url}" target="_blank">📎 Attachment</a>`;
+  }
+
+  if (m.role === "user") addUserMessage(text);
+  else addBotMessage(text);
+});
+
   loadConversationList();
 
 };
