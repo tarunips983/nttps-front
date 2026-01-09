@@ -13,6 +13,28 @@ let isAITyping = false;
 let currentAbortController = null;
 let typingInterval = null;
 
+let thinkingMsgDiv = null;
+
+function showStatusMessage(text) {
+  const messages = document.getElementById("aiMessages");
+  if (!messages) return;
+
+  thinkingMsgDiv = document.createElement("div");
+  thinkingMsgDiv.className = "ai-msg ai-bot ai-thinking";
+  thinkingMsgDiv.textContent = text;
+  messages.appendChild(thinkingMsgDiv);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function removeStatusMessage() {
+  if (thinkingMsgDiv) {
+    thinkingMsgDiv.remove();
+    thinkingMsgDiv = null;
+  }
+}
+
+
+  
   function el(id) {
     return document.getElementById(id);
   }
@@ -84,12 +106,22 @@ if (file) {
 
   });
 
-  showTyping();
+showTyping();
+    
+if (result.mode === "web") {
+  showStatusMessage("🌐 Searching the web...");
+}
+if (result.mode === "db") {
+  showStatusMessage("📊 Searching records...");
+}
+if (result.mode === "ai") {
+  showStatusMessage("🤔 Thinking...");
+}
 
-  try {
-    currentAbortController = new AbortController();
+try {
+  currentAbortController = new AbortController();
 
-const res = await fetch(`${API}/ai/query`, {
+  const res = await fetch(`${API}/ai/query`, {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
@@ -101,7 +133,8 @@ const res = await fetch(`${API}/ai/query`, {
 
 
     const result = await res.json();
-    hideTyping();
+hideTyping();
+removeStatusMessage();
 
     if (!result.reply) {
       addBotMessage("No response.");
