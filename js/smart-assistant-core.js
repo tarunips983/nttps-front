@@ -32,11 +32,12 @@ let currentConversationId = null;
   addUserMessage(text);
   input.value = "";
 
-  const token = localStorage.getItem("adminToken");
-  if (!token) {
-    addBotMessage("🔒 Please login to use Smart Assistant.");
-    return;
-  }
+ const token = localStorage.getItem("adminToken");
+if (!token) {
+  addBotMessage("🔒 Please login to use Smart Assistant.");
+  return;
+}
+
 
   if (!currentConversationId) {
     await window.createNewChat();
