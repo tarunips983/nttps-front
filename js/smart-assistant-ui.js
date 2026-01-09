@@ -36,8 +36,9 @@ function addUserMessage(text, file) {
     div.appendChild(p);
   }
 
-  aiMessages.appendChild(div);
-  messages.scrollTop = messages.scrollHeight;
+  
+messages.appendChild(div);
+messages.scrollTop = messages.scrollHeight;
 }
 
 
@@ -70,7 +71,7 @@ if (fileInput && previewBox) {
     previewBox.innerHTML = `📎 ${file.name}`;
   }
 };
-
+}
 
   if (window.__SMART_ASSISTANT_BOUND__) {
     return;
