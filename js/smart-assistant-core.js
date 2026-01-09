@@ -107,17 +107,9 @@ if (file) {
   });
 
 showTyping();
-    
-if (result.mode === "web") {
-  showStatusMessage("🌐 Searching the web...");
-}
-if (result.mode === "db") {
-  showStatusMessage("📊 Searching records...");
-}
-if (result.mode === "ai") {
-  showStatusMessage("🤔 Thinking...");
-}
+    showStatusMessage("🤔 Thinking...");
 
+    
 try {
   currentAbortController = new AbortController();
 
@@ -133,6 +125,21 @@ try {
 
 
     const result = await res.json();
+
+// Update status based on backend mode
+removeStatusMessage();
+
+if (result.mode === "web") {
+  showStatusMessage("🌐 Searching the web...");
+} else if (result.mode === "db") {
+  showStatusMessage("📊 Searching records...");
+} else {
+  showStatusMessage("🤔 Thinking...");
+}
+
+// Small delay so user sees it
+await new Promise(r => setTimeout(r, 400));
+
 hideTyping();
 removeStatusMessage();
 
