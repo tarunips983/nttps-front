@@ -9,6 +9,9 @@ if (!window.API) {
    const API = window.API;
 let currentConversationId = null;
 
+let isAITyping = false;
+let currentAbortController = null;
+let typingInterval = null;
 
   function el(id) {
     return document.getElementById(id);
@@ -60,14 +63,18 @@ if (!token) {
   showTyping();
 
   try {
-    const res = await fetch(`${API}/ai/query`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({ query: text })
-    });
+    currentAbortController = new AbortController();
+
+const res = await fetch(`${API}/ai/query`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`
+  },
+  body: JSON.stringify({ query: text }),
+  signal: currentAbortController.signal
+});
+
 
     const result = await res.json();
     hideTyping();
@@ -104,12 +111,44 @@ if (!token) {
     }
 
   } catch (err) {
+    setSendButtonMode("send");
+isAITyping = false;
+
     hideTyping();
     console.error(err);
     addBotMessage("❌ Unable to process request.");
   }
 }
+function stopAIResponse() {
+  console.log("⛔ AI stopped");
 
+  isAITyping = false;
+
+  if (typingInterval) {
+    clearInterval(typingInterval);
+    typingInterval = null;
+  }
+
+  if (currentAbortController) {
+    currentAbortController.abort();
+    currentAbortController = null;
+  }
+
+  setSendButtonMode("send");
+}
+
+function setSendButtonMode(mode) {
+  const icon = document.getElementById("sendIcon");
+  if (!icon) return;
+
+  if (mode === "stop") {
+    icon.textContent = "⏹";
+  } else {
+    icon.textContent = "▶️";
+  }
+}
+
+  
 function detectModule(columns) {
   if (columns.includes("estimate_no")) return "ESTIMATE";
   if (columns.includes("pr_no")) return "RECORD";
@@ -257,24 +296,25 @@ function typeWriter(element, text, speed = 20) {
   element.innerHTML = "";
   let i = 0;
 
-  function typing() {
-    if (i < text.length) {
-      element.innerHTML += text.charAt(i);
-      i++;
+  isAITyping = true;
+  setSendButtonMode("stop");
 
-      // ✅ Auto-scroll while typing
-      const box = el("aiMessages");
-      if (box) box.scrollTop = box.scrollHeight;
-
-      requestAnimationFrame(() => {
-        setTimeout(typing, speed);
-      });
+  typingInterval = setInterval(() => {
+    if (i >= text.length || !isAITyping) {
+      clearInterval(typingInterval);
+      typingInterval = null;
+      isAITyping = false;
+      setSendButtonMode("send");
+      return;
     }
-  }
 
-  typing();
+    element.innerHTML += text.charAt(i);
+    i++;
+
+    const box = document.getElementById("aiMessages");
+    if (box) box.scrollTop = box.scrollHeight;
+  }, speed);
 }
-
 
   function showTyping() {
     const t = el("aiTyping");
@@ -368,6 +408,23 @@ if (!Array.isArray(messages)) {
   loadConversationList();
 
 };
+div.ondblclick = async () => {
+  const newTitle = prompt("Rename chat:", c.title);
+  if (!newTitle) return;
+
+  await fetch(`${API}/ai/conversations/${c.id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ title: newTitle })
+  });
+
+  loadConversationList();
+};
+
+  
 document.addEventListener("DOMContentLoaded", async () => {
   if (window.bindSmartAssistantUI) {
     window.bindSmartAssistantUI();
@@ -386,6 +443,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
   window.handleAskAI = handleAskAI;
+  window.stopAIResponse = stopAIResponse;
+window.isAITyping = isAITyping;
+
 
   console.log("✅ Smart Assistant Core (SQL-only) loaded");
 })();
