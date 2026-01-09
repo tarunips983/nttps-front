@@ -365,8 +365,12 @@ window.createNewChat = async function () {
   currentConversationId = conv.id;
 
   clearChatUI();
-  loadConversationList();
+
+  // ✅ Reload list ONCE and auto-open this chat
+  await loadConversationList();
+  loadConversation(conv.id);
 };
+
 async function loadConversationList() {
   const token = localStorage.getItem("adminToken");
 
@@ -387,8 +391,7 @@ async function loadConversationList() {
   list.forEach(c => {
     const div = document.createElement("div");
     div.className = "chat-item" + (c.id === currentConversationId ? " active" : "");
-    div.textContent = c.title;
-
+    div.textContent = c.title || "New Chat";
     div.onclick = () => loadConversation(c.id);
 
     // 🗑️ Delete button
@@ -467,7 +470,7 @@ if (!Array.isArray(messages)) {
   else addBotMessage(text);
 });
 
-  loadConversationList();
+  
 
 };
 
@@ -480,10 +483,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const token = localStorage.getItem("adminToken");
   if (!token) return;
 
-  // ✅ Load conversation list from DB
   await loadConversationList();
 
-  // ✅ Auto-open latest conversation
+  // ✅ Auto-open first conversation
   const first = document.querySelector("#chatHistoryList .chat-item");
   if (first) first.click();
 });
