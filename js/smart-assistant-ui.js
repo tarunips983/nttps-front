@@ -42,6 +42,11 @@ window.bindSmartAssistantUI = function () {
   const container = document.getElementById("smart-assistant-container");
   const input = document.getElementById("aiInput");
   const sendBtn = document.getElementById("aiSendBtn");
+  const attachBtn = document.getElementById("attachBtn");
+const fileInput = document.getElementById("chatFile");
+
+attachBtn.onclick = () => fileInput.click();
+
   const messages = document.getElementById("aiMessages");
 
   if (!container || !input || !sendBtn || !messages) {
@@ -60,9 +65,14 @@ window.bindSmartAssistantUI = function () {
   window.enterChatMode = enterChatMode;
 
   
-  sendBtn.onclick = () => {
-    if (window.handleAskAI) window.handleAskAI();
-  };
+ sendBtn.onclick = () => {
+  if (window.isAITyping) {
+    window.stopAIResponse();
+  } else {
+    window.handleAskAI();
+  }
+};
+;
 
   input.onkeydown = e => {
     if (e.key === "Enter" && !e.shiftKey) {
