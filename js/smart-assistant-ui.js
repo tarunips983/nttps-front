@@ -77,14 +77,7 @@ window.bindSmartAssistantUI = function () {
 }
 
   }
-document.addEventListener("DOMContentLoaded", () => {
-  if (window.bindSmartAssistantUI) {
-    window.bindSmartAssistantUI();
-  }
 
-  // ✅ Load chats from DATABASE
-  loadConversationList();
-});
 
 function clearChatUI() {
   const messages = document.getElementById("aiMessages");
