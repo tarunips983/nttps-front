@@ -14,6 +14,8 @@ let currentAbortController = null;
 let typingInterval = null;
 
 let thinkingMsgDiv = null;
+  window.isAITyping = false;
+
 
 function showStatusMessage(text) {
   const messages = document.getElementById("aiMessages");
@@ -183,23 +185,27 @@ isAITyping = false;
     addBotMessage("❌ Unable to process request.");
   }
 }
-function stopAIResponse() {
+window.stopAIResponse = function () {
   console.log("⛔ AI stopped");
 
   isAITyping = false;
+  window.isAITyping = false;
 
+  // Stop typing animation immediately
   if (typingInterval) {
     clearInterval(typingInterval);
     typingInterval = null;
   }
 
+  // Abort fetch if still running
   if (currentAbortController) {
     currentAbortController.abort();
     currentAbortController = null;
   }
 
   setSendButtonMode("send");
-}
+};
+
 
 function setSendButtonMode(mode) {
   const icon = document.getElementById("sendIcon");
@@ -361,14 +367,16 @@ function typeWriter(element, text, speed = 20) {
   let i = 0;
 
   isAITyping = true;
-  setSendButtonMode("stop");
+window.isAITyping = true;
+setSendButtonMode("stop");
 
   typingInterval = setInterval(() => {
     if (i >= text.length || !isAITyping) {
       clearInterval(typingInterval);
       typingInterval = null;
       isAITyping = false;
-      setSendButtonMode("send");
+window.isAITyping = false;
+setSendButtonMode("send");
       return;
     }
 
