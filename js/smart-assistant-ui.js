@@ -152,12 +152,4 @@ function clearChatUI() {
   const messages = document.getElementById("aiMessages");
   if (messages) messages.innerHTML = "";
 }
-// Sync UI when conversations change
-window.syncChatUI = function () {
-  window.conversations = JSON.parse(
-    localStorage.getItem("ai_conversations") || "{}"
-  );
-  if (window.renderChatHistory) {
-    window.renderChatHistory();
-  }
-};
+
