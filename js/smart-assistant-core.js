@@ -46,7 +46,6 @@ function removeStatusMessage() {
   async function handleAskAI() {
   const input = el("aiInput");
   const msgBox = el("aiMessages");
-const fileInput = document.getElementById("chatFile");
 const file = fileInput ? fileInput.files[0] : null;
 
   if (!input || !msgBox) return;
@@ -551,8 +550,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
   window.handleAskAI = handleAskAI;
-  window.stopAIResponse = stopAIResponse;
-window.isAITyping = isAITyping;
+
 
 
   console.log("✅ Smart Assistant Core (SQL-only) loaded");
