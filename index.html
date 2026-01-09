@@ -5,6 +5,7 @@
   <title>TM&CAM - PDF Records</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <link rel="icon" style="border-radius: 25px;" href="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg">
   <style>
 /* ---------- RESTORED: Desktop + Shared styles (unchanged) ---------- */
@@ -2346,89 +2347,43 @@ body.smart-assistant-active {
 /* =========================================================
    🔥 SMART ASSISTANT – HARD MOBILE FIX (DO NOT REMOVE)
    ========================================================= */
+/* ================= MOBILE CHAT FIX ================= */
 @media (max-width: 768px) {
 
-  /* Main container */
+  body, html {
+    height: 100%;
+    overflow: hidden;
+  }
+
   #smart-assistant-container {
-    height: calc(var(--vh, 1vh) * 100) !important;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
 
-  /* Kill left history sidebar on mobile */
-  #smart-assistant-container > aside.left-bar {
-    display: none !important;
+  /* Header already fixed in your layout */
+
+  #aiMessages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+    margin-bottom: 0;
   }
 
-  /* Right panel = full screen */
-  #smart-assistant-container .right-panel.smart-ai-panel {
-    width: 100% !important;
-    height: 100% !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    overflow: hidden !important;
+  .ai-input-bar {
+    position: sticky;
+    bottom: 0;
+    background: #fff;
+    padding: 10px;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
   }
 
-  /* Messages area */
-  #smart-assistant-container #aiMessages {
-    flex: 1 !important;
-    width: 100% !important;
-    padding: 12px !important;
-    overflow-y: auto !important;
+  footer {
+    display: none; /* 🔴 HIDE FOOTER ON CHAT PAGE MOBILE */
   }
 
-  /* Welcome screen */
-  #smart-assistant-container .ai-welcome-screen {
-    padding: 20px 14px !important;
-    text-align: center;
-  }
-
-  /* Input wrapper */
-  #smart-assistant-container .ai-input-wrapper {
-    width: 100% !important;
-    padding: 10px !important;
-    margin: 0 !important;
-  }
-
-  /* Input bar */
-  #smart-assistant-container .ai-input-bar {
-    width: 100% !important;
-    border-radius: 14px !important;
-    padding: 8px 10px !important;
-  }
-
-  /* Textarea */
-  #smart-assistant-container #aiInput {
-    min-width: 0 !important;
-    width: 100% !important;
-    font-size: 16px !important;
-    height: 44px !important;
-    padding: 10px !important;
-  }
-
-  /* SEND BUTTON — FORCE VISIBLE */
-  #smart-assistant-container #aiSendBtn {
-    width: 44px !important;
-    height: 44px !important;
-    min-width: 44px !important;
-    min-height: 44px !important;
-    flex-shrink: 0 !important;
-    border-radius: 50% !important;
-    font-size: 18px !important;
-  }
-
-  /* Typing bar */
-  #smart-assistant-container #aiTyping {
-    padding: 6px 12px !important;
-  }
-
-  /* Auth avatar position fix */
-  .smart-auth-bar {
-    top: 6px !important;
-    right: 8px !important;
-  }
 }
-/* =========================================================
-   🔥 SMART ASSISTANT – FINAL CHAT LAYOUT FIX (MOBILE + DESKTOP)
-   ========================================================= */
+
 /* =========================================================
    ✅ SMART ASSISTANT – FINAL STABLE LAYOUT FIX (DESKTOP + MOBILE)
    ========================================================= */
@@ -4791,6 +4746,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
