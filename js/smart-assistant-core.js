@@ -11,41 +11,6 @@ fetch("https://nttps-ai.onrender.com/health")
    const API = window.API;
 let currentConversationId = null;
 
-   
-let conversations = JSON.parse(localStorage.getItem("ai_conversations") || "{}");
-
-
-function saveMessage(role, content) {
-  if (!currentConversationId) createNewChat();
-
-  conversations[currentConversationId].messages.push({
-    role,
-    content,
-    time: Date.now()
-  });
-
-  if (
-    role === "user" &&
-    conversations[currentConversationId].messages.length === 1
-  ) {
-    conversations[currentConversationId].title = content.slice(0, 30);
-  }
-
-  saveConversations();
-}
-
-function saveConversations() {
-  localStorage.setItem("ai_conversations", JSON.stringify(conversations));
-
-  // 🔁 sync UI after every save
-  if (window.syncChatUI) {
-    window.syncChatUI();
-  }
-}
-
-
-  
-
 
   function el(id) {
     return document.getElementById(id);
@@ -62,39 +27,39 @@ function saveConversations() {
   const text = input.value.trim();
   if (!text) return;
 
-  // 🔑 EXIT WELCOME MODE
-  if (typeof window.enterChatMode === "function") {
-    window.enterChatMode();
-  }
-
-  addUserMessage(text);
-    // 💾 Save USER message to DB
-await fetch(`${API}/ai/messages`, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`
-  },
-  body: JSON.stringify({
-    conversation_id: currentConversationId,
-    role: "user",
-    content: text
-  })
-});
-
-saveMessage("user", text);
-
-
-  input.value = "";
-
   const token = localStorage.getItem("adminToken");
   if (!token) {
     addBotMessage("🔒 Please login to use Smart Assistant.");
     return;
   }
-if (!currentConversationId) {
-  await window.createNewChat();
-}
+
+  // ✅ Ensure conversation exists FIRST
+  if (!currentConversationId) {
+    await window.createNewChat();
+  }
+
+  // UI
+  if (typeof window.enterChatMode === "function") {
+    window.enterChatMode();
+  }
+
+  addUserMessage(text);
+
+  // 💾 Save USER message to DB
+  await fetch(`${API}/ai/messages`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      conversation_id: currentConversationId,
+      role: "user",
+      content: text
+    })
+  });
+
+  input.value = "";
 
   showTyping();
 
@@ -133,6 +98,7 @@ await fetch(`${API}/ai/messages`, {
     content: result.reply
   })
 });
+;
 
   // 🔹 If table exists, render AFTER text finishes
   if (result.columns && result.data) {
@@ -140,19 +106,6 @@ await fetch(`${API}/ai/messages`, {
       renderTable(result.columns, result.data);
     }, Math.min(2000, result.reply.length * 15));
   }
-
-  saveMessage("assistant", {
-    text: result.reply,
-    type: result.columns && result.data ? "PR_TABLE" : "TEXT",
-    payload: result.columns && result.data
-      ? { columns: result.columns, rows: result.data }
-      : null
-  });
-}
-
-
-
-
    } catch (err) {
     hideTyping();
     console.error(err);
