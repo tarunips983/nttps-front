@@ -317,7 +317,7 @@ async function loadConversationList() {
 
   list.forEach(c => {
     const div = document.createElement("div");
-    div.className = "chat-item";
+    div.className = "chat-item" + (c.id === currentConversationId ? " active" : "");
     div.textContent = c.title;
     div.onclick = () => loadConversation(c.id);
     ui.appendChild(div);
@@ -347,7 +347,24 @@ if (!Array.isArray(messages)) {
     if (m.role === "user") addUserMessage(m.content);
     else addBotMessage(m.content);
   });
+  loadConversationList();
+
 };
+document.addEventListener("DOMContentLoaded", async () => {
+  if (window.bindSmartAssistantUI) {
+    window.bindSmartAssistantUI();
+  }
+
+  const token = localStorage.getItem("adminToken");
+  if (!token) return;
+
+  // ✅ Load conversation list from DB
+  await loadConversationList();
+
+  // ✅ Auto-open latest conversation
+  const first = document.querySelector("#chatHistoryList .chat-item");
+  if (first) first.click();
+});
 
 
   window.handleAskAI = handleAskAI;
