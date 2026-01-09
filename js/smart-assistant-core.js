@@ -97,8 +97,7 @@ if (file) {
     body: JSON.stringify({
   conversation_id: currentConversationId,
   role: "user",
-  content: text,
-  file_url: uploadedFileUrl
+  content: text
 })
 
   });
