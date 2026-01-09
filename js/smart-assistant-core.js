@@ -375,6 +375,11 @@ async function loadConversationList() {
   });
 
   const list = await res.json();
+  if (!Array.isArray(list)) {
+  console.error("Conversations API returned:", list);
+  return;
+}
+
 
   const ui = document.getElementById("chatHistoryList");
   ui.innerHTML = "";
