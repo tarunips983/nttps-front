@@ -1,6 +1,7 @@
 console.log("✅ Smart Assistant UI loaded");
 
-let selectedFile = null;
+window.selectedFile = null;
+
 
 const messages = document.getElementById("aiMessages");
 
@@ -50,7 +51,7 @@ if (fileInput && previewBox) {
   const file = fileInput.files[0];
   if (!file) return;
 
-  selectedFile = file;   // ✅ THIS IS REQUIRED
+  window.selectedFile = file;   // ✅ THIS IS REQUIRED
 
   previewBox.style.display = "block";
 
@@ -115,71 +116,10 @@ function hidePreview() {
 }
 
   
-sendBtn.onclick = handleSend;
+
 
   
-async function handleSend() {
-  const text = input.value.trim();
 
-  if (!text && !selectedFile) return;
-
-  // 1. If file exists → analyze it first
-  if (selectedFile) {
-  try {
-    const fd = new FormData();
-    fd.append("file", selectedFile);
-
-    const res = await fetch(API + "/ai/analyze-file", {
-      method: "POST",
-      headers: {
-        Authorization: "Bearer " + localStorage.getItem("adminToken")
-      },
-      body: fd
-    });
-
-    const data = await res.json();
-    extractedFileText = data.text || "";
-  } catch (err) {
-    console.error("File analyze failed:", err);
-    extractedFileText = "";
-  }
-}
-
-
-  // 2. Show message in chat (WITH IMAGE PREVIEW)
-  addUserMessage(text, selectedFile);
-
-  // 3. Send to AI
-  const res = await fetch(API + "/ai/query", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + localStorage.getItem("adminToken")
-    },
-    body: JSON.stringify({
-      query: text,
-      fileText: extractedFileText
-    })
-  });
-
-  const data = await res.json();
-  addBotMessage(data.reply);
-
-  // 4. CLEAR INPUT + FILE
-  input.value = "";
-  selectedFile = null;
-  extractedFileText = "";
-  fileInput.value = "";
-  hidePreview();
-}
-
-
-  input.onkeydown = e => {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    handleSend();   // ✅ CALL NEW FUNCTION
-  }
-};
 
   if (!window.createNewChat) {
   window.createNewChat = function () {
