@@ -71,26 +71,22 @@ if (!token) {
   if (!currentConversationId) {
     await window.createNewChat();
   }
-let uploadedFileUrl = null;
+let extractedText = "";
 
 if (file) {
   const fd = new FormData();
   fd.append("file", file);
 
-  const uploadRes = await fetch(`${API}/ai/upload-chat-file`, {
+  const analyzeRes = await fetch(`${API}/ai/analyze-file`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`
-    },
+    headers: { Authorization: `Bearer ${token}` },
     body: fd
   });
 
-  const uploadResult = await uploadRes.json();
-  uploadedFileUrl = uploadResult.url || null;
-
-  // clear file input
-  fileInput.value = "";
+  const analyzeResult = await analyzeRes.json();
+  extractedText = analyzeResult.text || "";
 }
+
 
   // Save user message to DB
   await fetch(`${API}/ai/messages`, {
@@ -121,7 +117,11 @@ try {
     "Content-Type": "application/json",
     Authorization: `Bearer ${token}`
   },
-  body: JSON.stringify({ query: text }),
+  body: JSON.stringify({
+  query: text,
+  fileText: extractedText
+}),
+
   signal: currentAbortController.signal
 });
 
@@ -361,32 +361,43 @@ window.renderTable = renderTable;
     link.click();
   };
 
-  /* ================= UI HELPERS ================= */
-function typeWriter(element, text, speed = 20) {
+function typeWriter(element, text, speed = 15) {
   element.innerHTML = "";
+
+  // 🔥 Convert text formatting to HTML
+  const formatted = text
+    .replace(/\n\n+/g, "</p><p>")    // paragraphs
+    .replace(/\n/g, "<br>")          // line breaks
+    .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")  // bold
+    .replace(/\*(.*?)\*/g, "• $1");  // simple bullets
+
   let i = 0;
+  let output = "";
 
   isAITyping = true;
-window.isAITyping = true;
-setSendButtonMode("stop");
+  window.isAITyping = true;
+  setSendButtonMode("stop");
 
   typingInterval = setInterval(() => {
-    if (i >= text.length || !isAITyping) {
+    if (i >= formatted.length || !isAITyping) {
       clearInterval(typingInterval);
       typingInterval = null;
       isAITyping = false;
-window.isAITyping = false;
-setSendButtonMode("send");
+      window.isAITyping = false;
+      setSendButtonMode("send");
       return;
     }
 
-    element.innerHTML += text.charAt(i);
-    i++;
+    output += formatted.charAt(i);
+    element.innerHTML = `<div class="ai-formatted"><p>${output}</p></div>`;
 
     const box = document.getElementById("aiMessages");
     if (box) box.scrollTop = box.scrollHeight;
+
+    i++;
   }, speed);
 }
+
 
   function showTyping() {
     const t = el("aiTyping");
