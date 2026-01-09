@@ -322,6 +322,24 @@ async function loadConversationList() {
     div.onclick = () => loadConversation(c.id);
     ui.appendChild(div);
   });
+  
+  const del = document.createElement("span");
+del.innerHTML = "🗑️";
+del.onclick = async (e) => {
+  e.stopPropagation();
+  if (!confirm("Delete this chat?")) return;
+
+  await fetch(`${API}/ai/conversations/${c.id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  loadConversationList();
+  clearChatUI();
+};
+
+div.appendChild(del);
+
 }
 window.loadConversation = async function (id) {
   currentConversationId = id;
