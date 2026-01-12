@@ -108,7 +108,22 @@ height: 44px;
 .details-modal.active {
   display: flex;
 }
+#filePreview img,
+#filePreview {
+  max-height: 200px;
+  overflow: auto;
+}
 
+/* Mobile specific tighter limit */
+@media (max-width: 600px) {
+  .chat-image-preview {
+    max-height: 140px;
+  }
+
+  #filePreview {
+    max-height: 160px;
+  }
+}
 
 .ai-table-wrapper {
   display: flex;
@@ -4786,6 +4801,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
