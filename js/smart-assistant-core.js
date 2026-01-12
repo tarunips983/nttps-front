@@ -44,6 +44,7 @@ function removeStatusMessage() {
   /* ================= CHAT HANDLERS ================= */
 
  async function handleAskAI() {
+   console.log("🧪 UI selectedFile at send time =", window.selectedFile);
   const input = el("aiInput");
   const msgBox = el("aiMessages");
 
