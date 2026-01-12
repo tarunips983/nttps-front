@@ -46,48 +46,52 @@ function removeStatusMessage() {
   async function handleAskAI() {
   const input = el("aiInput");
   const msgBox = el("aiMessages");
-const file = fileInput ? fileInput.files[0] : null;
+
+  const file = window.selectedFile || null;
 
   if (!input || !msgBox) return;
 
   const text = input.value.trim();
-  if (!text) return;
+  if (!text && !file) return;
 
   if (typeof window.enterChatMode === "function") {
     window.enterChatMode();
   }
 
-  addUserMessage(text);
+  addUserMessage(text, file);
   input.value = "";
 
- const token = localStorage.getItem("adminToken");
-if (!token) {
-  addBotMessage("🔒 Please login to use Smart Assistant.");
-  return;
-}
-
+  const token = localStorage.getItem("adminToken");
+  if (!token) {
+    addBotMessage("🔒 Please login to use Smart Assistant.");
+    return;
+  }
 
   if (!currentConversationId) {
     await window.createNewChat();
   }
-let extractedText = "";
 
-if (file) {
-  const fd = new FormData();
-  fd.append("file", file);
+  let extractedText = "";
 
-  const analyzeRes = await fetch(`${API}/ai/analyze-file`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
-    body: fd
-  });
+  if (file) {
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
 
-  const analyzeResult = await analyzeRes.json();
-  extractedText = analyzeResult.text || "";
-}
+      const analyzeRes = await fetch(`${API}/ai/analyze-file`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: fd
+      });
 
+      const analyzeResult = await analyzeRes.json();
+      extractedText = analyzeResult.text || "";
+    } catch (e) {
+      console.error("File analysis failed", e);
+    }
+  }
 
-  // Save user message to DB
+  // Save user message
   await fetch(`${API}/ai/messages`, {
     method: "POST",
     headers: {
@@ -95,53 +99,35 @@ if (file) {
       Authorization: `Bearer ${token}`
     },
     body: JSON.stringify({
-  conversation_id: currentConversationId,
-  role: "user",
-  content: text
-})
-
+      conversation_id: currentConversationId,
+      role: "user",
+      content: text
+    })
   });
 
-showTyping();
-    showStatusMessage("🤔 Thinking...");
+  showTyping();
+  showStatusMessage("🤔 Thinking...");
 
-    
-try {
-  currentAbortController = new AbortController();
+  try {
+    currentAbortController = new AbortController();
 
-  const res = await fetch(`${API}/ai/query`, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`
-  },
-  body: JSON.stringify({
-  query: text,
-  fileText: extractedText
-}),
-
-  signal: currentAbortController.signal
-});
-
+    const res = await fetch(`${API}/ai/query`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        query: text,
+        fileText: extractedText
+      }),
+      signal: currentAbortController.signal
+    });
 
     const result = await res.json();
 
-// Update status based on backend mode
-removeStatusMessage();
-
-if (result.mode === "web") {
-  showStatusMessage("🌐 Searching the web...");
-} else if (result.mode === "db") {
-  showStatusMessage("📊 Searching records...");
-} else {
-  showStatusMessage("🤔 Thinking...");
-}
-
-// Small delay so user sees it
-await new Promise(r => setTimeout(r, 400));
-
-hideTyping();
-removeStatusMessage();
+    hideTyping();
+    removeStatusMessage();
 
     if (!result.reply) {
       addBotMessage("No response.");
@@ -154,7 +140,7 @@ removeStatusMessage();
 
     typeWriter(msgDiv, result.reply, 15);
 
-    // Save assistant message to DB
+    // Save assistant message
     await fetch(`${API}/ai/messages`, {
       method: "POST",
       headers: {
@@ -168,6 +154,18 @@ removeStatusMessage();
       })
     });
 
+    // ✅ CLEAR FILE + PREVIEW
+    window.selectedFile = null;
+
+    const preview = document.getElementById("filePreview");
+    if (preview) {
+      preview.style.display = "none";
+      preview.innerHTML = "";
+    }
+
+    const fileInputEl = document.getElementById("chatFile");
+    if (fileInputEl) fileInputEl.value = "";
+
     if (result.columns && result.data) {
       setTimeout(() => {
         renderTable(result.columns, result.data);
@@ -175,14 +173,12 @@ removeStatusMessage();
     }
 
   } catch (err) {
-    setSendButtonMode("send");
-isAITyping = false;
-
     hideTyping();
     console.error(err);
     addBotMessage("❌ Unable to process request.");
   }
 }
+
 window.stopAIResponse = function () {
   console.log("⛔ AI stopped");
 
