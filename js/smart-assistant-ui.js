@@ -22,21 +22,22 @@ window.addUserMessage = function (text, file) {
   div.className = "ai-msg ai-user";
 
   if (file) {
-  if (file.type.startsWith("image/")) {
-    const img = document.createElement("img");
-    img.src = URL.createObjectURL(file);
-    img.className = "chat-image-preview";
-    div.appendChild(img);
-  } else {
-    const fileDiv = document.createElement("div");
-    fileDiv.style.padding = "8px";
-    fileDiv.style.border = "1px solid #ccc";
-    fileDiv.style.borderRadius = "6px";
-    fileDiv.textContent = "📎 " + file.name;
-    div.appendChild(fileDiv);
-  }
-}
+    console.log("🧾 UI showing file in chat:", file.name);
 
+    if (file.type && file.type.startsWith("image/")) {
+      const img = document.createElement("img");
+      img.src = URL.createObjectURL(file);
+      img.className = "chat-image-preview";
+      div.appendChild(img);
+    } else {
+      const fileDiv = document.createElement("div");
+      fileDiv.style.padding = "8px";
+      fileDiv.style.border = "1px solid #ccc";
+      fileDiv.style.borderRadius = "6px";
+      fileDiv.textContent = "📎 " + file.name;
+      div.appendChild(fileDiv);
+    }
+  }
 
   if (text) {
     const p = document.createElement("div");
@@ -47,6 +48,7 @@ window.addUserMessage = function (text, file) {
   messages.appendChild(div);
   messages.scrollTop = messages.scrollHeight;
 };
+
 
 window.bindSmartAssistantUI = function () {
   const fileInput = document.getElementById("chatFile");
@@ -59,22 +61,25 @@ window.bindSmartAssistantUI = function () {
 
   if (fileInput && previewBox) {
     fileInput.onchange = () => {
-      const file = fileInput.files[0];
-      if (!file) return;
+  const file = fileInput.files[0];
+  if (!file) return;
 
-      window.selectedFile = file;
+  console.log("📁 UI File selected:", file.name, file.type, file.size);  // ✅ ADD THIS
 
-      previewBox.style.display = "block";
+  window.selectedFile = file; // ✅ CRITICAL
 
-      if (file.type.startsWith("image/")) {
-        const url = URL.createObjectURL(file);
-        previewBox.innerHTML = `<img src="${url}" style="max-width:200px;border-radius:8px">`;
-      } else if (file.type === "application/pdf") {
-        previewBox.innerHTML = `<div style="padding:8px;border:1px solid #ccc;border-radius:6px">📄 ${file.name}</div>`;
-      } else {
-        previewBox.innerHTML = `📎 ${file.name}`;
-      }
-    };
+  previewBox.style.display = "block";
+
+  if (file.type.startsWith("image/")) {
+    const url = URL.createObjectURL(file);
+    previewBox.innerHTML = `<img src="${url}" style="max-width:200px;border-radius:8px">`;
+  } else if (file.type === "application/pdf") {
+    previewBox.innerHTML = `<div style="padding:8px;border:1px solid #ccc;border-radius:6px">📄 ${file.name}</div>`;
+  } else {
+    previewBox.innerHTML = `📎 ${file.name}`;
+  }
+};
+
   }
 
   if (window.__SMART_ASSISTANT_BOUND__) return;
