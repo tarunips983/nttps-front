@@ -3078,8 +3078,8 @@ function handleSmartAuth() {
     localStorage.removeItem("adminToken");
     localStorage.removeItem("isAdmin");
 
-    updateSmartAssistantLoginStatus();
-    updateFileLoginStatus();
+    syncAllLoginUI();
+
   } else {
     openPasswordModal();
   }
@@ -3961,7 +3961,8 @@ function handleFileAuthClick() {
     localStorage.removeItem("adminToken");
     localStorage.removeItem("isAdmin");
 
-    updateFileLoginStatus();
+   syncAllLoginUI();
+
     
 
     loadFiles(); // ✅ FORCE immediate refresh
@@ -4466,9 +4467,8 @@ async function renderCLBioData() {
 
   closePasswordModal();
 
-  updateFileLoginStatus();
-updateSmartAssistantLoginStatus(); // 🔥 NOW EXISTS
-updateSmartUserMenu();
+  syncAllLoginUI();
+
 hideAILoginOverlay();
 loadFiles();
 
@@ -4716,20 +4716,12 @@ function updateSmartLoginStatus() {
 }
 
 
-    
-document.addEventListener("DOMContentLoaded", () => {
-  const btn = document.getElementById("smartAuthBtn");
-  if (!btn) return;
+function syncAllLoginUI() {
+  updateFileLoginStatus();
+  updateSmartAssistantLoginStatus();
+  updateSmartUserMenu();
+}
 
-  btn.onclick = () => {
-    const token = localStorage.getItem("adminToken");
-    if (token) {
-      handleFileAuthClick(); // reuse SAME logout logic
-    } else {
-      openPasswordModal();
-    }
-  };
-});
 
 function handleSendMessage() {
   const token = localStorage.getItem("adminToken");
@@ -4801,6 +4793,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
