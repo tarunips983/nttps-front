@@ -77,7 +77,7 @@ function removeStatusMessage() {
   // ================= FILE ANALYSIS =================
   if (file) {
     try {
-      console.log("📎 Sending file to analyze:", file.name, file.type);
+      console.log("📎 UI sending file:", file.name, file.type, file.size);
 
       const fd = new FormData();
       fd.append("file", file);
