@@ -21,12 +21,22 @@ window.addUserMessage = function (text, file) {
   const div = document.createElement("div");
   div.className = "ai-msg ai-user";
 
-  if (file && file.type && file.type.startsWith("image/")) {
+  if (file) {
+  if (file.type.startsWith("image/")) {
     const img = document.createElement("img");
     img.src = URL.createObjectURL(file);
     img.className = "chat-image-preview";
     div.appendChild(img);
+  } else {
+    const fileDiv = document.createElement("div");
+    fileDiv.style.padding = "8px";
+    fileDiv.style.border = "1px solid #ccc";
+    fileDiv.style.borderRadius = "6px";
+    fileDiv.textContent = "📎 " + file.name;
+    div.appendChild(fileDiv);
   }
+}
+
 
   if (text) {
     const p = document.createElement("div");
