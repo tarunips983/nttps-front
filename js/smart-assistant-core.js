@@ -107,6 +107,7 @@ function removeStatusMessage() {
 
   showTyping();
   showStatusMessage("🤔 Thinking...");
+    setSendButtonMode("stop");
 
   try {
     currentAbortController = new AbortController();
@@ -171,12 +172,14 @@ function removeStatusMessage() {
         renderTable(result.columns, result.data);
       }, Math.min(2000, result.reply.length * 15));
     }
+setSendButtonMode("send");
 
   } catch (err) {
-    hideTyping();
-    console.error(err);
-    addBotMessage("❌ Unable to process request.");
-  }
+  hideTyping();
+  setSendButtonMode("send");
+  console.error(err);
+  addBotMessage("❌ Unable to process request.");
+}
 }
 
 window.stopAIResponse = function () {
@@ -211,7 +214,17 @@ function setSendButtonMode(mode) {
     icon.textContent = "▶️";
   }
 }
+const sendBtn = document.getElementById("aiSendBtn");
 
+if (sendBtn) {
+  sendBtn.onclick = () => {
+    if (window.isAITyping) {
+      window.stopAIResponse();
+    } else {
+      handleAskAI();
+    }
+  };
+}
   
 function detectModule(columns) {
   if (columns.includes("estimate_no")) return "ESTIMATE";
