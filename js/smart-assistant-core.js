@@ -87,10 +87,16 @@ function removeStatusMessage() {
       const analyzeResult = await analyzeRes.json();
       extractedText = analyzeResult.text || "";
 if (analyzeResult.source) {
-  addBotMessage(
-    `🧠 <b>Text extracted using:</b> ${analyzeResult.source.toUpperCase()}`
+  showStatusMessage(
+    `🧠 Extracted text using ${analyzeResult.source.toUpperCase()}`
   );
+
+  // Auto remove after short delay
+  setTimeout(() => {
+    removeStatusMessage();
+  }, 1500);
 }
+
       
     } catch (e) {
       console.error("File analysis failed", e);
