@@ -86,6 +86,12 @@ function removeStatusMessage() {
 
       const analyzeResult = await analyzeRes.json();
       extractedText = analyzeResult.text || "";
+if (analyzeResult.source) {
+  addBotMessage(
+    `🧠 <b>Text extracted using:</b> ${analyzeResult.source.toUpperCase()}`
+  );
+}
+      
     } catch (e) {
       console.error("File analysis failed", e);
     }
