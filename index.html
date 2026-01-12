@@ -133,7 +133,15 @@ height: 44px;
   display: flex;
   flex-direction: column;
 }
-
+.chat-image-preview {
+  max-width: 100%;
+  max-height: 300px;     /* you can adjust */
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  border-radius: 8px;
+}
 .ai-field .label {
   font-size: 11px;
   color: #666;
@@ -4778,6 +4786,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
