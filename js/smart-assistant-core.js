@@ -43,15 +43,16 @@ function removeStatusMessage() {
 
   /* ================= CHAT HANDLERS ================= */
 
-  async function handleAskAI() {
+ async function handleAskAI() {
   const input = el("aiInput");
   const msgBox = el("aiMessages");
-
-  const file = window.selectedFile || null;
 
   if (!input || !msgBox) return;
 
   const text = input.value.trim();
+  const file = window.selectedFile || null;
+
+  // Allow sending if either text OR file exists
   if (!text && !file) return;
 
   if (typeof window.enterChatMode === "function") {
@@ -73,8 +74,11 @@ function removeStatusMessage() {
 
   let extractedText = "";
 
+  // ================= FILE ANALYSIS =================
   if (file) {
     try {
+      console.log("📎 Sending file to analyze:", file.name, file.type);
+
       const fd = new FormData();
       fd.append("file", file);
 
@@ -86,24 +90,19 @@ function removeStatusMessage() {
 
       const analyzeResult = await analyzeRes.json();
       extractedText = analyzeResult.text || "";
-if (analyzeResult.source) {
-  showStatusMessage(
-    `🧠 Extracted text using ${analyzeResult.source.toUpperCase()}`
-  );
 
-  // Auto remove after short delay
-  setTimeout(() => {
-    removeStatusMessage();
-  }, 1500);
-}
+      if (analyzeResult.source) {
+        showStatusMessage(`🧠 Extracted using ${analyzeResult.source.toUpperCase()}`);
+        setTimeout(() => removeStatusMessage(), 1500);
+      }
 
-      
     } catch (e) {
-      console.error("File analysis failed", e);
+      console.error("❌ File analysis failed", e);
+      addBotMessage("❌ Failed to analyze file.");
     }
   }
 
-  // Save user message
+  // ================= SAVE USER MESSAGE =================
   await fetch(`${API}/ai/messages`, {
     method: "POST",
     headers: {
@@ -113,13 +112,13 @@ if (analyzeResult.source) {
     body: JSON.stringify({
       conversation_id: currentConversationId,
       role: "user",
-      content: text
+      content: text || "[File uploaded]"
     })
   });
 
   showTyping();
   showStatusMessage("🤔 Thinking...");
-    setSendButtonMode("stop");
+  setSendButtonMode("stop");
 
   try {
     currentAbortController = new AbortController();
@@ -153,7 +152,7 @@ if (analyzeResult.source) {
 
     typeWriter(msgDiv, result.reply, 15);
 
-    // Save assistant message
+    // ================= SAVE ASSISTANT MESSAGE =================
     await fetch(`${API}/ai/messages`, {
       method: "POST",
       headers: {
@@ -167,7 +166,7 @@ if (analyzeResult.source) {
       })
     });
 
-    // ✅ CLEAR FILE + PREVIEW
+    // ================= CLEAR FILE =================
     window.selectedFile = null;
 
     const preview = document.getElementById("filePreview");
@@ -184,15 +183,17 @@ if (analyzeResult.source) {
         renderTable(result.columns, result.data);
       }, Math.min(2000, result.reply.length * 15));
     }
-setSendButtonMode("send");
+
+    setSendButtonMode("send");
 
   } catch (err) {
-  hideTyping();
-  setSendButtonMode("send");
-  console.error(err);
-  addBotMessage("❌ Unable to process request.");
+    hideTyping();
+    setSendButtonMode("send");
+    console.error(err);
+    addBotMessage("❌ Unable to process request.");
+  }
 }
-}
+
 
 window.stopAIResponse = function () {
   console.log("⛔ AI stopped");
