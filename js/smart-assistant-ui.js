@@ -72,7 +72,7 @@ window.bindSmartAssistantUI = function () {
 
   if (file.type.startsWith("image/")) {
     const url = URL.createObjectURL(file);
-    previewBox.innerHTML = `<img src="${url}" style="max-width:200px;border-radius:8px">`;
+    previewBox.innerHTML = `<img src="${url}" class="chat-image-preview">`;
   } else if (file.type === "application/pdf") {
     previewBox.innerHTML = `<div style="padding:8px;border:1px solid #ccc;border-radius:6px">📄 ${file.name}</div>`;
   } else {
