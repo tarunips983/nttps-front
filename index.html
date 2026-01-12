@@ -1744,13 +1744,8 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
     overflow-x: hidden;
   }
 }
-@media (max-width: 768px) {
-  .main-view,
-  #modalContent,
-  .details-box {
-    height: calc(var(--vh, 1vh) * 100) !important;
-  }
-}
+
+  
 @media (max-width: 768px) {
   .right-panel {
     overflow: visible !important;
@@ -2210,6 +2205,9 @@ body.smart-assistant-active {
 @media (max-width: 600px) {
   .smart-ai-panel .ai-input-wrapper {
     padding: 10px;
+    position: sticky;
+    overflow: hidden;
+    height: 22vh;
   }
 }
 /* ================= CHATGPT-STYLE WELCOME MODE ================= */
@@ -2452,13 +2450,6 @@ body.smart-assistant-active {
   background: #f6f8fb;
   border-top: 1px solid #e0e0e0;
   margin-bottom: 10px;
-}
-
-/* Kill ALL height hacks */
-.smart-ai-panel,
-.smart-assistant-view,
-.right-panel {
-  min-height: 0 !important;
 }
 
 /* Prevent page scroll when assistant is open */
@@ -4793,6 +4784,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
