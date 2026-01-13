@@ -441,6 +441,14 @@ window.createNewChat = async function () {
     body: JSON.stringify({ title: "New Chat" })
   });
 
+// ✅ ADD THIS BLOCK
+if (res.status === 401 || res.status === 403) {
+  localStorage.removeItem("adminToken");
+  alert("Session expired. Please login again.");
+  location.reload();
+  return;
+}
+  
   const conv = await res.json();
   currentConversationId = conv.id;
 
