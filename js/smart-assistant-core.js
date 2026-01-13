@@ -1,11 +1,16 @@
 if (!window.API) {
   window.API = "https://nttps-backend.onrender.com";
 }
+let __AUTH_CHECKED__ = false;
+
 async function checkAuthOnLoad() {
+  if (__AUTH_CHECKED__) return;   // ✅ Prevent loops
+  __AUTH_CHECKED__ = true;
+
   const token = localStorage.getItem("adminToken");
 
   if (!token) {
-    forceSmartLogout();
+    showLoginOverlay();
     return;
   }
 
@@ -15,22 +20,23 @@ async function checkAuthOnLoad() {
     });
 
     if (res.status === 401 || res.status === 403) {
-      forceSmartLogout();
+      console.warn("🔒 Token expired");
+      forceSmartLogout(true);
     } else {
-      console.log("✅ Token valid, user is logged in");
+      console.log("✅ Token valid");
+      hideLoginOverlay();
     }
   } catch (e) {
-    console.error("Auth check failed:", e);
-    forceSmartLogout();
+    console.warn("⚠️ Backend not reachable yet, NOT logging out", e);
+    // ❗ DO NOTHING — do not logout on network error
   }
 }
 
-function forceSmartLogout() {
+function forceSmartLogout(reload = false) {
   console.warn("🔒 Forcing logout");
 
   localStorage.removeItem("adminToken");
 
-  // Reset UI
   const nameEl = document.getElementById("smartUserName");
   const statusEl = document.getElementById("smartUserStatus");
   const overlay = document.getElementById("aiLoginOverlay");
@@ -40,6 +46,19 @@ function forceSmartLogout() {
   if (overlay) overlay.style.display = "flex";
 
   clearChatUI();
+
+  if (reload) {
+    setTimeout(() => location.reload(), 300);
+  }
+}
+function showLoginOverlay() {
+  const overlay = document.getElementById("aiLoginOverlay");
+  if (overlay) overlay.style.display = "flex";
+}
+
+function hideLoginOverlay() {
+  const overlay = document.getElementById("aiLoginOverlay");
+  if (overlay) overlay.style.display = "none";
 }
 
 
@@ -608,17 +627,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.bindSmartAssistantUI();
   }
 
-  await checkAuthOnLoad();   // ✅ NEW
+  await checkAuthOnLoad();
 
   const token = localStorage.getItem("adminToken");
   if (!token) return;
 
-  await loadConversationList();
-
-  const first = document.querySelector("#chatHistoryList .chat-item");
-  if (first) first.click();
+  try {
+    await loadConversationList();
+    const first = document.querySelector("#chatHistoryList .chat-item");
+    if (first) first.click();
+  } catch (e) {
+    console.warn("Backend still waking up...");
+  }
 });
-
 
 
   window.handleAskAI = handleAskAI;
