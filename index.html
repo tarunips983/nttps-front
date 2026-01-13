@@ -3681,11 +3681,16 @@ function handleFileDownload(url, filename) {
   }
   triggerDownload(url, filename);
 }
+let __AUTH_CHECK_RUNNING__ = false;
+
 async function checkGlobalAuth() {
+  if (__AUTH_CHECK_RUNNING__) return false;
+  __AUTH_CHECK_RUNNING__ = true;
+
   const token = localStorage.getItem("adminToken");
 
   if (!token) {
-    forceLogoutEverywhere();
+    __AUTH_CHECK_RUNNING__ = false;
     return false;
   }
 
@@ -3695,35 +3700,23 @@ async function checkGlobalAuth() {
     });
 
     if (res.status === 401 || res.status === 403) {
-      forceLogoutEverywhere();
+      console.warn("Token invalid. Logging out.");
+      localStorage.removeItem("adminToken");
+      localStorage.removeItem("isAdmin");
+      __AUTH_CHECK_RUNNING__ = false;
       return false;
     }
 
-    console.log("✅ Token valid");
+    __AUTH_CHECK_RUNNING__ = false;
     return true;
 
   } catch (e) {
-    console.error("Auth check failed:", e);
-    forceLogoutEverywhere();
-    return false;
+    console.warn("Backend sleeping. Not forcing logout.");
+    __AUTH_CHECK_RUNNING__ = false;
+    return true; // ✅ DO NOT LOGOUT ON NETWORK ERROR
   }
 }
-function forceLogoutEverywhere() {
-  console.warn("🔒 Forcing logout (token invalid)");
 
-  localStorage.removeItem("adminToken");
-  localStorage.removeItem("isAdmin");
-
-  // Sync all UIs
-  syncAllLoginUI();
-
-  // Show AI overlay if in assistant
-  const overlay = document.getElementById("aiLoginOverlay");
-  if (overlay) overlay.style.display = "flex";
-
-  // Clear chat UI
-  if (window.clearChatUI) clearChatUI();
-}
 
 async function triggerDownload(url, filename = "file") {
 
@@ -4755,10 +4748,13 @@ function updateSmartLoginStatus() {
 
 
 async function syncAllLoginUI() {
-  await updateFileLoginStatus();
-  await updateSmartAssistantLoginStatus();
-  await updateSmartUserMenu();
+  const ok = await checkGlobalAuth();
+
+  await updateFileLoginStatusUIOnly(ok);
+  await updateSmartAssistantLoginStatusUIOnly(ok);
+  await updateSmartUserMenuUIOnly(ok);
 }
+
 
 
 
@@ -4815,9 +4811,7 @@ updateVisitCounter();
 // PAGE LOAD INIT
 window.addEventListener("load", async () => {
     applyUserSettings();
-    await checkGlobalAuth();   // ✅ CRITICAL
     syncAllLoginUI();
-
     loadDailyProgressDates();
     loadRecords();
     loadEstimates();
@@ -4836,6 +4830,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
