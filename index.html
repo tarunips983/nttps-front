@@ -4748,13 +4748,10 @@ function updateSmartLoginStatus() {
 
 
 async function syncAllLoginUI() {
-  const ok = await checkGlobalAuth();
-  await updateSmartAssistantLoginStatusUIOnly(ok);
-  await updateSmartUserMenuUIOnly(ok);
+  await updateSmartAssistantLoginStatus();
+  await updateSmartUserMenu();
+  await updateFileLoginStatus();
 }
-
-
-
 
 function handleSendMessage() {
   const token = localStorage.getItem("adminToken");
@@ -4828,6 +4825,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
