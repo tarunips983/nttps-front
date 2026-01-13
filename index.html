@@ -4749,8 +4749,6 @@ function updateSmartLoginStatus() {
 
 async function syncAllLoginUI() {
   const ok = await checkGlobalAuth();
-
-  await updateFileLoginStatusUIOnly(ok);
   await updateSmartAssistantLoginStatusUIOnly(ok);
   await updateSmartUserMenuUIOnly(ok);
 }
@@ -4830,6 +4828,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
