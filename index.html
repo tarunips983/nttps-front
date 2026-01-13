@@ -3039,8 +3039,8 @@ document.addEventListener("click", (e) => {
   }
 });
 
-function updateSmartUserMenu() {
-  const token = localStorage.getItem("adminToken");
+async function updateSmartUserMenu() {
+  const ok = await checkGlobalAuth();
 
   const nameEl = document.getElementById("smartUserName");
   const statusEl = document.getElementById("smartUserStatus");
@@ -3048,7 +3048,7 @@ function updateSmartUserMenu() {
 
   if (!nameEl || !statusEl || !btn) return;
 
-  if (token) {
+  if (ok) {
     nameEl.textContent = "Admin";
     statusEl.textContent = "Logged in";
     btn.textContent = "🚪 Logout";
@@ -3060,6 +3060,7 @@ function updateSmartUserMenu() {
     btn.classList.remove("logout");
   }
 }
+
 
 function handleSmartAuth() {
   const token = localStorage.getItem("adminToken");
@@ -3680,6 +3681,49 @@ function handleFileDownload(url, filename) {
   }
   triggerDownload(url, filename);
 }
+async function checkGlobalAuth() {
+  const token = localStorage.getItem("adminToken");
+
+  if (!token) {
+    forceLogoutEverywhere();
+    return false;
+  }
+
+  try {
+    const res = await fetch(`${SERVER_URL}/ai/conversations`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (res.status === 401 || res.status === 403) {
+      forceLogoutEverywhere();
+      return false;
+    }
+
+    console.log("✅ Token valid");
+    return true;
+
+  } catch (e) {
+    console.error("Auth check failed:", e);
+    forceLogoutEverywhere();
+    return false;
+  }
+}
+function forceLogoutEverywhere() {
+  console.warn("🔒 Forcing logout (token invalid)");
+
+  localStorage.removeItem("adminToken");
+  localStorage.removeItem("isAdmin");
+
+  // Sync all UIs
+  syncAllLoginUI();
+
+  // Show AI overlay if in assistant
+  const overlay = document.getElementById("aiLoginOverlay");
+  if (overlay) overlay.style.display = "flex";
+
+  // Clear chat UI
+  if (window.clearChatUI) clearChatUI();
+}
 
 async function triggerDownload(url, filename = "file") {
 
@@ -3771,20 +3815,21 @@ tbody.innerHTML = files.map(f => `
   }
 }
 
-function updateFileLoginStatus() {
+async function updateFileLoginStatus() {
+  const ok = await checkGlobalAuth();
+
   const statusEl = document.getElementById("fileLoginStatus");
   const btn = document.getElementById("fileAuthBtn");
   const uploadSection = document.getElementById("fileUploadSection");
-  const token = localStorage.getItem("adminToken");
 
-  if (token) {
+  if (ok) {
     statusEl.innerHTML = "🟢 Logged in";
     statusEl.style.color = "#198754";
 
     btn.innerHTML = "🚪 Logout";
     btn.style.background = "#dc3545";
 
-    uploadSection.style.display = "block"; // ✅ SHOW UPLOAD
+    uploadSection.style.display = "block";
   } else {
     statusEl.innerHTML = "🔒 Login required";
     statusEl.style.color = "#dc3545";
@@ -3792,9 +3837,10 @@ function updateFileLoginStatus() {
     btn.innerHTML = "🔐 Login";
     btn.style.background = "#007bff";
 
-    uploadSection.style.display = "none"; // ❌ HIDE UPLOAD
+    uploadSection.style.display = "none";
   }
 }
+
 
 async function deleteFile(id) {
   if (!confirm("Delete this file permanently?")) return;
@@ -4350,8 +4396,8 @@ goBottomBtn.onclick = () => {
 };
 
 
-function updateSmartAssistantLoginStatus() {
-  const token = localStorage.getItem("adminToken");
+async function updateSmartAssistantLoginStatus() {
+  const ok = await checkGlobalAuth();
 
   const nameEl = document.getElementById("smartUserName");
   const statusEl = document.getElementById("smartUserStatus");
@@ -4360,18 +4406,18 @@ function updateSmartAssistantLoginStatus() {
 
   if (!nameEl || !statusEl || !btn) return;
 
-  if (token) {
+  if (ok) {
     nameEl.textContent = "Admin";
     statusEl.textContent = "Logged in";
     btn.textContent = "🚪 Logout";
     btn.classList.add("logout");
-
     if (overlay) overlay.style.display = "none";
   } else {
     nameEl.textContent = "Guest";
     statusEl.textContent = "Login required";
     btn.textContent = "🔐 Login";
     btn.classList.remove("logout");
+    if (overlay) overlay.style.display = "flex";
   }
 }
 
@@ -4708,11 +4754,12 @@ function updateSmartLoginStatus() {
 }
 
 
-function syncAllLoginUI() {
-  updateFileLoginStatus();
-  updateSmartAssistantLoginStatus();
-  updateSmartUserMenu();
+async function syncAllLoginUI() {
+  await updateFileLoginStatus();
+  await updateSmartAssistantLoginStatus();
+  await updateSmartUserMenu();
 }
+
 
 
 function handleSendMessage() {
@@ -4766,12 +4813,16 @@ function updateVisitCounter() {
 updateVisitCounter();
 
 // PAGE LOAD INIT
-window.addEventListener("load", () => {
+window.addEventListener("load", async () => {
     applyUserSettings();
+    await checkGlobalAuth();   // ✅ CRITICAL
+    syncAllLoginUI();
+
     loadDailyProgressDates();
     loadRecords();
-  loadEstimates();
+    loadEstimates();
 });
+
 window.addEventListener("DOMContentLoaded", function () {
     showMainView("pdf");   // Forces All Indents to open first
 });
@@ -4785,6 +4836,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
