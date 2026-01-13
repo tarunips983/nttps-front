@@ -1,56 +1,19 @@
 if (!window.API) {
   window.API = "https://nttps-backend.onrender.com";
 }
-let __AUTH_CHECKED__ = false;
 
-async function checkAuthOnLoad() {
-  if (__AUTH_CHECKED__) return;   // ✅ Prevent loops
-  __AUTH_CHECKED__ = true;
-
-  const token = localStorage.getItem("adminToken");
-
-  if (!token) {
-    showLoginOverlay();
-    return;
-  }
-
-  try {
-    const res = await fetch(`${API}/ai/conversations`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-
-    if (res.status === 401 || res.status === 403) {
-      console.warn("🔒 Token expired");
-      forceSmartLogout(true);
-    } else {
-      console.log("✅ Token valid");
-      hideLoginOverlay();
-    }
-  } catch (e) {
-    console.warn("⚠️ Backend not reachable yet, NOT logging out", e);
-    // ❗ DO NOTHING — do not logout on network error
-  }
+// 🛑 GLOBAL LOOP PROTECTION
+if (window.__SMART_CORE_ALREADY_RUNNING__) {
+  console.warn("Smart core already running. Stopped duplicate load.");
+  throw new Error("Duplicate core load blocked");
 }
+window.__SMART_CORE_ALREADY_RUNNING__ = true;
 
-function forceSmartLogout(reload = false) {
-  console.warn("🔒 Forcing logout");
 
-  localStorage.removeItem("adminToken");
+const API = window.API;
 
-  const nameEl = document.getElementById("smartUserName");
-  const statusEl = document.getElementById("smartUserStatus");
-  const overlay = document.getElementById("aiLoginOverlay");
+let AUTH_STATE = "UNKNOWN"; // UNKNOWN | LOGGED_OUT | LOGGED_IN
 
-  if (nameEl) nameEl.textContent = "Guest";
-  if (statusEl) statusEl.textContent = "Login required";
-  if (overlay) overlay.style.display = "flex";
-
-  clearChatUI();
-
-  if (reload) {
-    setTimeout(() => location.reload(), 300);
-  }
-}
 function showLoginOverlay() {
   const overlay = document.getElementById("aiLoginOverlay");
   if (overlay) overlay.style.display = "flex";
@@ -61,6 +24,53 @@ function hideLoginOverlay() {
   if (overlay) overlay.style.display = "none";
 }
 
+function setGuestUI() {
+  const nameEl = document.getElementById("smartUserName");
+  const statusEl = document.getElementById("smartUserStatus");
+  if (nameEl) nameEl.textContent = "Guest";
+  if (statusEl) statusEl.textContent = "Login required";
+}
+
+function setLoggedUI() {
+  const nameEl = document.getElementById("smartUserName");
+  const statusEl = document.getElementById("smartUserStatus");
+  if (nameEl) nameEl.textContent = "User";
+  if (statusEl) statusEl.textContent = "Logged in";
+}
+
+async function checkAuthOnce() {
+  if (AUTH_STATE !== "UNKNOWN") return; // ✅ Only once
+
+  const token = localStorage.getItem("adminToken");
+
+  if (!token) {
+    AUTH_STATE = "LOGGED_OUT";
+    setGuestUI();
+    showLoginOverlay();
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API}/ai/conversations`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (res.status === 401 || res.status === 403) {
+      console.warn("Token invalid");
+      localStorage.removeItem("adminToken");
+      AUTH_STATE = "LOGGED_OUT";
+      setGuestUI();
+      showLoginOverlay();
+    } else {
+      AUTH_STATE = "LOGGED_IN";
+      hideLoginOverlay();
+      setLoggedUI();
+    }
+  } catch (e) {
+    console.warn("Backend sleeping. Not logging out.");
+    // ❗ DO NOTHING
+  }
+}
 
 (function () {
   if (window.__SMART_ASSISTANT_LOADED__) return;
@@ -500,13 +510,6 @@ window.createNewChat = async function () {
     body: JSON.stringify({ title: "New Chat" })
   });
 
-// ✅ ADD THIS BLOCK
-if (res.status === 401 || res.status === 403) {
-  localStorage.removeItem("adminToken");
-  alert("Session expired. Please login again.");
-  location.reload();
-  return;
-}
   
   const conv = await res.json();
   currentConversationId = conv.id;
@@ -627,10 +630,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.bindSmartAssistantUI();
   }
 
-  await checkAuthOnLoad();
+  await checkAuthOnce();
 
-  const token = localStorage.getItem("adminToken");
-  if (!token) return;
+  if (AUTH_STATE !== "LOGGED_IN") return;
 
   try {
     await loadConversationList();
