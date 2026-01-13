@@ -1,6 +1,46 @@
 if (!window.API) {
   window.API = "https://nttps-backend.onrender.com";
 }
+async function checkAuthOnLoad() {
+  const token = localStorage.getItem("adminToken");
+
+  if (!token) {
+    forceSmartLogout();
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API}/ai/conversations`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (res.status === 401 || res.status === 403) {
+      forceSmartLogout();
+    } else {
+      console.log("✅ Token valid, user is logged in");
+    }
+  } catch (e) {
+    console.error("Auth check failed:", e);
+    forceSmartLogout();
+  }
+}
+
+function forceSmartLogout() {
+  console.warn("🔒 Forcing logout");
+
+  localStorage.removeItem("adminToken");
+
+  // Reset UI
+  const nameEl = document.getElementById("smartUserName");
+  const statusEl = document.getElementById("smartUserStatus");
+  const overlay = document.getElementById("aiLoginOverlay");
+
+  if (nameEl) nameEl.textContent = "Guest";
+  if (statusEl) statusEl.textContent = "Login required";
+  if (overlay) overlay.style.display = "flex";
+
+  clearChatUI();
+}
 
 
 (function () {
@@ -568,15 +608,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.bindSmartAssistantUI();
   }
 
+  await checkAuthOnLoad();   // ✅ NEW
+
   const token = localStorage.getItem("adminToken");
   if (!token) return;
 
   await loadConversationList();
 
-  // ✅ Auto-open first conversation
   const first = document.querySelector("#chatHistoryList .chat-item");
   if (first) first.click();
 });
+
 
 
   window.handleAskAI = handleAskAI;
