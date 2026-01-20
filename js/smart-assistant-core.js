@@ -11,6 +11,9 @@ window.__SMART_CORE_ALREADY_RUNNING__ = true;
 
 
 const API = window.API;
+// ===== GLOBAL STREAM CONTROL =====
+let isAITyping = false;
+let currentAbortController = null;
 
 let AUTH_STATE = "UNKNOWN"; // UNKNOWN | LOGGED_OUT | LOGGED_IN
 
@@ -232,9 +235,6 @@ async function checkAuthOnce() {
   window.__SMART_ASSISTANT_LOADED__ = true;
    const API = window.API;
 let currentConversationId = null;
-
-let isAITyping = false;
-let currentAbortController = null;
 let thinkingMsgDiv = null;
 function startAIThinking() {
   isAITyping = true;
