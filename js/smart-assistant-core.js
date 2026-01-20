@@ -541,6 +541,7 @@ async function loadConversationList() {
   list.forEach(c => {
     const div = document.createElement("div");
 div.className = "chat-item";
+div.dataset.id = c.id;
 if (c.id === currentConversationId) {
   div.classList.add("active");
 }
@@ -598,19 +599,30 @@ window.loadConversation = async function (id) {
   // Highlight active chat
   document.querySelectorAll(".chat-item").forEach(el => {
     el.classList.remove("active");
+    if (el.dataset.id == id) {
+      el.classList.add("active");
+    }
   });
-
-  const active = [...document.querySelectorAll(".chat-item")]
-    .find(x => x.onclick && x.onclick.toString().includes(id));
 
   // Clear UI
   clearChatUI();
 
   const token = localStorage.getItem("adminToken");
 
-  const res = await fetch(`${API}/ai/conversations/${id}/messages`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  let res;
+  try {
+    res = await fetch(`${API}/ai/conversations/${id}/messages`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  } catch (e) {
+    addBotMessage("⚠️ Server waking up, try again in 5 seconds...");
+    return;
+  }
+
+  if (!res.ok) {
+    addBotMessage("⚠️ Failed to load conversation.");
+    return;
+  }
 
   const messages = await res.json();
 
@@ -640,6 +652,7 @@ window.loadConversation = async function (id) {
   if (box) box.scrollTop = box.scrollHeight;
 };
 
+
   
 document.addEventListener("DOMContentLoaded", async () => {
   if (window.bindSmartAssistantUI) {
@@ -653,7 +666,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   try {
     await loadConversationList();
     const first = document.querySelector("#chatHistoryList .chat-item");
-    if (first) first.click();
+if (first) {
+  const id = first.dataset.id;
+  if (id) loadConversation(id);
+}
   } catch (e) {
     console.warn("Backend still waking up...");
   }
