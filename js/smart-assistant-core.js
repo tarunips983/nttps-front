@@ -31,6 +31,44 @@ function setGuestUI() {
   if (statusEl) statusEl.textContent = "Login required";
 }
 
+function formatTime(dateStr) {
+  const d = dateStr ? new Date(dateStr) : new Date();
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
+function renderMessageBubble({ role, content, created_at, file_url }) {
+  const box = document.getElementById("aiMessages");
+  if (!box) return;
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "chat-bubble " + (role === "user" ? "user-bubble" : "assistant-bubble");
+
+  const bubble = document.createElement("div");
+  bubble.className = "bubble-body";
+
+  bubble.innerHTML = content || "";
+
+  if (file_url) {
+    const a = document.createElement("a");
+    a.href = file_url;
+    a.target = "_blank";
+    a.textContent = "📎 Attachment";
+    bubble.appendChild(document.createElement("br"));
+    bubble.appendChild(a);
+  }
+
+  const time = document.createElement("div");
+  time.className = "bubble-time";
+  time.textContent = formatTime(created_at);
+
+  wrapper.appendChild(bubble);
+  wrapper.appendChild(time);
+
+  box.appendChild(wrapper);
+  box.scrollTop = box.scrollHeight;
+}
+
+
 function setLoggedUI() {
   const nameEl = document.getElementById("smartUserName");
   const statusEl = document.getElementById("smartUserStatus");
@@ -108,6 +146,19 @@ function stopAIThinking() {
   removeStatusMessage();
   setSendButtonMode("send");
 }
+function renderDateSeparator(dateStr) {
+  const box = document.getElementById("aiMessages");
+  if (!box) return;
+
+  const d = new Date(dateStr);
+  const label = d.toDateString();
+
+  const sep = document.createElement("div");
+  sep.className = "chat-date-separator";
+  sep.textContent = "——— " + label + " ———";
+
+  box.appendChild(sep);
+}
 
 function showStatusMessage(text) {
   const messages = document.getElementById("aiMessages");
@@ -153,7 +204,12 @@ if (isAITyping) return;
     window.enterChatMode();
   }
 
-  addUserMessage(text, file);
+  renderMessageBubble({
+  role: "user",
+  content: text || "[File uploaded]",
+  created_at: new Date().toISOString()
+});
+
   input.value = "";
 
   const token = localStorage.getItem("adminToken");
@@ -192,7 +248,12 @@ if (isAITyping) return;
 
     } catch (e) {
       console.error("❌ File analysis failed", e);
-      addBotMessage("❌ Failed to analyze file.");
+      renderMessageBubble({
+  role: "assistant",
+  content: "❌ Failed to analyze file.",
+  created_at: new Date().toISOString()
+});
+
     }
   }
 
@@ -345,7 +406,11 @@ const DAILY_FIELDS = ["date","activity","status","division_label"];
   /* ================= RENDERERS ================= */
 function renderTable(columns, rows) {
   if (!rows || !rows.length) {
-    addBotMessage("No data found.");
+    renderMessageBubble({
+  role: "assistant",
+  content: html,
+  created_at: new Date().toISOString()
+});
     return;
   }
 
@@ -608,7 +673,11 @@ window.loadConversation = async function (id) {
   }
 
   if (!res.ok) {
-    addBotMessage("⚠️ Failed to load conversation.");
+    renderMessageBubble({
+  role: "assistant",
+  content: "⚠️ Failed to load conversation.",
+  created_at: new Date().toISOString()
+});
     return;
   }
 
@@ -616,24 +685,34 @@ window.loadConversation = async function (id) {
 
   if (!Array.isArray(messages)) {
     console.error("Invalid messages response:", messages);
-    addBotMessage("⚠️ Failed to load messages.");
+    renderMessageBubble({
+  role: "assistant",
+  content: "⚠️ Failed to load messages.",
+  created_at: new Date().toISOString()
+});
+
     return;
   }
+let lastDate = null;
 
-  // Render messages
-  messages.forEach(m => {
-    let text = m.content || "";
+messages.forEach(m => {
+  const msgDate = new Date(m.created_at).toDateString();
 
-    if (m.file_url) {
-      text += `<br><a href="${m.file_url}" target="_blank">📎 Attachment</a>`;
-    }
+  if (msgDate !== lastDate) {
+    renderDateSeparator(m.created_at);
+    lastDate = msgDate;
+  }
 
-    if (m.role === "user") {
-      addUserMessage(text);
-    } else {
-      addBotMessage(text);
-    }
+  let text = m.content || "";
+
+  renderMessageBubble({
+    role: m.role,
+    content: text,
+    created_at: m.created_at,
+    file_url: m.file_url
   });
+});
+
 
   // Scroll to bottom
   const box = document.getElementById("aiMessages");
