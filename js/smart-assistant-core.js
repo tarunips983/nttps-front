@@ -540,7 +540,10 @@ async function loadConversationList() {
 
   list.forEach(c => {
     const div = document.createElement("div");
-    div.className = "chat-item" + (c.id === currentConversationId ? " active" : "");
+div.className = "chat-item";
+if (c.id === currentConversationId) {
+  div.classList.add("active");
+}
     div.textContent = c.title || "New Chat";
     div.onclick = () => loadConversation(c.id);
 
@@ -591,6 +594,16 @@ async function loadConversationList() {
 
 window.loadConversation = async function (id) {
   currentConversationId = id;
+
+  // Highlight active chat
+  document.querySelectorAll(".chat-item").forEach(el => {
+    el.classList.remove("active");
+  });
+
+  const active = [...document.querySelectorAll(".chat-item")]
+    .find(x => x.onclick && x.onclick.toString().includes(id));
+
+  // Clear UI
   clearChatUI();
 
   const token = localStorage.getItem("adminToken");
@@ -599,29 +612,32 @@ window.loadConversation = async function (id) {
     headers: { Authorization: `Bearer ${token}` }
   });
 
-const messages = await res.json();
+  const messages = await res.json();
 
-if (!Array.isArray(messages)) {
-  console.error("Invalid messages response:", messages);
-  addBotMessage("⚠️ Failed to load messages.");
-  return;
-}
-
-
-
- messages.forEach(m => {
-  let text = m.content || "";
-
-  if (m.file_url) {
-    text += `<br><a href="${m.file_url}" target="_blank">📎 Attachment</a>`;
+  if (!Array.isArray(messages)) {
+    console.error("Invalid messages response:", messages);
+    addBotMessage("⚠️ Failed to load messages.");
+    return;
   }
 
-  if (m.role === "user") addUserMessage(text);
-  else addBotMessage(text);
-});
+  // Render messages
+  messages.forEach(m => {
+    let text = m.content || "";
 
-  
+    if (m.file_url) {
+      text += `<br><a href="${m.file_url}" target="_blank">📎 Attachment</a>`;
+    }
 
+    if (m.role === "user") {
+      addUserMessage(text);
+    } else {
+      addBotMessage(text);
+    }
+  });
+
+  // Scroll to bottom
+  const box = document.getElementById("aiMessages");
+  if (box) box.scrollTop = box.scrollHeight;
 };
 
   
