@@ -107,6 +107,22 @@ height: 44px;
   font-size: 14px;
   line-height: 1.4;
 }
+.bubble-actions {
+  display: flex;
+  gap: 8px;
+  font-size: 14px;
+  opacity: 0;
+  margin-top: 4px;
+  cursor: pointer;
+}
+
+.chat-bubble:hover .bubble-actions {
+  opacity: 1;
+}
+
+.bubble-actions span:hover {
+  transform: scale(1.2);
+}
 
 .user-bubble .bubble-body {
   background: #2563eb;
@@ -2754,9 +2770,12 @@ padding: 10px;
 
 <div id="chatHistory">
   <div class="chat-history-header">
+    
     <span>💬 Conversations</span>
     <button onclick="createNewChat()">＋</button>
+    <input id="chatSearch" placeholder="Search in chat..." />
   </div>
+  
   <div id="chatHistoryList"></div>
 </div>
 
@@ -2974,6 +2993,14 @@ function closeAllSidebars() {
     el.setAttribute("aria-hidden", "true");
   });
 }
+document.getElementById("chatSearch")?.addEventListener("input", function () {
+  const q = this.value.toLowerCase();
+
+  document.querySelectorAll(".chat-bubble").forEach(bubble => {
+    const text = bubble.innerText.toLowerCase();
+    bubble.style.display = text.includes(q) ? "" : "none";
+  });
+});
 
 window.showMainView = function (viewName) {
 
@@ -4891,6 +4918,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
