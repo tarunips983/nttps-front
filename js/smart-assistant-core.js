@@ -36,6 +36,72 @@ function formatTime(dateStr) {
   return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
+async function streamAIResponse({ query, fileText }) {
+  const token = localStorage.getItem("adminToken");
+
+  currentAbortController = new AbortController();
+
+  const res = await fetch(`${API}/ai/query-stream`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ query, fileText }),
+    signal: currentAbortController.signal
+  });
+
+  if (!res.ok || !res.body) {
+    throw new Error("Stream failed");
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder("utf-8");
+
+  let finalText = "";
+
+  // Create live assistant bubble
+  const box = document.getElementById("aiMessages");
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "chat-bubble assistant-bubble streaming-bubble";
+
+  const bubble = document.createElement("div");
+  bubble.className = "bubble-body";
+  bubble.textContent = "";
+
+  wrapper.appendChild(bubble);
+  box.appendChild(wrapper);
+  box.scrollTop = box.scrollHeight;
+
+  try {
+    while (isAITyping) {
+      const { value, done } = await reader.read();
+
+      if (done) break;
+
+      if (value) {
+        const chunk = decoder.decode(value, { stream: true });
+        finalText += chunk;
+        bubble.textContent = finalText;
+        box.scrollTop = box.scrollHeight;
+      }
+    }
+  } catch (err) {
+    if (err.name !== "AbortError") {
+      console.error("Stream read error:", err);
+    }
+  } finally {
+    try {
+      await reader.cancel();
+    } catch (e) {}
+  }
+
+  return finalText;
+}
+
+
+
 function renderMessageBubble({ role, content, created_at, file_url, message_id }) {
   const box = document.getElementById("aiMessages");
   if (!box) return;
@@ -169,8 +235,6 @@ let currentConversationId = null;
 
 let isAITyping = false;
 let currentAbortController = null;
-let typingInterval = null;
-
 let thinkingMsgDiv = null;
 
 function startAIThinking() {
@@ -182,21 +246,14 @@ function startAIThinking() {
 function stopAIThinking() {
   isAITyping = false;
 
-  // Stop typing animation
-  if (typingInterval) {
-    clearInterval(typingInterval);
-    typingInterval = null;
-  }
-
-  // Abort fetch
   if (currentAbortController) {
     currentAbortController.abort();
     currentAbortController = null;
   }
 
-  removeStatusMessage();
   setSendButtonMode("send");
 }
+
 function renderDateSeparator(dateStr) {
   const box = document.getElementById("aiMessages");
   if (!box) return;
@@ -211,37 +268,17 @@ function renderDateSeparator(dateStr) {
   box.appendChild(sep);
 }
 
-function showStatusMessage(text) {
-  const messages = document.getElementById("aiMessages");
-  if (!messages) return;
-
-  thinkingMsgDiv = document.createElement("div");
-  thinkingMsgDiv.className = "ai-msg ai-bot ai-thinking";
-  thinkingMsgDiv.textContent = text;
-  messages.appendChild(thinkingMsgDiv);
-  messages.scrollTop = messages.scrollHeight;
-}
-
-function removeStatusMessage() {
-  if (thinkingMsgDiv) {
-    thinkingMsgDiv.remove();
-    thinkingMsgDiv = null;
-  }
-}
-
-
-  
   function el(id) {
     return document.getElementById(id);
   }
 
   /* ================= CHAT HANDLERS ================= */
+async function handleAskAI() {
+  console.log("🧪 UI selectedFile at send time =", window.selectedFile);
 
- async function handleAskAI() {
-   console.log("🧪 UI selectedFile at send time =", window.selectedFile);
   const input = el("aiInput");
   const msgBox = el("aiMessages");
-if (isAITyping) return;
+  if (isAITyping) return;
 
   if (!input || !msgBox) return;
 
@@ -255,17 +292,22 @@ if (isAITyping) return;
     window.enterChatMode();
   }
 
+  // Render user message immediately
   renderMessageBubble({
-  role: "user",
-  content: text || "[File uploaded]",
-  created_at: new Date().toISOString()
-});
+    role: "user",
+    content: text || "[File uploaded]",
+    created_at: new Date().toISOString()
+  });
 
   input.value = "";
 
   const token = localStorage.getItem("adminToken");
   if (!token) {
-    addBotMessage("🔒 Please login to use Smart Assistant.");
+    renderMessageBubble({
+      role: "assistant",
+      content: "🔒 Please login to use Smart Assistant.",
+      created_at: new Date().toISOString()
+    });
     return;
   }
 
@@ -278,8 +320,6 @@ if (isAITyping) return;
   // ================= FILE ANALYSIS =================
   if (file) {
     try {
-      console.log("📎 UI sending file:", file.name, file.type, file.size);
-
       const fd = new FormData();
       fd.append("file", file);
 
@@ -292,19 +332,13 @@ if (isAITyping) return;
       const analyzeResult = await analyzeRes.json();
       extractedText = analyzeResult.text || "";
 
-      if (analyzeResult.source) {
-        showStatusMessage(`🧠 Extracted using ${analyzeResult.source.toUpperCase()}`);
-        setTimeout(() => removeStatusMessage(), 1500);
-      }
-
     } catch (e) {
       console.error("❌ File analysis failed", e);
       renderMessageBubble({
-  role: "assistant",
-  content: "❌ Failed to analyze file.",
-  created_at: new Date().toISOString()
-});
-
+        role: "assistant",
+        content: "❌ Failed to analyze file.",
+        created_at: new Date().toISOString()
+      });
     }
   }
 
@@ -322,42 +356,22 @@ if (isAITyping) return;
     })
   });
 
-startAIThinking();
-currentAbortController = new AbortController();
+  // ================= STREAM AI RESPONSE =================
 
-try {
-    const res = await fetch(`${API}/ai/query`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        query: text,
-        fileText: extractedText
-      }),
-      signal: currentAbortController.signal
+  startAIThinking();
+
+  try {
+    const finalReply = await streamAIResponse({
+      query: text,
+      fileText: extractedText
     });
 
-    const result = await res.json();
+    // Stream ended normally
+   stopAIThinking();
 
- // We are still in "AI working" state while typing
-if (!result.reply) {
-  stopAIThinking();
-  return;
-}
+    if (!finalReply) return;
 
-const msgDiv = document.createElement("div");
-msgDiv.className = "ai-message";
-el("aiMessages").appendChild(msgDiv);
-
-// Start typing animation while still in AI mode
-typeWriter(msgDiv, result.reply, 15);
-
-// Only stop AI mode when typing finishes
-
-
-    // ================= SAVE ASSISTANT MESSAGE =================
+    // Save assistant message
     await fetch(`${API}/ai/messages`, {
       method: "POST",
       headers: {
@@ -367,10 +381,25 @@ typeWriter(msgDiv, result.reply, 15);
       body: JSON.stringify({
         conversation_id: currentConversationId,
         role: "assistant",
-        content: result.reply
+        content: finalReply
       })
     });
 
+  } catch (err) {
+    isAITyping = false;
+    setSendButtonMode("send");
+
+    if (err.name === "AbortError") {
+      console.log("Stream aborted");
+    } else {
+      console.error(err);
+      renderMessageBubble({
+        role: "assistant",
+        content: "❌ Unable to process request.",
+        created_at: new Date().toISOString()
+      });
+    }
+  } finally {
     // ================= CLEAR FILE =================
     window.selectedFile = null;
 
@@ -382,23 +411,8 @@ typeWriter(msgDiv, result.reply, 15);
 
     const fileInputEl = document.getElementById("chatFile");
     if (fileInputEl) fileInputEl.value = "";
-
-    if (result.columns && result.data) {
-      setTimeout(() => {
-        renderTable(result.columns, result.data);
-      }, Math.min(2000, result.reply.length * 15));
-    }
-  } catch (err) {
-    stopAIThinking();
-    if (err.name === "AbortError") {
-  console.log("Request aborted");
-} else {
-  console.error(err);
-  addBotMessage("❌ Unable to process request.");
-}
   }
 }
-
 
 window.stopAIResponse = stopAIThinking;
 
@@ -458,10 +472,10 @@ const DAILY_FIELDS = ["date","activity","status","division_label"];
 function renderTable(columns, rows) {
   if (!rows || !rows.length) {
     renderMessageBubble({
-  role: "assistant",
-  content: html,
-  created_at: new Date().toISOString()
-});
+      role: "assistant",
+      content: "No data found.",
+      created_at: new Date().toISOString()
+    });
     return;
   }
 
@@ -550,7 +564,12 @@ function renderTable(columns, rows) {
   </div>
   `;
 
-  addBotMessage(html);
+  renderMessageBubble({
+  role: "assistant",
+  content: html,
+  created_at: new Date().toISOString()
+});
+
 }
 window.renderTable = renderTable;
   /* ================= EXPORT ================= */
@@ -571,36 +590,7 @@ window.renderTable = renderTable;
     link.click();
   };
 
-function typeWriter(element, text, speed = 15) {
-  element.innerHTML = "";
 
-  // 🔥 Convert text formatting to HTML
-  const formatted = text
-    .replace(/\n\n+/g, "</p><p>")    // paragraphs
-    .replace(/\n/g, "<br>")          // line breaks
-    .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")  // bold
-    .replace(/\*(.*?)\*/g, "• $1");  // simple bullets
-
-  let i = 0;
-  let output = "";
-
-  typingInterval = setInterval(() => {
-   if (i >= formatted.length || !isAITyping) {
-  clearInterval(typingInterval);
-  typingInterval = null;
-  stopAIThinking();   // ✅ THIS IS IMPORTANT
-  return;
-}
-
-    output += formatted.charAt(i);
-    element.innerHTML = `<div class="ai-formatted"><p>${output}</p></div>`;
-
-    const box = document.getElementById("aiMessages");
-    if (box) box.scrollTop = box.scrollHeight;
-
-    i++;
-  }, speed);
-}
 
 window.createNewChat = async function () {
   const token = localStorage.getItem("adminToken");
