@@ -103,6 +103,25 @@ window.bindSmartAssistantUI = function () {
   window.enterChatMode = enterChatMode;
 };
 
+window.regenerateLastAnswer = async function () {
+  if (isAITyping) return;
+
+  const token = localStorage.getItem("adminToken");
+  if (!token || !currentConversationId) return;
+
+  // Find last user message in UI
+  const bubbles = document.querySelectorAll(".chat-bubble.user-bubble .bubble-body");
+  if (!bubbles.length) return;
+
+  const lastUserText = bubbles[bubbles.length - 1].innerText;
+
+  const input = document.getElementById("aiInput");
+  input.value = lastUserText;
+
+  await handleAskAI();
+};
+
+
 window.clearChatUI = function () {
   const messages = document.getElementById("aiMessages");
   if (messages) messages.innerHTML = "";
