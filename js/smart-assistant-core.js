@@ -475,7 +475,6 @@ function typeWriter(element, text, speed = 15) {
   stopAIThinking();   // ✅ THIS IS IMPORTANT
   return;
 }
-    }
 
     output += formatted.charAt(i);
     element.innerHTML = `<div class="ai-formatted"><p>${output}</p></div>`;
