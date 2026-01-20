@@ -38,6 +38,35 @@ function formatTime(dateStr) {
   const d = dateStr ? new Date(dateStr) : new Date();
   return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
+function renderMarkdown(text) {
+  if (!text) return "";
+
+  let html = text;
+
+  // Escape basic HTML
+  html = html.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  // Headings
+  html = html.replace(/^### (.*$)/gim, "<h3>$1</h3>");
+  html = html.replace(/^## (.*$)/gim, "<h2>$1</h2>");
+  html = html.replace(/^# (.*$)/gim, "<h1>$1</h1>");
+
+  // Bold
+  html = html.replace(/\*\*(.*?)\*\*/gim, "<b>$1</b>");
+
+  // Italic
+  html = html.replace(/\*(.*?)\*/gim, "<i>$1</i>");
+
+  // Bullet points
+  html = html.replace(/^\s*[-•] (.*)$/gim, "<li>$1</li>");
+  html = html.replace(/(<li>.*<\/li>)/gims, "<ul>$1</ul>");
+
+  // Line breaks → paragraphs
+  html = html.replace(/\n\n+/g, "</p><p>");
+  html = html.replace(/\n/g, "<br>");
+
+  return "<div class='ai-formatted'><p>" + html + "</p></div>";
+}
 
 async function streamAIResponse({ query, fileText }) {
   const token = localStorage.getItem("adminToken");
@@ -86,7 +115,7 @@ async function streamAIResponse({ query, fileText }) {
       if (value) {
         const chunk = decoder.decode(value, { stream: true });
         finalText += chunk;
-        bubble.textContent = finalText;
+        bubble.innerHTML = renderMarkdown(finalText);
         box.scrollTop = box.scrollHeight;
       }
     }
@@ -118,7 +147,7 @@ function renderMessageBubble({ role, content, created_at, file_url, message_id }
 
   const bubble = document.createElement("div");
   bubble.className = "bubble-body";
-  bubble.innerHTML = content || "";
+  bubble.innerHTML = renderMarkdown(content || "");
 
   if (file_url) {
     const a = document.createElement("a");
