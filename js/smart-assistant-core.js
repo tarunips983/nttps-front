@@ -36,16 +36,19 @@ function formatTime(dateStr) {
   return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-function renderMessageBubble({ role, content, created_at, file_url }) {
+function renderMessageBubble({ role, content, created_at, file_url, message_id }) {
   const box = document.getElementById("aiMessages");
   if (!box) return;
 
   const wrapper = document.createElement("div");
   wrapper.className = "chat-bubble " + (role === "user" ? "user-bubble" : "assistant-bubble");
 
+  if (message_id) {
+    wrapper.dataset.id = message_id;
+  }
+
   const bubble = document.createElement("div");
   bubble.className = "bubble-body";
-
   bubble.innerHTML = content || "";
 
   if (file_url) {
@@ -57,16 +60,58 @@ function renderMessageBubble({ role, content, created_at, file_url }) {
     bubble.appendChild(a);
   }
 
+  // 🛠 Action bar
+  const actions = document.createElement("div");
+  actions.className = "bubble-actions";
+
+  // 📋 Copy
+  const copyBtn = document.createElement("span");
+  copyBtn.textContent = "📋";
+  copyBtn.title = "Copy";
+  copyBtn.onclick = () => {
+    navigator.clipboard.writeText(bubble.innerText || "");
+  };
+
+  // 💬 Quote
+  const quoteBtn = document.createElement("span");
+  quoteBtn.textContent = "💬";
+  quoteBtn.title = "Quote";
+  quoteBtn.onclick = () => {
+    const input = document.getElementById("aiInput");
+    if (!input) return;
+    input.value = `> ${bubble.innerText}\n\n` + input.value;
+    input.focus();
+  };
+
+  // 🔁 Retry (only for assistant)
+  const retryBtn = document.createElement("span");
+  retryBtn.textContent = "🔁";
+  retryBtn.title = "Regenerate";
+
+  if (role === "assistant") {
+    retryBtn.onclick = () => {
+      window.regenerateLastAnswer();
+    };
+  } else {
+    retryBtn.style.display = "none";
+  }
+
+  actions.appendChild(copyBtn);
+  actions.appendChild(quoteBtn);
+  actions.appendChild(retryBtn);
+
   const time = document.createElement("div");
   time.className = "bubble-time";
   time.textContent = formatTime(created_at);
 
   wrapper.appendChild(bubble);
+  wrapper.appendChild(actions);
   wrapper.appendChild(time);
 
   box.appendChild(wrapper);
   box.scrollTop = box.scrollHeight;
 }
+
 
 
 function setLoggedUI() {
