@@ -236,12 +236,11 @@ let currentConversationId = null;
 let isAITyping = false;
 let currentAbortController = null;
 let thinkingMsgDiv = null;
-
 function startAIThinking() {
   isAITyping = true;
   setSendButtonMode("stop");
-  showStatusMessage("🤔 Thinking...");
 }
+
 
 function stopAIThinking() {
   isAITyping = false;
