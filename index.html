@@ -2503,7 +2503,15 @@ padding: 10px;
     <div class="nav-right">
       <div class="search-wrapper">
     <button id="searchIconBtn" onclick="toggleSearchBar()" class="search-btn">🔍</button>
-    <input id="searchInput" class="search-field" placeholder="Search by Work, PR No, or Send To..." />
+    <input 
+  id="searchInput"
+  class="search-field"
+  placeholder="Search by Work, PR No, or Send To..."
+  autocomplete="off"
+  autocapitalize="off"
+  autocorrect="off"
+  spellcheck="false"
+/>
 </div>
       <a href="javascript:void(0)" onclick="openPasswordModal()" title="Add New Record">➕ Add Record</a>
       <a href="login.html" id="loginLink" title="Login Page">🔐 Login</a>
@@ -4825,6 +4833,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
