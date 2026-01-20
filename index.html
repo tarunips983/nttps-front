@@ -107,14 +107,7 @@ height: 44px;
   font-size: 14px;
   line-height: 1.4;
 }
-.bubble-actions {
-  display: flex;
-  gap: 8px;
-  font-size: 14px;
-  opacity: 0;
-  margin-top: 4px;
-  cursor: pointer;
-}
+
 
 .chat-bubble:hover .bubble-actions {
   opacity: 1;
@@ -135,11 +128,29 @@ height: 44px;
   color: #000;
   border-bottom-left-radius: 4px;
 }
+.bubble-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.bubble-actions {
+  display: flex;
+  gap: 8px;
+  font-size: 14px;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.chat-bubble:hover .bubble-actions {
+  opacity: 1;
+}
 
 .bubble-time {
   font-size: 11px;
   opacity: 0.6;
-  margin-top: 2px;
+  white-space: nowrap;
 }
 
 .chat-date-separator {
@@ -4918,6 +4929,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
