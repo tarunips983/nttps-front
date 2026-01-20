@@ -83,8 +83,31 @@ let currentAbortController = null;
 let typingInterval = null;
 
 let thinkingMsgDiv = null;
-  window.isAITyping = false;
 
+function startAIThinking() {
+  isAITyping = true;
+  setSendButtonMode("stop");
+  showStatusMessage("🤔 Thinking...");
+}
+
+function stopAIThinking() {
+  isAITyping = false;
+
+  // Stop typing animation
+  if (typingInterval) {
+    clearInterval(typingInterval);
+    typingInterval = null;
+  }
+
+  // Abort fetch
+  if (currentAbortController) {
+    currentAbortController.abort();
+    currentAbortController = null;
+  }
+
+  removeStatusMessage();
+  setSendButtonMode("send");
+}
 
 function showStatusMessage(text) {
   const messages = document.getElementById("aiMessages");
@@ -116,6 +139,7 @@ function removeStatusMessage() {
    console.log("🧪 UI selectedFile at send time =", window.selectedFile);
   const input = el("aiInput");
   const msgBox = el("aiMessages");
+if (isAITyping) return;
 
   if (!input || !msgBox) return;
 
@@ -186,13 +210,10 @@ function removeStatusMessage() {
     })
   });
 
-  showTyping();
-  showStatusMessage("🤔 Thinking...");
-  setSendButtonMode("stop");
+startAIThinking();
+currentAbortController = new AbortController();
 
-  try {
-    currentAbortController = new AbortController();
-
+try {
     const res = await fetch(`${API}/ai/query`, {
       method: "POST",
       headers: {
@@ -208,19 +229,21 @@ function removeStatusMessage() {
 
     const result = await res.json();
 
-    hideTyping();
-    removeStatusMessage();
+ // We are still in "AI working" state while typing
+if (!result.reply) {
+  stopAIThinking();
+  return;
+}
 
-    if (!result.reply) {
-      addBotMessage("No response.");
-      return;
-    }
+const msgDiv = document.createElement("div");
+msgDiv.className = "ai-message";
+el("aiMessages").appendChild(msgDiv);
 
-    const msgDiv = document.createElement("div");
-    msgDiv.className = "ai-message";
-    el("aiMessages").appendChild(msgDiv);
+// Start typing animation while still in AI mode
+typeWriter(msgDiv, result.reply, 15);
 
-    typeWriter(msgDiv, result.reply, 15);
+// Only stop AI mode when typing finishes
+
 
     // ================= SAVE ASSISTANT MESSAGE =================
     await fetch(`${API}/ai/messages`, {
@@ -253,38 +276,19 @@ function removeStatusMessage() {
         renderTable(result.columns, result.data);
       }, Math.min(2000, result.reply.length * 15));
     }
-
-    setSendButtonMode("send");
-
   } catch (err) {
-    hideTyping();
-    setSendButtonMode("send");
-    console.error(err);
-    addBotMessage("❌ Unable to process request.");
+    stopAIThinking();
+    if (err.name === "AbortError") {
+  console.log("Request aborted");
+} else {
+  console.error(err);
+  addBotMessage("❌ Unable to process request.");
+}
   }
 }
 
 
-window.stopAIResponse = function () {
-  console.log("⛔ AI stopped");
-
-  isAITyping = false;
-  window.isAITyping = false;
-
-  // Stop typing animation immediately
-  if (typingInterval) {
-    clearInterval(typingInterval);
-    typingInterval = null;
-  }
-
-  // Abort fetch if still running
-  if (currentAbortController) {
-    currentAbortController.abort();
-    currentAbortController = null;
-  }
-
-  setSendButtonMode("send");
-};
+window.stopAIResponse = stopAIThinking;
 
 
 function setSendButtonMode(mode) {
@@ -301,11 +305,11 @@ const sendBtn = document.getElementById("aiSendBtn");
 
 if (sendBtn) {
   sendBtn.onclick = () => {
-    if (window.isAITyping) {
-      window.stopAIResponse();
-    } else {
-      handleAskAI();
-    }
+    if (isAITyping) {
+  stopAIThinking();
+} else {
+  handleAskAI();
+}
   };
 }
   
@@ -464,18 +468,13 @@ function typeWriter(element, text, speed = 15) {
   let i = 0;
   let output = "";
 
-  isAITyping = true;
-  window.isAITyping = true;
-  setSendButtonMode("stop");
-
   typingInterval = setInterval(() => {
-    if (i >= formatted.length || !isAITyping) {
-      clearInterval(typingInterval);
-      typingInterval = null;
-      isAITyping = false;
-      window.isAITyping = false;
-      setSendButtonMode("send");
-      return;
+   if (i >= formatted.length || !isAITyping) {
+  clearInterval(typingInterval);
+  typingInterval = null;
+  stopAIThinking();   // ✅ THIS IS IMPORTANT
+  return;
+}
     }
 
     output += formatted.charAt(i);
@@ -488,16 +487,6 @@ function typeWriter(element, text, speed = 15) {
   }, speed);
 }
 
-
-  function showTyping() {
-    const t = el("aiTyping");
-    if (t) t.style.display = "block";
-  }
-
-  function hideTyping() {
-    const t = el("aiTyping");
-    if (t) t.style.display = "none";
-  }
 window.createNewChat = async function () {
   const token = localStorage.getItem("adminToken");
 
