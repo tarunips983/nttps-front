@@ -104,9 +104,15 @@ function renderMessageBubble({ role, content, created_at, file_url, message_id }
   time.className = "bubble-time";
   time.textContent = formatTime(created_at);
 
-  wrapper.appendChild(bubble);
-  wrapper.appendChild(actions);
-  wrapper.appendChild(time);
+ const footer = document.createElement("div");
+footer.className = "bubble-footer";
+
+footer.appendChild(actions);
+footer.appendChild(time);
+
+wrapper.appendChild(bubble);
+wrapper.appendChild(footer);
+
 
   box.appendChild(wrapper);
   box.scrollTop = box.scrollHeight;
