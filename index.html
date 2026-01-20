@@ -2493,6 +2493,10 @@ padding: 10px;
 
 </head>
 <body>
+  <!-- Chrome autofill trap -->
+<input type="text" name="fake-username" style="display:none">
+<input type="password" name="fake-password" style="display:none">
+
   <header>
     <div style="display:flex;align-items:center;gap:12px">
       <img src="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg"
@@ -2502,15 +2506,17 @@ padding: 10px;
 
     <div class="nav-right">
       <div class="search-wrapper">
-    <input 
+   <input 
+  type="search"
   id="searchInput"
-  name="search_dummy_field_123"
+  name="q_stage5_search_987654"
   class="search-field"
   placeholder="Search by Work, PR No, or Send To..."
   autocomplete="off"
-  autocapitalize="off"
   autocorrect="off"
+  autocapitalize="off"
   spellcheck="false"
+  inputmode="search"
 />
 </div>
       <a href="javascript:void(0)" onclick="openPasswordModal()" title="Add New Record">➕ Add Record</a>
@@ -4837,6 +4843,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
