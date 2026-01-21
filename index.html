@@ -37,6 +37,18 @@ button, a, .burger-menu {
 }
 
 header h1 { margin: 0; font-size: 22px; }
+/* FORCE FIX FOR CODE BLOCK COLOR */
+.ai-code-block,
+.ai-code-block pre,
+.ai-code-block code {
+  background: #0f172a !important;
+  color: #e5e7eb !important;
+}
+
+/* Also kill any bootstrap/pre default */
+.bubble-body pre {
+  background: #0f172a !important;
+}
 
 .nav-right { display:flex; align-items:center; gap:15px; }
 
@@ -4981,6 +4993,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
