@@ -39,33 +39,83 @@ function formatTime(dateStr) {
   return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 function renderMarkdown(text) {
-  if (!text) return "";
+  
 
+  if (!text) return "";
+  // ✅ Normalize paragraphs
+  text = text.replace(/\n{3,}/g, "\n\n");
   let html = text;
 
-  // Escape basic HTML
+  // Escape HTML
   html = html.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-  // Headings
+  // ================= CODE BLOCKS =================
+  html = html.replace(/```([\s\S]*?)```/g, (match, code) => {
+    return `
+      <div class="ai-code-block">
+        <button class="copy-btn" onclick="navigator.clipboard.writeText(\`${code.replace(/`/g, "\\`")}\`)">Copy</button>
+        <pre><code>${code}</code></pre>
+      </div>
+    `;
+  });
+
+  // ================= HEADINGS =================
   html = html.replace(/^### (.*$)/gim, "<h3>$1</h3>");
   html = html.replace(/^## (.*$)/gim, "<h2>$1</h2>");
   html = html.replace(/^# (.*$)/gim, "<h1>$1</h1>");
 
-  // Bold
+  // ================= BOLD / ITALIC =================
   html = html.replace(/\*\*(.*?)\*\*/gim, "<b>$1</b>");
-
-  // Italic
   html = html.replace(/\*(.*?)\*/gim, "<i>$1</i>");
 
-  // Bullet points
+  // ================= TABLES =================
+  if (html.includes("|")) {
+    const lines = html.split("\n");
+    let tableMode = false;
+    let tableHTML = "<table class='ai-md-table'>";
+
+    let out = [];
+
+    for (let line of lines) {
+      if (line.includes("|")) {
+        const cells = line.split("|").map(c => c.trim()).filter(Boolean);
+        if (!tableMode) {
+          tableMode = true;
+          tableHTML = "<table class='ai-md-table'><tr>";
+          cells.forEach(c => tableHTML += `<th>${c}</th>`);
+          tableHTML += "</tr>";
+        } else {
+          tableHTML += "<tr>";
+          cells.forEach(c => tableHTML += `<td>${c}</td>`);
+          tableHTML += "</tr>";
+        }
+      } else {
+        if (tableMode) {
+          tableHTML += "</table>";
+          out.push(tableHTML);
+          tableMode = false;
+        }
+        out.push(line);
+      }
+    }
+
+    if (tableMode) {
+      tableHTML += "</table>";
+      out.push(tableHTML);
+    }
+
+    html = out.join("\n");
+  }
+
+  // ================= LISTS =================
   html = html.replace(/^\s*[-•] (.*)$/gim, "<li>$1</li>");
   html = html.replace(/(<li>.*<\/li>)/gims, "<ul>$1</ul>");
 
-  // Line breaks → paragraphs
+  // ================= PARAGRAPHS =================
   html = html.replace(/\n\n+/g, "</p><p>");
   html = html.replace(/\n/g, "<br>");
 
-  return "<div class='ai-formatted'><p>" + html + "</p></div>";
+  return `<div class="ai-formatted"><p>${html}</p></div>`;
 }
 
 async function streamAIResponse({ query, fileText }) {
@@ -115,8 +165,10 @@ async function streamAIResponse({ query, fileText }) {
       if (value) {
         const chunk = decoder.decode(value, { stream: true });
         finalText += chunk;
-        bubble.innerHTML = renderMarkdown(finalText);
-        box.scrollTop = box.scrollHeight;
+        bubble.innerHTML = renderMarkdown(finalText + "<span class='typing-cursor'>▍</span>");
+        const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 120;
+if (nearBottom) box.scrollTop = box.scrollHeight;
+
       }
     }
   } catch (err) {
@@ -128,6 +180,11 @@ async function streamAIResponse({ query, fileText }) {
       await reader.cancel();
     } catch (e) {}
   }
+
+  // ✅ REMOVE CURSOR AFTER STREAM FINISH
+  bubble.innerHTML = renderMarkdown(finalText);
+
+  currentAbortController = null;
 
   return finalText;
 }
@@ -213,7 +270,9 @@ wrapper.appendChild(footer);
 
 
   box.appendChild(wrapper);
-  box.scrollTop = box.scrollHeight;
+  const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 120;
+if (nearBottom) box.scrollTop = box.scrollHeight;
+
 }
 
 
@@ -785,7 +844,10 @@ messages.forEach(m => {
 
   // Scroll to bottom
   const box = document.getElementById("aiMessages");
-  if (box) box.scrollTop = box.scrollHeight;
+  if (box) 
+    const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 120;
+if (nearBottom) box.scrollTop = box.scrollHeight;
+
 };
 
 
