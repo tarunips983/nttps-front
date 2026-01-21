@@ -108,6 +108,58 @@ height: 44px;
   line-height: 1.4;
 }
 
+.typing-cursor {
+  animation: blink 1s infinite;
+  font-weight: bold;
+}
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.ai-code-block {
+  position: relative;
+  background: #0f172a;
+  color: #e5e7eb;
+  padding: 12px;
+  border-radius: 8px;
+  margin: 10px 0;
+  overflow-x: auto;
+}
+
+.ai-code-block pre {
+  margin: 0;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 12px;
+  padding: 4px 8px;
+  border: none;
+  background: #2563eb;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.ai-md-table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 10px 0;
+}
+
+.ai-md-table th, .ai-md-table td {
+  border: 1px solid #ccc;
+  padding: 6px;
+}
+
+.ai-md-table th {
+  background: #f1f5f9;
+}
 
 .chat-bubble:hover .bubble-actions {
   opacity: 1;
@@ -4929,6 +4981,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 </body>
 </html>
+
 
 
 
