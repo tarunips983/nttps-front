@@ -843,10 +843,12 @@ messages.forEach(m => {
 
 
   // Scroll to bottom
-  const box = document.getElementById("aiMessages");
-  if (box) 
-    const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 120;
-if (nearBottom) box.scrollTop = box.scrollHeight;
+  // Scroll to bottom
+const box = document.getElementById("aiMessages");
+if (box) {
+  const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 120;
+  if (nearBottom) box.scrollTop = box.scrollHeight;
+}
 
 };
 
