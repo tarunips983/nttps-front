@@ -775,6 +775,10 @@ if (c.id === currentConversationId) {
 }
 
 window.loadConversation = async function (id) {
+  if (typeof window.enterChatMode === "function") {
+  window.enterChatMode();
+}
+
   currentConversationId = id;
 
   // Highlight active chat
