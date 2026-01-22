@@ -696,6 +696,10 @@ window.createNewChat = async function () {
   currentConversationId = conv.id;
 
   clearChatUI();
+  if (window.enterWelcomeMode) {
+  window.enterWelcomeMode();   // ✅ Back to welcome screen
+}
+
 
   // ✅ Reload list ONCE and auto-open this chat
   await loadConversationList();
@@ -775,8 +779,8 @@ if (c.id === currentConversationId) {
 }
 
 window.loadConversation = async function (id) {
-  if (typeof window.enterChatMode === "function") {
-  window.enterChatMode();
+if (window.enterChatMode) {
+  window.enterChatMode();   // ✅ SWITCH TO CHAT VIEW
 }
 
   currentConversationId = id;
@@ -859,6 +863,10 @@ if (box) {
 
   
 document.addEventListener("DOMContentLoaded", async () => {
+  if (window.enterWelcomeMode) {
+  window.enterWelcomeMode();   // ✅ ALWAYS start with welcome screen
+}
+
   if (window.bindSmartAssistantUI) {
     window.bindSmartAssistantUI();
   }
