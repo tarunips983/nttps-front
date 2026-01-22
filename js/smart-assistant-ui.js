@@ -96,11 +96,19 @@ window.bindSmartAssistantUI = function () {
   console.log("✅ Smart Assistant UI bound");
 
   function enterChatMode() {
-    container.classList.remove("ai-welcome");
-    messagesBox.style.display = "block";
-  }
+  container.classList.remove("ai-welcome");
+  messagesBox.style.display = "block";
+}
+
+function enterWelcomeMode() {
+  container.classList.add("ai-welcome");
+  messagesBox.style.display = "none";
+}
+
 
   window.enterChatMode = enterChatMode;
+window.enterWelcomeMode = enterWelcomeMode;
+
 };
 
 window.regenerateLastAnswer = async function () {
