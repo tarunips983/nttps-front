@@ -113,7 +113,7 @@ return finalHTML;
 }
 
 
-async function streamAIResponse({ query, fileText }) {
+async function streamAIResponse({ query, fileText, memory = [] }) {
   const token = localStorage.getItem("adminToken");
 
   currentAbortController = new AbortController();
@@ -124,7 +124,12 @@ async function streamAIResponse({ query, fileText }) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`
     },
-    body: JSON.stringify({ query, fileText }),
+    body: JSON.stringify({
+  query,
+  fileText,
+  memory
+}),
+
     signal: currentAbortController.signal
   });
 
@@ -443,10 +448,31 @@ async function handleAskAI() {
   startAIThinking();
 
   try {
-    const finalReply = await streamAIResponse({
-      query: text,
-      fileText: extractedText
-    });
+    // ✅ Load last messages for memory
+let memory = [];
+
+try {
+  const memRes = await fetch(`${API}/ai/conversations/${currentConversationId}/messages`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  const memMsgs = await memRes.json();
+
+  // Take last 10 messages only (to avoid overload)
+  memory = memMsgs.slice(-10).map(m => ({
+    role: m.role,
+    content: m.content
+  }));
+} catch (e) {
+  console.warn("Memory load failed");
+}
+
+const finalReply = await streamAIResponse({
+  query: text,
+  fileText: extractedText,
+  memory
+});
+
 
     // Stream ended normally
    stopAIThinking();
