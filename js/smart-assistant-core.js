@@ -80,17 +80,36 @@ function renderMarkdown(text) {
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;");
 
-    const block = `
-      <div class="ai-code-block">
-        <button class="copy-btn" onclick="navigator.clipboard.writeText(${JSON.stringify(code)})">Copy</button>
-        <pre><code>${safeCode}</code></pre>
-      </div>
-    `;
+   const block = `
+  <div class="ai-code-block">
+    <button class="copy-btn">Copy</button>
+    <pre><code>${safeCode}</code></pre>
+  </div>
+`;
+;
 
     html = html.replace(`@@CODEBLOCK_${i}@@`, block);
   });
 
-  return `<div class="ai-formatted"><p>${html}</p></div>`;
+  const finalHTML = `<div class="ai-formatted"><p>${html}</p></div>`;
+
+// ✅ Bind copy buttons AFTER render
+setTimeout(() => {
+  document.querySelectorAll(".ai-code-block .copy-btn").forEach(btn => {
+    btn.onclick = () => {
+      const codeEl = btn.parentElement.querySelector("code");
+      const text = codeEl.innerText;   // ✅ WHAT USER SEES ON SCREEN
+
+      navigator.clipboard.writeText(text);
+
+      btn.textContent = "Copied!";
+      setTimeout(() => (btn.textContent = "Copy"), 1200);
+    };
+  });
+}, 0);
+
+return finalHTML;
+
 }
 
 
