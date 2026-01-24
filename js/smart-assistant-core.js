@@ -125,10 +125,11 @@ async function streamAIResponse({ query, fileText, memory = [] }) {
       Authorization: `Bearer ${token}`
     },
     body: JSON.stringify({
-  query,
-  fileText,
-  memory
-}),
+  query: text,
+  fileText: extractedText,
+  memory,
+  conversation_id: currentConversationId
+})
 
     signal: currentAbortController.signal
   });
