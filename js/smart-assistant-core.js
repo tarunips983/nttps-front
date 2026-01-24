@@ -38,26 +38,24 @@ function formatTime(dateStr) {
   const d = dateStr ? new Date(dateStr) : new Date();
   return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
+
 function renderMarkdown(text) {
-  
-
   if (!text) return "";
-  // ✅ Normalize paragraphs
+
+  // Normalize paragraphs
   text = text.replace(/\n{3,}/g, "\n\n");
-  let html = text;
 
-  // Escape HTML
-  html = html.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  let codeBlocks = [];
 
-  // ================= CODE BLOCKS =================
-  html = html.replace(/```([\s\S]*?)```/g, (match, code) => {
-    return `
-      <div class="ai-code-block">
-        <button class="copy-btn" onclick="navigator.clipboard.writeText(\`${code.replace(/`/g, "\\`")}\`)">Copy</button>
-        <pre><code>${code}</code></pre>
-      </div>
-    `;
+  // ✅ Extract code blocks FIRST
+  text = text.replace(/```([\s\S]*?)```/g, (match, code) => {
+    const id = codeBlocks.length;
+    codeBlocks.push(code);
+    return `@@CODEBLOCK_${id}@@`;
   });
+
+  // ✅ Escape HTML in remaining text
+  let html = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
   // ================= HEADINGS =================
   html = html.replace(/^### (.*$)/gim, "<h3>$1</h3>");
@@ -68,45 +66,6 @@ function renderMarkdown(text) {
   html = html.replace(/\*\*(.*?)\*\*/gim, "<b>$1</b>");
   html = html.replace(/\*(.*?)\*/gim, "<i>$1</i>");
 
-  // ================= TABLES =================
-  if (html.includes("|")) {
-    const lines = html.split("\n");
-    let tableMode = false;
-    let tableHTML = "<table class='ai-md-table'>";
-
-    let out = [];
-
-    for (let line of lines) {
-      if (line.includes("|")) {
-        const cells = line.split("|").map(c => c.trim()).filter(Boolean);
-        if (!tableMode) {
-          tableMode = true;
-          tableHTML = "<table class='ai-md-table'><tr>";
-          cells.forEach(c => tableHTML += `<th>${c}</th>`);
-          tableHTML += "</tr>";
-        } else {
-          tableHTML += "<tr>";
-          cells.forEach(c => tableHTML += `<td>${c}</td>`);
-          tableHTML += "</tr>";
-        }
-      } else {
-        if (tableMode) {
-          tableHTML += "</table>";
-          out.push(tableHTML);
-          tableMode = false;
-        }
-        out.push(line);
-      }
-    }
-
-    if (tableMode) {
-      tableHTML += "</table>";
-      out.push(tableHTML);
-    }
-
-    html = out.join("\n");
-  }
-
   // ================= LISTS =================
   html = html.replace(/^\s*[-•] (.*)$/gim, "<li>$1</li>");
   html = html.replace(/(<li>.*<\/li>)/gims, "<ul>$1</ul>");
@@ -115,8 +74,25 @@ function renderMarkdown(text) {
   html = html.replace(/\n\n+/g, "</p><p>");
   html = html.replace(/\n/g, "<br>");
 
+  // ================= RESTORE CODE BLOCKS =================
+  codeBlocks.forEach((code, i) => {
+    const safeCode = code
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+
+    const block = `
+      <div class="ai-code-block">
+        <button class="copy-btn" onclick="navigator.clipboard.writeText(${JSON.stringify(code)})">Copy</button>
+        <pre><code>${safeCode}</code></pre>
+      </div>
+    `;
+
+    html = html.replace(`@@CODEBLOCK_${i}@@`, block);
+  });
+
   return `<div class="ai-formatted"><p>${html}</p></div>`;
 }
+
 
 async function streamAIResponse({ query, fileText }) {
   const token = localStorage.getItem("adminToken");
