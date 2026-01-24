@@ -113,7 +113,7 @@ return finalHTML;
 }
 
 
-async function streamAIResponse({ query, fileText, memory = [] }) {
+async function streamAIResponse({ query, fileText, memory = [], conversationId }) {
   const token = localStorage.getItem("adminToken");
 
   currentAbortController = new AbortController();
@@ -125,14 +125,13 @@ async function streamAIResponse({ query, fileText, memory = [] }) {
       Authorization: `Bearer ${token}`
     },
     body: JSON.stringify({
-      query,            
-      fileText,             
-      memory,
-      conversation_id: currentConversationId
-    }),               
-
-    signal: currentAbortController.signal
-  });
+    query,
+    fileText,
+    memory,
+    conversation_id: conversationId
+  }),
+  signal: currentAbortController.signal
+});
 
   if (!res.ok || !res.body) {
     throw new Error("Stream failed");
@@ -471,8 +470,10 @@ try {
 const finalReply = await streamAIResponse({
   query: text,
   fileText: extractedText,
-  memory
+  memory,
+  conversationId: currentConversationId
 });
+
 
 
     // Stream ended normally
