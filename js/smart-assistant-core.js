@@ -112,6 +112,30 @@ return finalHTML;
 
 }
 
+function showThinkingIndicator() {
+  const box = document.getElementById("aiMessages");
+  if (!box) return;
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "chat-bubble assistant-bubble thinking-bubble";
+  wrapper.id = "thinkingIndicator";
+
+  wrapper.innerHTML = `
+    <div class="thinking-container">
+      <div class="thinking-logo">
+        <img src="/assets/logo-moon.png" alt="Dusky AI" />
+      </div>
+      <div class="thinking-text">Thinking...</div>
+    </div>
+  `;
+
+  box.appendChild(wrapper);
+  box.scrollTop = box.scrollHeight;
+}
+function removeThinkingIndicator() {
+  const el = document.getElementById("thinkingIndicator");
+  if (el) el.remove();
+}
 
 async function streamAIResponse({ query, fileText, memory = [], conversationId }) {
   const token = localStorage.getItem("adminToken");
@@ -155,7 +179,8 @@ async function streamAIResponse({ query, fileText, memory = [], conversationId }
   wrapper.appendChild(bubble);
   box.appendChild(wrapper);
   box.scrollTop = box.scrollHeight;
-
+let streamStarted = false;
+  
   try {
     while (isAITyping) {
       const { value, done } = await reader.read();
@@ -164,6 +189,10 @@ async function streamAIResponse({ query, fileText, memory = [], conversationId }
 
       if (value) {
         const chunk = decoder.decode(value, { stream: true });
+        if (!streamStarted) {
+        removeThinkingIndicator();
+        streamStarted = true;
+      }
         finalText += chunk;
         bubble.innerHTML = renderMarkdown(finalText + "<span class='typing-cursor'>▍</span>");
         const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 120;
@@ -181,7 +210,7 @@ if (nearBottom) box.scrollTop = box.scrollHeight;
     } catch (e) {}
   }
 
-  // ✅ REMOVE CURSOR AFTER STREAM FINISH
+  
   bubble.innerHTML = renderMarkdown(finalText);
 
   currentAbortController = null;
@@ -467,6 +496,8 @@ input.style.height = "auto";;
   // ================= STREAM AI RESPONSE =================
 
   startAIThinking();
+  showThinkingIndicator();
+
 
   try {
     // ✅ Load last messages for memory
