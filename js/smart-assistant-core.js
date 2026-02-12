@@ -112,6 +112,7 @@ return finalHTML;
 
 }
 
+
 function showThinkingIndicator() {
   const box = document.getElementById("aiMessages");
   if (!box) return;
@@ -132,6 +133,7 @@ function showThinkingIndicator() {
   box.appendChild(wrapper);
   box.scrollTop = box.scrollHeight;
 }
+
 function removeThinkingIndicator() {
   const el = document.getElementById("thinkingIndicator");
   if (el) el.remove();
