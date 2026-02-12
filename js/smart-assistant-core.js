@@ -149,55 +149,63 @@ async function streamAIResponse({ query, fileText, memory = [], conversationId }
       Authorization: `Bearer ${token}`
     },
     body: JSON.stringify({
-    query,
-    fileText,
-    memory,
-    conversation_id: conversationId
-  }),
-  signal: currentAbortController.signal
-});
+      query,
+      fileText,
+      memory,
+      conversation_id: conversationId
+    }),
+    signal: currentAbortController.signal
+  });
 
   if (!res.ok || !res.body) {
+    removeThinkingIndicator();
     throw new Error("Stream failed");
   }
 
   const reader = res.body.getReader();
   const decoder = new TextDecoder("utf-8");
 
-  let finalText = "";
-
-  // Create live assistant bubble
   const box = document.getElementById("aiMessages");
 
-  const wrapper = document.createElement("div");
-  wrapper.className = "chat-bubble assistant-bubble streaming-bubble";
+  let finalText = "";
+  let streamStarted = false;
+  let wrapper = null;
+  let bubble = null;
 
-  const bubble = document.createElement("div");
-  bubble.className = "bubble-body";
-  bubble.textContent = "";
-
-  wrapper.appendChild(bubble);
-  box.appendChild(wrapper);
-  box.scrollTop = box.scrollHeight;
-let streamStarted = false;
-  
   try {
     while (isAITyping) {
       const { value, done } = await reader.read();
-
       if (done) break;
 
       if (value) {
         const chunk = decoder.decode(value, { stream: true });
-        if (!streamStarted) {
-        removeThinkingIndicator();
-        streamStarted = true;
-      }
-        finalText += chunk;
-        bubble.innerHTML = renderMarkdown(finalText + "<span class='typing-cursor'>▍</span>");
-        const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 120;
-if (nearBottom) box.scrollTop = box.scrollHeight;
 
+        // 🔥 FIRST TOKEN ARRIVED
+        if (!streamStarted) {
+          removeThinkingIndicator();
+          streamStarted = true;
+
+          // NOW create streaming bubble
+          wrapper = document.createElement("div");
+          wrapper.className = "chat-bubble assistant-bubble streaming-bubble";
+
+          bubble = document.createElement("div");
+          bubble.className = "bubble-body";
+
+          wrapper.appendChild(bubble);
+          box.appendChild(wrapper);
+        }
+
+        finalText += chunk;
+
+        bubble.innerHTML = renderMarkdown(
+          finalText + "<span class='typing-cursor'>▍</span>"
+        );
+
+        const nearBottom =
+          box.scrollHeight - box.scrollTop - box.clientHeight < 120;
+
+        if (nearBottom) box.scrollTop = box.scrollHeight;
       }
     }
   } catch (err) {
@@ -205,15 +213,18 @@ if (nearBottom) box.scrollTop = box.scrollHeight;
       console.error("Stream read error:", err);
     }
   } finally {
+    removeThinkingIndicator(); // 🛡 Always cleanup
+
     try {
       await reader.cancel();
     } catch (e) {}
+
+    currentAbortController = null;
   }
 
-  
-  bubble.innerHTML = renderMarkdown(finalText);
-
-  currentAbortController = null;
+  if (bubble) {
+    bubble.innerHTML = renderMarkdown(finalText);
+  }
 
   return finalText;
 }
@@ -372,8 +383,10 @@ function stopAIThinking() {
     currentAbortController = null;
   }
 
+  removeThinkingIndicator(); // 🔥 important
   setSendButtonMode("send");
 }
+
 
 function renderDateSeparator(dateStr) {
   const box = document.getElementById("aiMessages");
