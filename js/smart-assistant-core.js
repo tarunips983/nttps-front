@@ -363,7 +363,17 @@ function renderDateSeparator(dateStr) {
   function el(id) {
     return document.getElementById(id);
   }
+// ✅ Auto-resize textarea
+const composerInput = el("aiInput");
 
+if (composerInput) {
+  composerInput.addEventListener("input", () => {
+    composerInput.style.height = "auto";
+    composerInput.style.height = composerInput.scrollHeight + "px";
+  });
+}
+
+  
   /* ================= CHAT HANDLERS ================= */
 async function handleAskAI() {
   console.log("🧪 UI selectedFile at send time =", window.selectedFile);
@@ -391,7 +401,13 @@ async function handleAskAI() {
     created_at: new Date().toISOString()
   });
 
-  input.value = "";
+// Clear input FIRST
+input.value = "";
+
+// Reset textarea height properly
+input.style.height = "auto";;
+
+
 
   const token = localStorage.getItem("adminToken");
   if (!token) {
