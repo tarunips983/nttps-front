@@ -204,8 +204,13 @@ function renderMessageBubble({ role, content, created_at, file_url, message_id }
 
   const bubble = document.createElement("div");
   bubble.className = "bubble-body";
+  if (content.includes("From:") && content.includes("To:")) {
+  bubble.innerHTML = `
+    <pre class="letter-format">${content}</pre>
+  `;
+} else {
   bubble.innerHTML = renderMarkdown(content || "");
-
+}
   if (file_url) {
     const a = document.createElement("a");
     a.href = file_url;
