@@ -9,7 +9,7 @@ if (window.__SMART_CORE_ALREADY_RUNNING__) {
 }
 window.__SMART_CORE_ALREADY_RUNNING__ = true;
 
-
+ 
 const API = window.API;
 // ===== GLOBAL STREAM CONTROL =====
 let isAITyping = false;
