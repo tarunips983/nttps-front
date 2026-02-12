@@ -464,7 +464,7 @@ try {
   const memMsgs = await memRes.json();
 
   // Take last 10 messages only (to avoid overload)
-  memory = memMsgs.slice(-10).map(m => ({
+  memory = memMsgs.slice(-4).map(m => ({
     role: m.role,
     content: m.content
   }));
