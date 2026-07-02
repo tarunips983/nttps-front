@@ -3,9 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <title>TM&CAM - PDF Records</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="style.css">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <link rel="stylesheet" href="style.css">
   <link rel="icon" style="border-radius: 25px;" href="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg">
   <style>
 /* ---------- RESTORED: Desktop + Shared styles (unchanged) ---------- */
@@ -2630,6 +2629,179 @@ padding: 10px;
   color: #222;
 }
 
+
+
+/* ========================================
+   PROFESSIONAL RESPONSIVE POLISH - 2026
+   ======================================== */
+:root {
+  --brand-navy: #0f2238;
+  --brand-blue: #2563eb;
+  --brand-cyan: #06b6d4;
+  --surface: #ffffff;
+  --surface-soft: #f8fafc;
+  --border-soft: #e2e8f0;
+  --text-main: #0f172a;
+  --shadow-card: 0 16px 40px rgba(15, 34, 56, 0.10);
+  --radius-lg: 18px;
+}
+
+html { scroll-padding-top: 150px; }
+body {
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 34rem),
+    linear-gradient(180deg, #f8fafc 0%, #eef4fb 100%) !important;
+  color: var(--text-main);
+}
+
+header {
+  background: linear-gradient(135deg, var(--brand-navy), #1e3a5f 58%, #155e75) !important;
+  gap: 14px;
+  padding: 14px clamp(14px, 3vw, 28px) !important;
+}
+header h1 {
+  letter-spacing: .2px;
+  line-height: 1.25;
+  max-width: min(760px, 100%);
+}
+.search-wrapper { flex: 1 1 280px; min-width: 180px; }
+.search-field, .nav-right input[type="text"] {
+  width: 100% !important;
+  border: 1px solid rgba(255,255,255,.22) !important;
+  border-radius: 999px !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 8px 20px rgba(0,0,0,.12);
+}
+.nav-right a, .dropdown-menu a, .subnav-btn, .view-btn, .upload-btn, #inlinePrintBtn {
+  transition: transform .2s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
+}
+.nav-right a, .view-btn, .upload-btn, #inlinePrintBtn {
+  border-radius: 999px !important;
+  box-shadow: 0 8px 18px rgba(37, 99, 235, .18);
+}
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible {
+  outline: 3px solid rgba(6, 182, 212, .45);
+  outline-offset: 3px;
+}
+
+#subNavBar {
+  background: rgba(255,255,255,.86) !important;
+  backdrop-filter: blur(16px);
+  overflow-x: auto;
+  justify-content: flex-start !important;
+  padding: 12px clamp(12px, 3vw, 28px) !important;
+  scrollbar-width: thin;
+}
+.subnav-btn {
+  flex: 0 0 auto;
+  background: #e2e8f0 !important;
+  color: #1e293b !important;
+  border: 1px solid #cbd5e1 !important;
+}
+.subnav-btn:hover, .subnav-btn.active {
+  background: linear-gradient(135deg, var(--brand-blue), var(--brand-cyan)) !important;
+  color: #fff !important;
+  box-shadow: 0 12px 28px rgba(37,99,235,.28) !important;
+}
+
+.left-bar, #estimates-leftbar {
+  background: rgba(255,255,255,.92) !important;
+  border: 1px solid var(--border-soft) !important;
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+  box-shadow: 10px 0 30px rgba(15,34,56,.06);
+}
+.left-bar button, #estimates-leftbar button, .date-list-item {
+  border-radius: 12px !important;
+}
+.right-panel, .cl-view {
+  background: transparent !important;
+  padding: clamp(14px, 2.5vw, 28px) !important;
+}
+
+.product, .cl-card, .ai-card, .drop-zone, .estimate-table, #modalContent {
+  border: 1px solid var(--border-soft) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+.product { overflow: hidden; }
+.product-info h3 { color: var(--brand-navy) !important; }
+.product:hover, .cl-card:hover { transform: translateY(-6px); }
+.product-grid, #clBioGrid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)) !important;
+}
+#estimatesGrid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)) !important;
+  gap: 20px !important;
+}
+
+.table-animate, .estimate-table {
+  overflow: hidden;
+}
+.estimate-table th { white-space: nowrap; }
+.estimate-table td { vertical-align: middle; }
+
+@media (max-width: 768px) {
+  header { position: sticky; top: 0; }
+  header h1 { font-size: clamp(14px, 4vw, 18px) !important; }
+  .nav-right {
+    display: grid !important;
+    grid-template-columns: 1fr auto auto;
+    width: 100%;
+    align-items: center;
+  }
+  .nav-right a { display: none; }
+  .burger-menu { justify-self: end; margin-right: 0 !important; }
+  #subNavBar { top: auto !important; position: sticky; }
+  #mobileFilterBtn, #mobileEstFilterBtn, #mobileDailyFilterBtn {
+    position: sticky;
+    top: 0;
+    z-index: 850;
+    width: calc(100% - 24px) !important;
+    margin: 10px 12px !important;
+    border: 0;
+    border-radius: 14px !important;
+    background: linear-gradient(135deg, var(--brand-blue), var(--brand-cyan));
+    color: #fff;
+    box-shadow: 0 12px 24px rgba(37,99,235,.24);
+  }
+  .main-view.active, #pdf-view-container, #estimatesContainer, #daily-progress-container, #file-transfer-container, #smart-assistant-container {
+    min-height: auto !important;
+  }
+  .left-bar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0;
+    width: min(86vw, 340px) !important;
+    height: 100dvh !important;
+    z-index: 3000 !important;
+    transform: translateX(-110%);
+    opacity: 0;
+    border-radius: 0 22px 22px 0 !important;
+    padding-top: 22px !important;
+  }
+  .left-bar.active { transform: translateX(0) !important; opacity: 1 !important; }
+  .right-panel { height: auto !important; min-height: 60vh; width: 100%; }
+  .product-grid, #estimatesGrid, #clBioGrid { grid-template-columns: 1fr !important; }
+  #productModal { align-items: stretch !important; }
+  #modalContent { max-width: none !important; width: 100% !important; height: 100dvh !important; border-radius: 0 !important; }
+}
+
+@media (max-width: 480px) {
+  .nav-right { grid-template-columns: 1fr auto; }
+  #loginLink { display: none !important; }
+  .search-wrapper { min-width: 0; }
+  .subnav-btn { font-size: 12px !important; padding: 9px 12px !important; }
+  .product, .cl-card { padding: 14px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
+
 </style>
 
 </head>
@@ -3118,7 +3290,7 @@ if (pm && pm.classList.contains("active")) {
   // ---------- PDF ----------
   if (viewName === "pdf") {
     pdfView.style.display = "flex";
-    mobileFilterBtn.style.display = "block";
+    if (window.innerWidth <= 768) mobileFilterBtn.style.display = "block";
     document.getElementById("pdfHeader").textContent = "📄 All Stage-V Indents";
     document.querySelector("#subNavBar button:nth-child(1)").classList.add("active");
   }
@@ -3126,7 +3298,7 @@ if (pm && pm.classList.contains("active")) {
   // ---------- ESTIMATES ----------
   if (viewName === "estimates") {
     estimatesContainer.style.display = "flex";
-    mobileEstFilterBtn.style.display = "block";
+    if (window.innerWidth <= 768) mobileEstFilterBtn.style.display = "block";
     document.getElementById("estHeader").textContent = "📘 All Stage-V Estimates";
     document.querySelector("#subNavBar button:nth-child(2)").classList.add("active");
   }
@@ -3134,7 +3306,7 @@ if (pm && pm.classList.contains("active")) {
   // ---------- DAILY PROGRESS ----------
   if (viewName === "progress") {
     progressView.style.display = "flex";
-    mobileDailyFilterBtn.style.display = "block";
+    if (window.innerWidth <= 768) mobileDailyFilterBtn.style.display = "block";
     document.querySelector("#subNavBar button:nth-child(3)").classList.add("active");
   }
 
@@ -3324,12 +3496,13 @@ function deactivateSmartAssistant() {
       return clean;
     }
     
-let lastRenderedCount = null;
+let lastRenderedSignature = null;
     // render records
     function renderRecords(records) {
 
-      if (records.length === lastRenderedCount) return;
-    lastRenderedCount = records.length;
+      const renderSignature = JSON.stringify((records || []).map(r => `${r.id || r.prNo || r.workName || ""}:${r.recordType || ""}:${r.subDivision || ""}`));
+      if (renderSignature === lastRenderedSignature) return;
+      lastRenderedSignature = renderSignature;
       
     const container = document.getElementById("product-list");
     const listEnabled = localStorage.getItem("listView") === "true";
@@ -3431,7 +3604,7 @@ if (listEnabled) {
 if (!records || records.length === 0) {
     listBody.innerHTML = `
         <tr>
-            <td colspan="8" 
+            <td colspan="9"
                 style="
                     padding: 25px;
                     text-align: center;
