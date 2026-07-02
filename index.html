@@ -3,9 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <title>TM&CAM - PDF Records</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="style.css">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <link rel="stylesheet" href="style.css">
   <link rel="icon" style="border-radius: 25px;" href="https://upload.wikimedia.org/wikipedia/en/f/ff/Andhra_Pradesh_Power_Generation_Company_Limited.jpg">
   <style>
 /* ---------- RESTORED: Desktop + Shared styles (unchanged) ---------- */
@@ -459,7 +458,7 @@ aside.left-bar:hover {
    ======================================== */
 
 @media (max-width: 480px) {
-  
+
   header h1 {
     font-size: 13px !important;
   }
@@ -482,7 +481,7 @@ aside.left-bar:hover {
     font-size: 14px;
   }
 
- 
+
 }
 
 /* ========================================
@@ -490,7 +489,7 @@ aside.left-bar:hover {
    ======================================== */
 
 @media (max-height: 500px) and (orientation: landscape) {
-  
+
   header {
     position: relative;
   }
@@ -512,7 +511,7 @@ aside.left-bar:hover {
    ======================================== */
 
 @media (max-width: 768px) {
-  
+
   /* Larger touch targets */
   button,
   a,
@@ -551,7 +550,7 @@ aside.left-bar:hover {
    ======================================== */
 
 @media print {
-  
+
   header,
   .nav-right,
   #subNavBar,
@@ -578,7 +577,7 @@ aside.left-bar:hover {
    ======================================== */
 
 @media (max-width: 768px) {
-  
+
   @keyframes slideInFromLeft {
     from {
       transform: translateX(-100%);
@@ -740,7 +739,7 @@ aside.left-bar:hover {
   #pdf-grid-wrapper {
     overflow-x: auto !important;
     overflow-y: auto;
-    
+
   }
 
   table {
@@ -752,7 +751,7 @@ aside.left-bar:hover {
   }
 }
 
-    
+
 #clBioGrid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -900,7 +899,7 @@ header.dark-mode input::placeholder { color:#bbb !important; }
 
 /* MOBILE BURGER MENU */
 
-    
+
 .view-btn { background:#007bff; color:white; }
 
 /* Sub Nav Bar */
@@ -918,7 +917,7 @@ header.dark-mode input::placeholder { color:#bbb !important; }
 }
 
 
-    
+
 .subnav-btn {
     background:#4a5c70;
     color:white;
@@ -1067,7 +1066,7 @@ main {
 
     /* Desktop restore */
 @media (min-width: 769px) {
-    
+
 
     #mobileFilterBtn,
     #mobileEstFilterBtn,
@@ -1131,7 +1130,7 @@ main {
     background:#0056b3;
 }
 
-    
+
 
 
 /* PDF NAV BUTTONS */
@@ -1149,16 +1148,16 @@ main {
     font-weight:600;
 }
 
-#pdf-nav-bar .pdf-nav-header { 
-    background:#ff9900; 
+#pdf-nav-bar .pdf-nav-header {
+    background:#ff9900;
     transition: background 0.2s ease, transform 0.2s ease;
 }
 #pdf-nav-bar .pdf-nav-header:active {
     transform: scale(0.96);
 }
 
-#pdf-nav-bar button.active { 
-    background:#28a745; 
+#pdf-nav-bar button.active {
+    background:#28a745;
 }
 
 /* -------------------------
@@ -1308,7 +1307,7 @@ main {
     opacity: 0;
 }
 
-    
+
     @keyframes fadeSlideUp {
     from {
         opacity: 0;
@@ -1410,7 +1409,7 @@ main {
     }
 }
 @media (min-width: 769px) {
-   
+
 
     #mobileFilterBtn,
     #mobileDailyFilterBtn {
@@ -1677,7 +1676,7 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
         display: flex;
         align-items: center;
         justify-content: center;
-       
+
   }
 
   .subnav-btn img,
@@ -1886,7 +1885,7 @@ animation: spinLoader 0.9s linear infinite; /* ✅ FIX */
   }
 }
 
-  
+
 @media (max-width: 768px) {
   .right-panel {
     overflow: visible !important;
@@ -2253,7 +2252,7 @@ body.smart-assistant-active {
 }
 
 .smart-ai-panel button {
-  
+
   border: none;
   background: #007bff;
   color: white;
@@ -2566,7 +2565,7 @@ body.smart-assistant-active {
 
 /* Right panel = fixed flex column */
 #smart-assistant-container .right-panel.smart-ai-panel {
-  
+
   display: flex !important;
   flex-direction: column !important;
   overflow: hidden !important;
@@ -2630,6 +2629,286 @@ padding: 10px;
   color: #222;
 }
 
+
+
+/* ========================================
+   PROFESSIONAL RESPONSIVE POLISH - 2026
+   ======================================== */
+:root {
+  --brand-navy: #0f2238;
+  --brand-blue: #2563eb;
+  --brand-cyan: #06b6d4;
+  --surface: #ffffff;
+  --surface-soft: #f8fafc;
+  --border-soft: #e2e8f0;
+  --text-main: #0f172a;
+  --shadow-card: 0 16px 40px rgba(15, 34, 56, 0.10);
+  --radius-lg: 18px;
+}
+
+html { scroll-padding-top: 150px; }
+body {
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 34rem),
+    linear-gradient(180deg, #f8fafc 0%, #eef4fb 100%) !important;
+  color: var(--text-main);
+}
+
+header {
+  background: linear-gradient(135deg, var(--brand-navy), #1e3a5f 58%, #155e75) !important;
+  gap: 14px;
+  padding: 14px clamp(14px, 3vw, 28px) !important;
+}
+header h1 {
+  letter-spacing: .2px;
+  line-height: 1.25;
+  max-width: min(760px, 100%);
+}
+.search-wrapper { flex: 1 1 280px; min-width: 180px; }
+.search-field, .nav-right input[type="text"] {
+  width: 100% !important;
+  border: 1px solid rgba(255,255,255,.22) !important;
+  border-radius: 999px !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 8px 20px rgba(0,0,0,.12);
+}
+.nav-right a, .dropdown-menu a, .subnav-btn, .view-btn, .upload-btn, #inlinePrintBtn {
+  transition: transform .2s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
+}
+.nav-right a, .view-btn, .upload-btn, #inlinePrintBtn {
+  border-radius: 999px !important;
+  box-shadow: 0 8px 18px rgba(37, 99, 235, .18);
+}
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible {
+  outline: 3px solid rgba(6, 182, 212, .45);
+  outline-offset: 3px;
+}
+
+#subNavBar {
+  background: rgba(255,255,255,.86) !important;
+  backdrop-filter: blur(16px);
+  overflow-x: auto;
+  justify-content: flex-start !important;
+  padding: 12px clamp(12px, 3vw, 28px) !important;
+  scrollbar-width: thin;
+}
+.subnav-btn {
+  flex: 0 0 auto;
+  background: #e2e8f0 !important;
+  color: #1e293b !important;
+  border: 1px solid #cbd5e1 !important;
+}
+.subnav-btn:hover, .subnav-btn.active {
+  background: linear-gradient(135deg, var(--brand-blue), var(--brand-cyan)) !important;
+  color: #fff !important;
+  box-shadow: 0 12px 28px rgba(37,99,235,.28) !important;
+}
+
+.left-bar, #estimates-leftbar {
+  background: rgba(255,255,255,.92) !important;
+  border: 1px solid var(--border-soft) !important;
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+  box-shadow: 10px 0 30px rgba(15,34,56,.06);
+}
+.left-bar button, #estimates-leftbar button, .date-list-item {
+  border-radius: 12px !important;
+}
+.right-panel, .cl-view {
+  background: transparent !important;
+  padding: clamp(14px, 2.5vw, 28px) !important;
+}
+
+.product, .cl-card, .ai-card, .drop-zone, .estimate-table, #modalContent {
+  border: 1px solid var(--border-soft) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+.product { overflow: hidden; }
+.product-info h3 { color: var(--brand-navy) !important; }
+.product:hover, .cl-card:hover { transform: translateY(-6px); }
+.product-grid, #clBioGrid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)) !important;
+}
+#estimatesGrid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)) !important;
+  gap: 20px !important;
+}
+
+.table-animate, .estimate-table {
+  overflow: hidden;
+}
+.estimate-table th { white-space: nowrap; }
+.estimate-table td { vertical-align: middle; }
+
+@media (max-width: 768px) {
+  header { position: sticky; top: 0; }
+  header h1 { font-size: clamp(14px, 4vw, 18px) !important; }
+  .nav-right {
+    display: grid !important;
+    grid-template-columns: 1fr auto auto;
+    width: 100%;
+    align-items: center;
+  }
+  .nav-right a { display: none; }
+  .burger-menu { justify-self: end; margin-right: 0 !important; }
+  #subNavBar { top: auto !important; position: sticky; }
+  #mobileFilterBtn, #mobileEstFilterBtn, #mobileDailyFilterBtn {
+    position: sticky;
+    top: 0;
+    z-index: 850;
+    width: calc(100% - 24px) !important;
+    margin: 10px 12px !important;
+    border: 0;
+    border-radius: 14px !important;
+    background: linear-gradient(135deg, var(--brand-blue), var(--brand-cyan));
+    color: #fff;
+    box-shadow: 0 12px 24px rgba(37,99,235,.24);
+  }
+  .main-view.active, #pdf-view-container, #estimatesContainer, #daily-progress-container, #file-transfer-container, #smart-assistant-container {
+    min-height: auto !important;
+  }
+  .left-bar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0;
+    width: min(86vw, 340px) !important;
+    height: 100dvh !important;
+    z-index: 3000 !important;
+    transform: translateX(-110%);
+    opacity: 0;
+    border-radius: 0 22px 22px 0 !important;
+    padding-top: 22px !important;
+  }
+  .left-bar.active { transform: translateX(0) !important; opacity: 1 !important; }
+  .right-panel { height: auto !important; min-height: 60vh; width: 100%; }
+  .product-grid, #estimatesGrid, #clBioGrid { grid-template-columns: 1fr !important; }
+  #productModal { align-items: stretch !important; }
+  #modalContent { max-width: none !important; width: 100% !important; height: 100dvh !important; border-radius: 0 !important; }
+}
+
+@media (max-width: 480px) {
+  .nav-right { grid-template-columns: 1fr auto; }
+  #loginLink { display: none !important; }
+  .search-wrapper { min-width: 0; }
+  .subnav-btn { font-size: 12px !important; padding: 9px 12px !important; }
+  .product, .cl-card { padding: 14px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+
+/* File-transfer and mobile refinement overrides */
+#file-transfer-container .right-panel {
+  width: 100%;
+  gap: 16px;
+}
+.drop-zone {
+  min-height: 130px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  border: 2px dashed #bfdbfe !important;
+  background: linear-gradient(180deg, #ffffff, #f8fbff);
+}
+.upload-preview > div, #previewList > div { min-width: 0; }
+#previewList span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-right: 12px;
+}
+#file-transfer-container .estimate-table { table-layout: fixed; }
+#file-transfer-container .estimate-table td:first-child { overflow-wrap: anywhere; }
+.file-action-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+@media (max-width: 768px) {
+  body { min-width: 0 !important; }
+  header {
+    align-items: stretch !important;
+    padding: 12px !important;
+  }
+  header h1 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-align: center;
+    margin: 0 !important;
+  }
+  header h1 img { width: 28px !important; height: 28px !important; }
+  .nav-right {
+    grid-template-columns: 1fr 48px !important;
+    gap: 10px !important;
+  }
+  .search-wrapper { grid-column: 1 / -1; }
+  .burger-menu {
+    grid-column: 2;
+    grid-row: 2;
+    min-height: 44px;
+    display: grid !important;
+    place-items: center;
+  }
+  #subNavBar {
+    gap: 10px !important;
+    padding: 10px 12px !important;
+  }
+  #mobileFilterBtn, #mobileEstFilterBtn, #mobileDailyFilterBtn {
+    position: relative !important;
+    top: auto !important;
+  }
+  #pdfHeader, #estHeader {
+    font-size: 18px !important;
+    line-height: 1.25;
+    margin: 12px 0 !important;
+  }
+  #file-transfer-container .estimate-table,
+  #file-transfer-container .estimate-table thead,
+  #file-transfer-container .estimate-table tbody,
+  #file-transfer-container .estimate-table tr,
+  #file-transfer-container .estimate-table th,
+  #file-transfer-container .estimate-table td {
+    display: block;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+  #file-transfer-container .estimate-table thead { display: none; }
+  #file-transfer-container .estimate-table tr {
+    background: #fff;
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+    box-shadow: 0 10px 24px rgba(15,34,56,.08);
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  #file-transfer-container .estimate-table td {
+    border: 0 !important;
+    border-bottom: 1px solid #eef2f7 !important;
+    padding: 10px 12px !important;
+    font-size: 14px !important;
+  }
+  #file-transfer-container .estimate-table td::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 11px;
+    font-weight: 800;
+    color: #64748b;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .file-action-group .view-btn { flex: 1 1 130px; }
+}
+
 </style>
 
 </head>
@@ -2647,7 +2926,7 @@ padding: 10px;
 
     <div class="nav-right">
       <div class="search-wrapper">
-   <input 
+   <input
   type="search"
   id="searchInput"
   name="q_stage5_search_987654"
@@ -2687,7 +2966,7 @@ padding: 10px;
 </div>
 
   <!-- Mobile toggles (visible on mobile only by CSS) -->
-  
+
   <button id="mobileFilterBtn" style="display:none;">📂 Filters</button>
 <button id="mobileEstFilterBtn" style="display:none;">📘 Estimate Filters</button>
 <button id="mobileDailyFilterBtn" style="display:none;">📂 Daily Filters</button>
@@ -2705,7 +2984,7 @@ padding: 10px;
          <h1 id="pdfHeader" style="margin: 10px;text-align: center;">📄 All Stage-V Indents</h1>
         <div id="pdf-loader" class="loader"></div>
         <div class="product-grid" id="product-list" style="display:none">
-          
+
         </div>
       </section>
     </div>
@@ -2727,7 +3006,7 @@ padding: 10px;
 </section>
 </div>  <!-- Only ONE closing div is correct -->
 
-    
+
     <!-- Daily Progress view -->
     <div id="daily-progress-container" class="main-view">
       <aside id="inlineLeftBar" class="left-bar" aria-hidden="true">
@@ -2847,12 +3126,12 @@ padding: 10px;
 <input id="chatSearch" style="animation: auto ease 0s 1 normal none running none;border-radius: 5px;margin-top: 10px;height: 4vh;" placeholder="Search in chat..." />
 <div id="chatHistory">
   <div class="chat-history-header">
-    
+
     <span>💬 Conversations</span>
     <button onclick="createNewChat()">＋</button>
-    
+
   </div>
-  
+
   <div id="chatHistoryList"></div>
 </div>
 
@@ -2892,7 +3171,7 @@ padding: 10px;
 </button>
 
 
-    
+
   </div>
 </div>
 <div id="aiLoginOverlay" style="
@@ -3118,7 +3397,7 @@ if (pm && pm.classList.contains("active")) {
   // ---------- PDF ----------
   if (viewName === "pdf") {
     pdfView.style.display = "flex";
-    mobileFilterBtn.style.display = "block";
+    if (window.innerWidth <= 768) mobileFilterBtn.style.display = "block";
     document.getElementById("pdfHeader").textContent = "📄 All Stage-V Indents";
     document.querySelector("#subNavBar button:nth-child(1)").classList.add("active");
   }
@@ -3126,7 +3405,7 @@ if (pm && pm.classList.contains("active")) {
   // ---------- ESTIMATES ----------
   if (viewName === "estimates") {
     estimatesContainer.style.display = "flex";
-    mobileEstFilterBtn.style.display = "block";
+    if (window.innerWidth <= 768) mobileEstFilterBtn.style.display = "block";
     document.getElementById("estHeader").textContent = "📘 All Stage-V Estimates";
     document.querySelector("#subNavBar button:nth-child(2)").classList.add("active");
   }
@@ -3134,7 +3413,7 @@ if (pm && pm.classList.contains("active")) {
   // ---------- DAILY PROGRESS ----------
   if (viewName === "progress") {
     progressView.style.display = "flex";
-    mobileDailyFilterBtn.style.display = "block";
+    if (window.innerWidth <= 768) mobileDailyFilterBtn.style.display = "block";
     document.querySelector("#subNavBar button:nth-child(3)").classList.add("active");
   }
 
@@ -3259,7 +3538,7 @@ function collapseAllDropdowns(sidebarId) {
     sidebar.querySelectorAll("button").forEach(b => b.classList.remove("active"));
 }
 
-    
+
     // Set initial mobile buttons visibility depending on width
     function updateMobileButtons(view) {
   mobileFilterBtn.style.display = "none";
@@ -3290,7 +3569,7 @@ function collapseAllDropdowns(sidebarId) {
         const res = await fetch(`${SERVER_URL}/records`);
         allRecords = await res.json();
         allEstimates = allRecords.filter(r => (r.recordType || "").toLowerCase() === "estimate");
-       
+
 
       }catch(e){
         console.error("Failed to load records", e);
@@ -3323,16 +3602,17 @@ function deactivateSmartAssistant() {
       if(clean.length > 100) clean = clean.substring(0,100) + "...";
       return clean;
     }
-    
-let lastRenderedCount = null;
+
+let lastRenderedSignature = null;
     // render records
     function renderRecords(records) {
 
-      if (records.length === lastRenderedCount) return;
-    lastRenderedCount = records.length;
-      
+      const renderSignature = JSON.stringify((records || []).map(r => `${r.id || r.prNo || r.workName || ""}:${r.recordType || ""}:${r.subDivision || ""}`));
+      if (renderSignature === lastRenderedSignature) return;
+      lastRenderedSignature = renderSignature;
+
     const container = document.getElementById("product-list");
-    const listEnabled = localStorage.getItem("listView") === "true";
+    const listEnabled = localStorage.getItem("listView") === "true" && window.innerWidth > 768;
 
 
 
@@ -3395,7 +3675,7 @@ let lastRenderedCount = null;
 
 
 
-      
+
     // ========= 🟦 LIST VIEW MODE ========
     // ========= 🟦 LIST VIEW MODE ========
 if (listEnabled) {
@@ -3418,7 +3698,7 @@ if (listEnabled) {
                     <th style="padding:10px;border:1px solid #ddd;background:#007bff;color:white;">Amount</th>
                     <th style="padding:10px;border:1px solid #ddd;background:#007bff;color:white;">Send To</th>
                     <th style="padding:10px;border:1px solid #ddd;background:#007bff;color:white;">Status</th>
-                    <th style="padding:10px;border:1px solid #ddd;background:#007bff;color:white;">Action</th>        
+                    <th style="padding:10px;border:1px solid #ddd;background:#007bff;color:white;">Action</th>
                 </tr>
             </thead>
             <tbody id="listBody"></tbody>
@@ -3431,7 +3711,7 @@ if (listEnabled) {
 if (!records || records.length === 0) {
     listBody.innerHTML = `
         <tr>
-            <td colspan="8" 
+            <td colspan="9"
                 style="
                     padding: 25px;
                     text-align: center;
@@ -3468,7 +3748,7 @@ console.log("Index records[0]:", records[0]);
 
             <!-- ⭐ VIEW PDF BUTTON ⭐ -->
             <td style="padding:10px;text-align:center;">
-                <button 
+                <button
                     onclick='showPDF(${JSON.stringify(r).replace(/'/g,"&apos;")})'
                     style="
                         background:#007bff;
@@ -3591,7 +3871,7 @@ container.innerHTML = records.map((r, i) => {
 }
 
       if (estimatesContainer.style.display !== "none") {
-    
+
 
     const filtered = allEstimates.filter(r =>
         (r.description || "").toLowerCase().includes(key) ||
@@ -3604,7 +3884,7 @@ container.innerHTML = records.map((r, i) => {
 }
 });
 
-let allEstimates = [];    
+let allEstimates = [];
 async function loadEstimates() {
     try {
 
@@ -3659,7 +3939,7 @@ function triggerSmartLogin() {
   openPasswordModal(); // ✅ your existing modal
 }
 
-    
+
 function buildEstimateFilters() {
     const bar = document.getElementById("estimates-leftbar");
 
@@ -3689,7 +3969,7 @@ function buildEstimateFilters() {
 
 function renderEstimates(data) {
     const container = document.getElementById("estimatesGrid");
-    const listEnabled = localStorage.getItem("listView") === "true";
+    const listEnabled = localStorage.getItem("listView") === "true" && window.innerWidth > 768;
 
     document.getElementById("est-loader").style.display = "none";
 
@@ -3817,18 +4097,29 @@ async function uploadFile() {
   };
 
   xhr.onload = () => {
-  progressBar.style.width = "100%";
+    progressBar.style.width = "100%";
 
-  setTimeout(() => {
+    if (xhr.status < 200 || xhr.status >= 300) {
+      progressBox.style.display = "none";
+      alert(`Upload failed (${xhr.status}). Please try again.`);
+      return;
+    }
+
+    setTimeout(() => {
+      progressBox.style.display = "none";
+      preview.style.display = "none";
+      previewList.innerHTML = "";
+      fileInput.value = "";
+
+      showMainView("files");
+      setTimeout(loadFiles, 300);
+    }, 700);
+  };
+
+  xhr.onerror = () => {
     progressBox.style.display = "none";
-    preview.style.display = "none";
-    fileInput.value = "";
-
-    // 🔥 FORCE refresh
-    showMainView("files");
-    setTimeout(loadFiles, 300);
-  }, 700);
-};
+    alert("Upload failed due to a network problem. Please check your connection and try again.");
+  };
 
   xhr.send(fd);
 }
@@ -3838,6 +4129,23 @@ function isLoggedIn() {
   return !!localStorage.getItem("adminToken");
 }
 let pendingDownloadUrl = null;
+
+function resolveFileUrl(url) {
+  if (!url) return "";
+  if (/^https?:\/\//i.test(url) || url.startsWith("blob:")) return url;
+  const base = (window.SERVER_URL || SERVER_URL || "").replace(/\/$/, "");
+  return `${base}/${String(url).replace(/^\//, "")}`;
+}
+
+function escapeHtml(value = "") {
+  return String(value).replace(/[&<>"']/g, ch => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;"
+  }[ch]));
+}
 
 function handleFileDownload(url, filename) {
   if (!isLoggedIn()) {
@@ -3886,35 +4194,32 @@ async function checkGlobalAuth() {
 
 async function triggerDownload(url, filename = "file") {
 
-  // 🔒 BLOCK DOWNLOAD IF NOT LOGGED IN
   if (!isFileUserLoggedIn()) {
     pendingDownloadUrl = { url, filename };
     openPasswordModal();
     return;
   }
 
-  const token = localStorage.getItem("adminToken");
+  const finalUrl = resolveFileUrl(url);
 
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-
-  const blob = await res.blob();
-  const blobUrl = window.URL.createObjectURL(blob);
+  if (!finalUrl) {
+    alert("Download link is missing for this file.");
+    return;
+  }
 
   const a = document.createElement("a");
-  a.href = blobUrl;
-  a.download = filename;
+  a.href = finalUrl;
+  a.download = filename || "file";
+  a.target = "_blank";
+  a.rel = "noopener";
   document.body.appendChild(a);
   a.click();
-
   document.body.removeChild(a);
-  window.URL.revokeObjectURL(blobUrl);
 }
 
 
 async function loadFiles() {
- 
+
 
   try {
     const res = await fetch(`${SERVER_URL}/file-transfer`);
@@ -3927,7 +4232,7 @@ async function loadFiles() {
     const files = await res.json();
 
     const loggedIn = isFileUserLoggedIn();
-    
+
  const tbody = document.getElementById("fileList");
 
 if (!files || files.length === 0) {
@@ -3941,33 +4246,40 @@ if (!files || files.length === 0) {
   return;
 }
 
-tbody.innerHTML = files.map(f => `
+tbody.innerHTML = files.map(f => {
+  const safeFile = JSON.stringify(f).replace(/"/g, "&quot;");
+  const safeUrl = JSON.stringify(resolveFileUrl(f.file_url)).replace(/"/g, "&quot;");
+  const safeName = JSON.stringify(f.file_name).replace(/"/g, "&quot;");
+  const displayName = escapeHtml(f.file_name);
+  return `
   <tr>
-    <td style="cursor:pointer;color:#0d6efd;font-weight:600"
-        onclick="requireFileLogin() && openFilePreview(${JSON.stringify(f).replace(/"/g,'&quot;')})">
-      ${f.file_name}
+    <td data-label="File" style="cursor:pointer;color:#0d6efd;font-weight:700"
+        onclick="requireFileLogin() && openFilePreview(${safeFile})">
+      ${displayName}
     </td>
-    <td>${(f.file_size / 1024).toFixed(1)} KB</td>
-    <td>${new Date(f.uploaded_at).toLocaleString()}</td>
-    <td>${new Date(f.expires_at).toLocaleString()}</td>
-    <td>
+    <td data-label="Size">${(f.file_size / 1024).toFixed(1)} KB</td>
+    <td data-label="Uploaded">${new Date(f.uploaded_at).toLocaleString()}</td>
+    <td data-label="Expires">${new Date(f.expires_at).toLocaleString()}</td>
+    <td data-label="Action">
       ${
         isFileUserLoggedIn()
           ? `
-            <button class="view-btn"
-              onclick="handleFileDownload('${f.file_url}','${f.file_name}')">
-              ⬇ Download
-            </button>
-            <button class="view-btn" style="background:#dc3545"
-              onclick="deleteFile(${f.id})">
-              🗑 Delete
-            </button>
+            <div class="file-action-group">
+              <button class="view-btn"
+                onclick="handleFileDownload(${safeUrl},${safeName})">
+                ⬇ Download
+              </button>
+              <button class="view-btn" style="background:#dc3545"
+                onclick="deleteFile(${f.id})">
+                🗑 Delete
+              </button>
+            </div>
           `
           : `<span style="color:#dc3545;font-weight:600;">🔒 Login required</span>`
       }
     </td>
-  </tr>
-`).join("");
+  </tr>`;
+}).join("");
 
   } catch (err) {
     console.error("loadFiles failed:", err);
@@ -4033,6 +4345,11 @@ function openFilePreview(file) {
   const title = document.getElementById("previewTitle");
   const downloadBtn = document.getElementById("previewDownloadBtn");
 
+  const finalUrl = resolveFileUrl(file.file_url);
+  const safeName = escapeHtml(file.file_name);
+  const previewUrlArg = JSON.stringify(finalUrl).replace(/"/g, "&quot;");
+  const previewNameArg = JSON.stringify(file.file_name).replace(/"/g, "&quot;");
+
   title.textContent = file.file_name;
   content.innerHTML = "Loading preview…";
 
@@ -4044,7 +4361,7 @@ function openFilePreview(file) {
   // PDF preview
   if (ext === "pdf") {
     content.innerHTML = `
-      <iframe src="${file.file_url}" 
+      <iframe src="${finalUrl}"
         style="width:100%;height:65vh;border:none;border-radius:8px">
       </iframe>`;
   }
@@ -4052,7 +4369,8 @@ function openFilePreview(file) {
   // Image preview
   else if (["jpg","jpeg","png","gif","webp"].includes(ext)) {
     content.innerHTML = `
-      <img src="${file.file_url}" 
+      <img src="${finalUrl}"
+        alt="${safeName}"
         style="max-width:100%;max-height:65vh;border-radius:10px;display:block;margin:auto">
     `;
   }
@@ -4061,11 +4379,11 @@ function openFilePreview(file) {
   else {
     content.innerHTML = `
       <div style="text-align:center;padding:30px;">
-        <p style="font-size:18px;font-weight:600;">📄 ${file.file_name}</p>
+        <p style="font-size:18px;font-weight:600;">📄 ${safeName}</p>
         <p style="color:#666;margin-top:10px;">
           Preview not available for this file type.
         </p>
-        <button class="view-btn" onclick="triggerDownload('${file.file_url}','${file.file_name}')">
+        <button class="view-btn" onclick="triggerDownload(${previewUrlArg},${previewNameArg})">
           ⬇ Download File
         </button>
       </div>
@@ -4160,7 +4478,7 @@ function handleFileAuthClick() {
 
    syncAllLoginUI();
 
-    
+
 
     loadFiles(); // ✅ FORCE immediate refresh
   } else {
@@ -4324,7 +4642,7 @@ function openAddRecordFromDetails() {
 }
 
 
-    
+
 function toggleSearchBar() {
     const input = document.getElementById("searchInput");
     input.classList.toggle("active");
@@ -4333,7 +4651,7 @@ function toggleSearchBar() {
         input.focus();
     }
 }
-    
+
     // PDF modal logic (redesigned close etc)
     const productModal = document.getElementById('productModal');
     const modalName = document.getElementById('modalName');
@@ -4495,7 +4813,7 @@ fetch(`${SERVER_URL}/api/remarks`, {
           td.removeAttribute('contenteditable');
           td.style.background = 'none';
         });
-        
+
         // close the left pane on mobile so user sees the table
         if(window.innerWidth <= 768){
           document.getElementById('inlineLeftBar')?.classList?.remove('active');
@@ -4548,9 +4866,9 @@ goTopBtn.onclick = () => {
 
 // Scroll to bottom
 goBottomBtn.onclick = () => {
-    window.scrollTo({ 
-        top: document.documentElement.scrollHeight, 
-        behavior: "smooth" 
+    window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: "smooth"
     });
 };
 
@@ -4580,7 +4898,7 @@ async function updateSmartAssistantLoginStatus() {
   }
 }
 
-    
+
 async function renderCLBioData() {
   const container = document.getElementById("clBioGrid");
   container.innerHTML = "<p>Loading CL data...</p>";
@@ -4596,8 +4914,8 @@ async function renderCLBioData() {
 
    container.innerHTML = data
   .map(c => {
-    const photo = c.photo_url 
-      ? c.photo_url 
+    const photo = c.photo_url
+      ? c.photo_url
       : "https://icon-library.com/images/no-picture-available-icon/no-picture-available-icon-20.jpg";
 
     return `
@@ -4634,7 +4952,7 @@ async function renderCLBioData() {
   }
 }
 
-    
+
     // password modal helpers
     window.openPasswordModal = function(){ document.getElementById('passwordModal').style.display='flex'; document.getElementById('usernameInput').focus(); }
     window.closePasswordModal = function(){ document.getElementById('passwordModal').style.display='none'; document.getElementById('usernameInput').value=''; document.getElementById('passwordInput').value=''; }
@@ -4644,9 +4962,9 @@ async function renderCLBioData() {
   const username = document.getElementById('usernameInput').value.trim();
   const pass = document.getElementById('passwordInput').value.trim();
 
-  if(!username || !pass){ 
-    alert('Please enter a username and password.'); 
-    return; 
+  if(!username || !pass){
+    alert('Please enter a username and password.');
+    return;
   }
 
   try{
@@ -4684,7 +5002,7 @@ if (pendingAIMessage) {
   sendAI();
 }
 
-      
+
   // ✅ If upload was pending, continue upload
   if (pendingUpload) {
     pendingUpload = false;
@@ -4748,7 +5066,7 @@ loadUser();
       toggleSidebar('mobileEstFilterBtn','estimates-leftbar'); // Estimates
       toggleSidebar('mobileDailyFilterBtn','inlineLeftBar');
     });
-    
+
 //dropdown
     document.getElementById("menuOverlay").addEventListener("click", () => {
   document.getElementById("dropdownMenu").classList.remove("active");
@@ -4816,7 +5134,7 @@ function applyUserSettings() {
     if (!anim) {
         document.querySelectorAll("*").forEach(e => e.style.animation = "none");
     }
-}  
+}
 
 document.addEventListener("click", (e) => {
     const row = e.target.closest(".list-row");
@@ -4862,7 +5180,7 @@ dropZone.addEventListener("drop", e => {
 // File select
 fileInput.addEventListener("change", showPreview);
 
-    
+
 const previewList = document.getElementById("previewList");
 
 function showPreview() {
@@ -4873,13 +5191,15 @@ function showPreview() {
     <div style="
       display:flex;
       justify-content:space-between;
-      padding:6px 10px;
+      align-items:center;
+      gap:12px;
+      padding:8px 10px;
       background:#e9f1ff;
-      border-radius:6px;
+      border-radius:10px;
       font-size:14px;
       font-weight:600;
     ">
-      <span>${f.name}</span>
+      <span title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</span>
       <span>${(f.size / 1024).toFixed(1)} KB</span>
     </div>
   `).join("");
@@ -4891,7 +5211,7 @@ function stopIOS(e) {
   e.preventDefault();
   e.stopPropagation();
 }
-    
+
 function updateSmartLoginStatus() {
   const token = localStorage.getItem("adminToken");
 
