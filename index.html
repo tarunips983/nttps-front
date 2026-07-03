@@ -1,6 +1,19 @@
 <!doctype html>
 <html lang="en">
 <head>
+
+  <script>
+    (function enforceSiteLogin() {
+      const token = localStorage.getItem("adminToken") || localStorage.getItem("rememberToken");
+      if (!token) {
+        const target = encodeURIComponent(location.pathname.split('/').pop() || 'index.html');
+        location.replace(`login.html?redirect=${target}`);
+      } else if (!localStorage.getItem("adminToken")) {
+        localStorage.setItem("adminToken", token);
+        localStorage.setItem("isAdmin", "true");
+      }
+    })();
+  </script>
   <meta charset="utf-8" />
   <title>TM&CAM - PDF Records</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -3080,6 +3093,37 @@ header > div:first-child h1 {
 
 
 
+
+/* Sticky nav, filter, user and notes polish */
+.user-chip { display:inline-flex; align-items:center; gap:6px; padding:8px 12px; border-radius:999px; background:rgba(255,255,255,.14); color:#fff; font-weight:700; white-space:nowrap; }
+.audit-chip { display:inline-flex; align-items:center; gap:4px; margin-top:6px; padding:4px 8px; border-radius:999px; background:#eef6ff; color:#0f4c81; font-size:12px; font-weight:700; }
+.notes-panel { width:100%; padding:22px; background:linear-gradient(135deg,#f8fbff,#eef6ff); }
+.notes-header { display:flex; justify-content:space-between; gap:16px; align-items:center; margin-bottom:16px; }
+.notes-header h2 { margin:0 0 4px; color:#10233f; }
+.notes-header p { margin:0; color:#64748b; }
+.notes-composer { display:grid; gap:12px; background:#fff; border:1px solid #dbe7f3; border-radius:18px; padding:16px; box-shadow:0 10px 30px rgba(15,23,42,.08); }
+.notes-composer input, .notes-composer textarea { width:100%; border:1px solid #cbd5e1; border-radius:12px; padding:12px 14px; font:inherit; }
+.notes-composer textarea { min-height:130px; resize:vertical; }
+.notes-actions { display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+.secondary-note-btn { background:#64748b !important; }
+.notes-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; margin-top:18px; }
+.note-card { background:#fff; border:1px solid #dbe7f3; border-left:5px solid #2563eb; border-radius:16px; padding:14px; box-shadow:0 10px 24px rgba(15,23,42,.08); overflow-wrap:anywhere; }
+.note-card h3 { margin:0 0 8px; color:#172554; }
+.note-meta { color:#64748b; font-size:12px; margin-bottom:10px; }
+.note-body { white-space:pre-wrap; color:#1f2937; line-height:1.45; }
+.note-card-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:12px; }
+.note-card-actions button { border:0; border-radius:10px; padding:8px 10px; cursor:pointer; font-weight:700; }
+.note-delete { background:#fee2e2; color:#991b1b; }
+.notes-header .user-chip { background:#e0f2fe; color:#075985; }
+
+@media (max-width:768px) {
+  #subNavBar { position: sticky !important; top: var(--app-header-height, 0px) !important; z-index: 1800 !important; background:rgba(248,250,252,.98) !important; box-shadow:0 8px 20px rgba(15,23,42,.12); }
+  #mobileFilterBtn, #mobileEstFilterBtn, #mobileDailyFilterBtn { position: sticky !important; top: calc(var(--app-header-height, 0px) + 54px) !important; z-index: 1700 !important; margin:8px 12px !important; width:calc(100% - 24px) !important; }
+  main { padding-top:0 !important; }
+  .notes-panel { padding:14px; }
+  .notes-header { align-items:flex-start; flex-direction:column; }
+}
+
 /* ===== Consolidated responsive fixes (2026) ===== */
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
@@ -3134,7 +3178,8 @@ header, main, section, .container, .right-panel, #pdf-grid-wrapper { min-width: 
 />
 </div>
       <a href="javascript:void(0)" onclick="openPasswordModal()" title="Add New Record">➕ Add Record</a>
-      <a href="login.html" id="loginLink" title="Login Page">🔐 Login</a>
+      <span id="currentUserChip" class="user-chip" title="Logged in user">👤 User</span>
+      <a href="login.html?redirect=index.html" id="loginLink" title="Login Page">🔐 Login</a>
       <div class="burger-menu" onclick="toggleMenu()">☰</div>
 <div id="menuOverlay" class="menu-overlay">
 <!-- Dropdown Menu -->
@@ -3150,12 +3195,13 @@ header, main, section, .container, .right-panel, #pdf-grid-wrapper { min-width: 
   </header>
 
   <div id="subNavBar">
-  <button class="subnav-btn" onclick="showMainView('pdf')">📄 All Indents</button>
-    <button class="subnav-btn" onclick="showMainView('estimates')">📘 Estimates</button>
-  <button class="subnav-btn" onclick="showMainView('progress')">📅 Daily Progress</button>
-  <button class="subnav-btn" onclick="showMainView('clbiodata')">👥 CL's Bio Data</button>
-   <button class="subnav-btn" onclick="showMainView('files')">📁 File Transfer</button>
-   <button class="subnav-btn" onclick="showMainView('assistant')">🤖 Smart Assistant</button>
+  <button class="subnav-btn" data-view="pdf" onclick="showMainView('pdf')">📄 All Indents</button>
+    <button class="subnav-btn" data-view="estimates" onclick="showMainView('estimates')">📘 Estimates</button>
+  <button class="subnav-btn" data-view="progress" onclick="showMainView('progress')">📅 Daily Progress</button>
+  <button class="subnav-btn" data-view="notes" onclick="showMainView('notes')">🗒️ Notes</button>
+  <button class="subnav-btn" data-view="clbiodata" onclick="showMainView('clbiodata')">👥 CL's Bio Data</button>
+   <button class="subnav-btn" data-view="files" onclick="showMainView('files')">📁 File Transfer</button>
+   <button class="subnav-btn" data-view="assistant" onclick="showMainView('assistant')">🤖 Smart Assistant</button>
 
 </div>
 
@@ -3216,6 +3262,28 @@ header, main, section, .container, .right-panel, #pdf-grid-wrapper { min-width: 
         <div id="inlineSnapshotFrame" style="flex:1;padding:20px">
           <p style="color:#555">Please select a date from the list on the left.</p>
         </div>
+      </section>
+    </div>
+
+    <!-- Notes view -->
+    <div id="notes-container" class="main-view notes-view" style="display:none;">
+      <section class="right-panel notes-panel">
+        <div class="notes-header">
+          <div>
+            <h2>🗒️ My Notes</h2>
+            <p>Private notes are saved on this device for the logged-in user.</p>
+          </div>
+          <span id="notesUserLabel" class="user-chip">👤 User</span>
+        </div>
+        <div class="notes-composer">
+          <input id="noteTitleInput" type="text" placeholder="Note title" maxlength="80" />
+          <textarea id="noteBodyInput" placeholder="Write a note, reminder, observation, or pending work item..."></textarea>
+          <div class="notes-actions">
+            <button type="button" class="view-btn" onclick="saveUserNote()">💾 Save Note</button>
+            <button type="button" class="view-btn secondary-note-btn" onclick="clearNoteComposer()">Clear</button>
+          </div>
+        </div>
+        <div id="notesGrid" class="notes-grid"></div>
       </section>
     </div>
     <!-- CL Bio Data View -->
@@ -3511,11 +3579,114 @@ header, main, section, .container, .right-panel, #pdf-grid-wrapper { min-width: 
 
 let pendingAIMessage = null;
 
+function decodeJwtPayload(token) {
+  try {
+    const payload = token.split('.')[1];
+    if (!payload) return null;
+    return JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+  } catch (e) { return null; }
+}
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", "\"":"&quot;", "\'":"&#39;" }[ch]));
+}
+
+function getCurrentUser() {
+  const stored = localStorage.getItem("loggedUser");
+  if (stored) {
+    try { return JSON.parse(stored); } catch (e) {}
+  }
+  const token = localStorage.getItem("adminToken") || localStorage.getItem("rememberToken") || "";
+  const payload = decodeJwtPayload(token) || {};
+  const email = payload.email || payload.sub || localStorage.getItem("savedEmail") || "";
+  const name = payload.name || payload.username || (email ? email.split('@')[0] : "User");
+  return { name, email, role: payload.role || localStorage.getItem("role") || "viewer" };
+}
+
+function getAuditName(record = {}) {
+  return record.updatedByName || record.updatedBy || record.modifiedBy || record.editedBy || record.createdByName || record.createdBy || record.ownerName || record.userName || record.email || getCurrentUser().name || "User";
+}
+
+function authFetchOptions(options = {}) {
+  const token = localStorage.getItem("adminToken") || localStorage.getItem("rememberToken");
+  return token ? { ...options, headers: { ...(options.headers || {}), Authorization: `Bearer ${token}` } } : options;
+}
+
+function filterRecordsForCurrentUser(records = []) {
+  const user = getCurrentUser();
+  if ((user.role || "").toLowerCase() === "admin") return records;
+  const email = (user.email || "").toLowerCase();
+  const name = (user.name || "").toLowerCase();
+  const owned = records.filter(r => {
+    const values = [r.ownerEmail, r.email, r.createdByEmail, r.userEmail, r.updatedByEmail, r.ownerName, r.createdBy, r.updatedBy, r.userName].filter(Boolean).map(v => String(v).toLowerCase());
+    return values.some(v => (email && v === email) || (name && v === name));
+  });
+  return owned.length ? owned : records;
+}
+
+function setActiveSubNav(view) {
+  document.querySelector(`#subNavBar .subnav-btn[data-view="${view}"]`)?.classList.add("active");
+}
+
+function syncCurrentUserUI() {
+  const user = getCurrentUser();
+  const label = user.name || user.email || "User";
+  document.getElementById("currentUserChip") && (document.getElementById("currentUserChip").textContent = `👤 ${label}`);
+  document.getElementById("notesUserLabel") && (document.getElementById("notesUserLabel").textContent = `👤 ${label}`);
+}
+
+function notesStorageKey() {
+  const user = getCurrentUser();
+  return `nttps_notes_${(user.email || user.name || "user").toLowerCase()}`;
+}
+function getUserNotes() {
+  try { return JSON.parse(localStorage.getItem(notesStorageKey()) || "[]"); } catch (e) { return []; }
+}
+function setUserNotes(notes) { localStorage.setItem(notesStorageKey(), JSON.stringify(notes)); }
+window.clearNoteComposer = function() {
+  document.getElementById("noteTitleInput").value = "";
+  document.getElementById("noteBodyInput").value = "";
+};
+window.saveUserNote = function() {
+  const title = document.getElementById("noteTitleInput").value.trim() || "Untitled note";
+  const body = document.getElementById("noteBodyInput").value.trim();
+  if (!body) { alert("Please write a note before saving."); return; }
+  const user = getCurrentUser();
+  const notes = getUserNotes();
+  notes.unshift({ id: Date.now(), title, body, user: user.name || user.email || "User", createdAt: new Date().toISOString() });
+  setUserNotes(notes);
+  clearNoteComposer();
+  renderUserNotes();
+};
+window.deleteUserNote = function(id) {
+  if (!confirm("Delete this note?")) return;
+  setUserNotes(getUserNotes().filter(n => n.id !== id));
+  renderUserNotes();
+};
+function renderUserNotes() {
+  syncCurrentUserUI();
+  const grid = document.getElementById("notesGrid");
+  if (!grid) return;
+  const notes = getUserNotes();
+  if (!notes.length) {
+    grid.innerHTML = `<div class="note-card"><h3>No notes yet</h3><div class="note-body">Create your first note above. Notes are private to the logged-in user on this device.</div></div>`;
+    return;
+  }
+  grid.innerHTML = notes.map(note => `
+    <article class="note-card">
+      <h3>${escapeHTML(note.title)}</h3>
+      <div class="note-meta">${new Date(note.createdAt).toLocaleString('en-IN')} • ${escapeHTML(note.user)}</div>
+      <div class="note-body">${escapeHTML(note.body)}</div>
+      <div class="note-card-actions"><button class="note-delete" onclick="deleteUserNote(${note.id})">Delete</button></div>
+    </article>`).join("");
+}
+
 
     // DOM refs
     const pdfView = document.getElementById("pdf-view-container");
     const clbiodata = document.getElementById("clbiodata-container");
     const progressView = document.getElementById("daily-progress-container");
+    const notesView = document.getElementById("notes-container");
     const viewTabPdf = document.getElementById("viewTabPdf");
     const viewTabProgress = document.getElementById("viewTabProgress");
     const pdfNav = document.getElementById("pdf-nav-bar");
@@ -3572,6 +3743,7 @@ window.showMainView = function (viewName) {
   // ---------- HIDE ALL VIEWS ----------
   pdfView.style.display = "none";
   progressView.style.display = "none";
+  if (notesView) notesView.style.display = "none";
   clbiodata.style.display = "none";
   estimatesContainer.style.display = "none";
   document.getElementById("file-transfer-container").style.display = "none";
@@ -3594,7 +3766,7 @@ if (pm && pm.classList.contains("active")) {
     pdfView.style.display = "flex";
     if (window.innerWidth <= 768) mobileFilterBtn.style.display = "block";
     document.getElementById("pdfHeader").textContent = "📄 All Stage-V Indents";
-    document.querySelector("#subNavBar button:nth-child(1)").classList.add("active");
+    setActiveSubNav("pdf");
   }
 
   // ---------- ESTIMATES ----------
@@ -3602,27 +3774,35 @@ if (pm && pm.classList.contains("active")) {
     estimatesContainer.style.display = "flex";
     if (window.innerWidth <= 768) mobileEstFilterBtn.style.display = "block";
     document.getElementById("estHeader").textContent = "📘 All Stage-V Estimates";
-    document.querySelector("#subNavBar button:nth-child(2)").classList.add("active");
+    setActiveSubNav("estimates");
   }
 
   // ---------- DAILY PROGRESS ----------
   if (viewName === "progress") {
     progressView.style.display = "flex";
     if (window.innerWidth <= 768) mobileDailyFilterBtn.style.display = "block";
-    document.querySelector("#subNavBar button:nth-child(3)").classList.add("active");
+    setActiveSubNav("progress");
+  }
+
+
+  // ---------- NOTES ----------
+  if (viewName === "notes") {
+    if (notesView) notesView.style.display = "flex";
+    setActiveSubNav("notes");
+    renderUserNotes();
   }
 
   // ---------- CL BIO DATA ----------
   if (viewName === "clbiodata") {
     clbiodata.style.display = "block";
-    document.querySelector("#subNavBar button:nth-child(4)").classList.add("active");
+    setActiveSubNav("clbiodata");
     renderCLBioData();
   }
 
   // ---------- FILE TRANSFER ----------
  if (viewName === "files") {
   document.getElementById("file-transfer-container").style.display = "flex";
-document.querySelector("#subNavBar button:nth-child(5)").classList.add("active");
+setActiveSubNav("files");
   if (fileAutoRefreshTimer) {
     clearInterval(fileAutoRefreshTimer);
   }
@@ -3640,7 +3820,7 @@ if (sa) {
   sa.style.display = "flex";
 }
 
-    document.querySelector("#subNavBar button:nth-child(6)").classList.add("active");
+    setActiveSubNav("assistant");
 
     updateSmartUserMenu();
 
@@ -3761,8 +3941,8 @@ function collapseAllDropdowns(sidebarId) {
     // Load records
     async function loadRecords(){
       try{
-        const res = await fetch(`${SERVER_URL}/records`);
-        allRecords = await res.json();
+        const res = await fetch(`${SERVER_URL}/records`, authFetchOptions());
+        allRecords = filterRecordsForCurrentUser(await res.json());
         allEstimates = allRecords.filter(r => (r.recordType || "").toLowerCase() === "estimate");
 
 
@@ -3893,6 +4073,7 @@ if (listEnabled) {
                     <th style="padding:10px;border:1px solid #ddd;background:#007bff;color:white;">Amount</th>
                     <th style="padding:10px;border:1px solid #ddd;background:#007bff;color:white;">Send To</th>
                     <th style="padding:10px;border:1px solid #ddd;background:#007bff;color:white;">Status</th>
+                    <th style="padding:10px;border:1px solid #ddd;background:#007bff;color:white;">Updated By</th>
                     <th style="padding:10px;border:1px solid #ddd;background:#007bff;color:white;">Action</th>
                 </tr>
             </thead>
@@ -3906,7 +4087,7 @@ if (listEnabled) {
 if (!records || records.length === 0) {
     listBody.innerHTML = `
         <tr>
-            <td colspan="9"
+            <td colspan="10"
                 style="
                     padding: 25px;
                     text-align: center;
@@ -3939,7 +4120,7 @@ console.log("Index records[0]:", records[0]);
        <td style="padding:10px;border:1px solid #ddd;text-align:center;">
   ${statusBadge(r.status)}
 </td>
-
+            <td style="padding:10px;border:1px solid #ddd;text-align:center;">${getAuditName(r)}</td>
 
             <!-- ⭐ VIEW PDF BUTTON ⭐ -->
             <td style="padding:10px;text-align:center;">
@@ -3994,6 +4175,7 @@ container.innerHTML = records.map((r, i) => {
           <p><strong>PR No:</strong> ${r.prNo || 'N/A'}</p>
           <p><strong>Sub Div:</strong> ${r.subDivision || 'N/A'}</p>
           <p><strong>Type:</strong> ${r.recordType || 'N/A'}</p>
+          <span class="audit-chip">👤 ${getAuditName(r)}</span>
         </div>
         <button class="view-btn" onclick="handlePDFClick(event, ${recordData})">
     View PDF
@@ -4083,10 +4265,10 @@ let allEstimates = [];
 async function loadEstimates() {
     try {
 
-        const res = await fetch(`${SERVER_URL}/estimates`);
+        const res = await fetch(`${SERVER_URL}/estimates`, authFetchOptions());
         const data = await res.json();
 
-        allEstimates = data;
+        allEstimates = filterRecordsForCurrentUser(data);
 
         buildEstimateFilters();
         renderEstimates(allEstimates);
@@ -4191,6 +4373,7 @@ function renderEstimates(data) {
                 <th>Amount</th>
                 <th>Send To</th>
                 <th>Status</th>
+                <th>Updated By</th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -4211,6 +4394,7 @@ function renderEstimates(data) {
             <td style="text-align:center;">
   ${statusBadge(r.status)}
 </td>
+            <td>${getAuditName(r)}</td>
             <td>
                 <button class="view-btn" onclick='showPDF(${JSON.stringify(r).replace(/'/g,"&apos;")})'>View PDF</button>
             </td>
@@ -4236,6 +4420,7 @@ function renderEstimates(data) {
                 <p><strong>Division:</strong> ${r.division}</p>
                 <p><strong>Amount:</strong> ₹ ${(parseFloat(r.amount) || 0).toLocaleString('en-IN')}</p>
                 <p><strong>Status:</strong> ${statusBadge(r.status)}</p>
+                <span class="audit-chip">👤 ${getAuditName(r)}</span>
             </div>
 ${userRole !== "viewer" ? `
 <button onclick='openRemarks("${r.prNo}")'>📝</button>
@@ -5176,6 +5361,7 @@ async function renderCLBioData() {
 
   localStorage.setItem("adminToken", data.token);
   localStorage.setItem("isAdmin", "true");
+  localStorage.setItem("loggedUser", JSON.stringify({ name: data.name || data.username || username.split("@")[0], email: username, role: data.role || "viewer" }));
 
   closePasswordModal();
 
@@ -5236,6 +5422,7 @@ function logoutAI() {
   location.href = "login.html";
 }
 
+syncCurrentUserUI();
 loadUser();
 
     // Mobile sidebar toggles (slide-in from LEFT)

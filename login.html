@@ -213,6 +213,7 @@ const form = document.getElementById("authForm");
 const errorMsg = document.getElementById("errorMsg");
 const successMsg = document.getElementById("successMsg");
 const SERVER_URL = "https://nttps-backend.onrender.com";
+const redirectTarget = new URLSearchParams(window.location.search).get("redirect") || "index.html";
 
 const emailField = document.getElementById("email");
 const passwordField = document.getElementById("password");
@@ -256,7 +257,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Auto-login ONLY IF not logged out manually
   if (rememberToken && !loggedOut) {
-    window.location.href = "add-product.html";
+    window.location.href = redirectTarget;
   }
 
   sessionStorage.removeItem("loggedOut");
@@ -284,6 +285,11 @@ async function handleLogin() {
     // Save session token
     localStorage.setItem("adminToken", data.token);
     localStorage.setItem("isAdmin", "true");
+    localStorage.setItem("loggedUser", JSON.stringify({
+      name: data.name || data.username || email.split("@")[0],
+      email,
+      role: data.role || "viewer"
+    }));
 
     // Remember me storage
     if (remember) {
@@ -294,7 +300,7 @@ async function handleLogin() {
       localStorage.removeItem("rememberToken");
     }
 
-    window.location.href = "add-product.html";
+    window.location.href = redirectTarget;
 
   } catch (err) {
     console.error(err);
