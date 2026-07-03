@@ -13,7 +13,7 @@ if (!token || isAdmin !== "true") {
 
     // If user manually logged out → DO NOT auto-login → go to login page normally
     if (loggedOut) {
-        window.location.href = "login.html";
+        window.location.href = "login.html?redirect=add-product.html";
     }
 
     // If Remember Me login exists → auto-login
@@ -23,7 +23,7 @@ if (!token || isAdmin !== "true") {
         localStorage.setItem("isAdmin", "true");
     } else {
         alert("You must be logged in to access this page.");
-        window.location.href = "login.html";
+        window.location.href = "login.html?redirect=add-product.html";
     }
 }
 
@@ -1188,6 +1188,62 @@ html, body {
     color:white;
 }
      
+
+
+/* ===== Consolidated responsive fixes (2026) ===== */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { min-width: 0; }
+img, iframe, embed, object { max-width: 100%; }
+button, input, select, textarea { max-width: 100%; font: inherit; }
+header, .container, .panel, .table-scroll { min-width: 0; }
+header .buttons { flex-wrap: wrap; }
+.tabs { display: flex; flex-wrap: wrap; }
+.tab-btn { min-height: 44px; }
+.flex-row { flex-wrap: wrap; }
+.flex-row .col { flex: 1 1 240px; min-width: 0; }
+.table-scroll { overflow: auto !important; -webkit-overflow-scrolling: touch; max-width: 100%; }
+.table-scroll table { width: max-content !important; min-width: 100%; table-layout: auto !important; }
+table { max-width: 100%; }
+th, td { overflow-wrap: anywhere; }
+#estimateListTable { width: max-content !important; min-width: 1400px; table-layout: auto !important; }
+#estimateListTable th:nth-child(2), #estimateListTable td:nth-child(2) { width: clamp(260px, 32vw, 500px) !important; min-width: 260px !important; max-width: 500px !important; }
+#pdfEntryTable, #estimateEntryTable, #progressTable, #savedProgressTable, #clTable, #pdfListTable { min-width: 760px; }
+.modal-overlay { padding: 16px; }
+#previewModalContent, #snapshotPreviewContent, #confirmModalContent { max-width: min(100%, 1200px) !important; max-height: calc(100dvh - 32px) !important; }
+#snapshotPreviewContent .modal-controls { flex-wrap: wrap; padding: 12px; }
+.record-card, .record-card-trash { overflow-wrap: anywhere; }
+
+@media (max-width: 900px) {
+  body { padding: 0 !important; overflow-x: hidden; }
+  header { position: sticky; top: 0; z-index: 100; width: 100%; }
+  header .buttons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  header .buttons button { width: 100%; min-height: 42px; }
+  .container { width: 100% !important; padding: 10px !important; margin: 0 auto 32px !important; }
+  .tabs { flex-wrap: nowrap; overflow-x: auto; gap: 8px; padding-bottom: 8px; scroll-snap-type: x proximity; }
+  .tab-btn { flex: 0 0 auto !important; scroll-snap-align: start; padding: 10px 14px !important; }
+  .panel { padding: 12px !important; }
+  .pdf-dashboard-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .filter-bar, .search-row, .sheet-controls, #pdfEntryControls, #estimateEntryControls, .control-group { align-items: stretch; }
+  .filter-bar > *, .search-row > *, .sheet-controls > *, #pdfEntryControls > *, #estimateEntryControls > * { flex: 1 1 180px; }
+  .control-group { border-left: 0; padding-left: 0; flex-wrap: wrap; }
+  input, select, textarea, button, .btn-import-label { min-height: 42px; }
+  .actions, .record-card-actions { gap: 8px; }
+  .small-btn { min-height: 36px; }
+}
+
+@media (max-width: 520px) {
+  header h1 { font-size: 0.95rem !important; }
+  header .buttons { grid-template-columns: 1fr; }
+  .container { padding: 8px !important; }
+  .panel { padding: 10px !important; }
+  .pdf-dashboard-grid { grid-template-columns: 1fr !important; }
+  .record-meta { grid-template-columns: 1fr !important; }
+  .modal-overlay { padding: 0; align-items: stretch; }
+  #previewModalContent, #snapshotPreviewContent { width: 100% !important; height: 100dvh !important; max-height: 100dvh !important; border-radius: 0 !important; }
+  #toastContainer { left: 10px; right: 10px; bottom: 10px; }
+}
+
 </style>
 </head>
 <body>
@@ -3172,7 +3228,7 @@ function previewPDF(path) {
     // Prevent auto-login
     sessionStorage.setItem("loggedOut", "true");
 
-    window.location.href = "login.html";
+    window.location.href = "login.html?redirect=add-product.html";
 }
 
 
