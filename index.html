@@ -4364,27 +4364,27 @@ async function checkGlobalAuth() {
 
 async function triggerDownload(url, filename = "file") {
 
-  if (!isFileUserLoggedIn()) {
-    pendingDownloadUrl = { url, filename };
-    openPasswordModal();
-    return;
-  }
-
   const finalUrl = resolveFileUrl(url);
 
-  if (!finalUrl) {
-    alert("Download link is missing for this file.");
+  const response = await fetch(finalUrl);
+
+  if (!response.ok) {
+    alert("Unable to download file.");
     return;
   }
 
+  const blob = await response.blob();
+
+  const blobUrl = URL.createObjectURL(blob);
+
   const a = document.createElement("a");
-  a.href = finalUrl;
-  a.download = filename || "file";
-  a.target = "_blank";
-  a.rel = "noopener";
+  a.href = blobUrl;
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
-  document.body.removeChild(a);
+  a.remove();
+
+  URL.revokeObjectURL(blobUrl);
 }
 
 
@@ -4855,7 +4855,9 @@ function toggleSearchBar() {
   modalPR.textContent = "PR No: " + (prNo || 'N/A');
 
   // Load PDF
-  pdfFrame.src = finalUrl;
+ pdfFrame.src =
+  "https://docs.google.com/gview?embedded=1&url=" +
+  encodeURIComponent(finalUrl);
 
   productModal.classList.add('active');
   document.body.classList.add("modal-open");
