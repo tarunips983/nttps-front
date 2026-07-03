@@ -3078,6 +3078,31 @@ header > div:first-child h1 {
   .subnav-btn { font-size: 12px !important; padding-inline: 12px !important; }
 }
 
+
+
+/* ===== Consolidated responsive fixes (2026) ===== */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { min-width: 0; overflow-x: hidden; }
+img, iframe, embed, object, video { max-width: 100%; height: auto; }
+button, input, select, textarea { max-width: 100%; font: inherit; }
+header, main, section, .container, .right-panel, #pdf-grid-wrapper { min-width: 0; }
+.nav-right, header, #subNavBar, .filter-bar, .search-row { min-width: 0; }
+.product-grid, #estimatesGrid, #clBioGrid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)) !important; }
+.product, .cl-card, .record-card { min-width: 0; overflow-wrap: anywhere; }
+.ai-md-table, table { display: block; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ai-code-block { overflow-x: auto; }
+
+@media (max-width: 768px) {
+  header { width: 100%; }
+  .nav-right { width: 100%; flex-wrap: wrap; }
+  .nav-right input { width: 100% !important; flex: 1 1 100%; }
+  main { padding-inline: 10px !important; }
+  .product-grid, #estimatesGrid, #clBioGrid { grid-template-columns: 1fr !important; }
+  .product, .cl-card { width: 100% !important; max-width: 100% !important; }
+  .modal, .modal-content, #modalContent, .details-box { max-width: 100% !important; }
+}
+
 </style>
 
 </head>

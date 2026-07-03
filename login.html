@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Admin Portal - Login</title>
   <style>
     /* Cleaned and fixed login-style.css */
@@ -10,7 +11,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100dvh;
       margin: 0;
       background-image: url('back-login.jpeg');
       background-size: cover;
@@ -22,7 +23,7 @@
 
     .login-container {
       width: 350px;
-      max-width: 90%;
+      max-width: calc(100% - 32px);
       padding: 25px;
       background: white;
       border-radius: 10px;
@@ -129,10 +130,11 @@
 
   
   .login-container {
-    width: 100vw !important;          /* full width */
-    max-width: 100vw !important;
-    height: auto;
-    padding: 40px 25px !important;    /* bigger spacing */
+    width: 100% !important;          /* full width */
+    max-width: 100% !important;
+    min-height: 100dvh;
+    box-sizing: border-box;
+    padding: 32px 20px !important;    /* bigger spacing */
     margin: 0;
     border-radius: 0 !important;      /* remove rounded corners */
     box-shadow: none !important;      /* remove shadow */
