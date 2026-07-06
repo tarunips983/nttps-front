@@ -5405,10 +5405,15 @@ if (pendingAIMessage) {
 };
 
 function loadUser() {
-  const user = JSON.parse(localStorage.getItem("loggedUser"));
-  if (user) {
-    document.getElementById("aiUsername").innerText = user.name;
-  }
+    const user = JSON.parse(localStorage.getItem("loggedUser"));
+
+ const username =
+      document.getElementById("aiUsername") ||
+      document.getElementById("smartUserName");
+
+    if (user && username) {
+        username.innerText = user.name || "User";
+    }
 }
 
 function startNewChat() {
