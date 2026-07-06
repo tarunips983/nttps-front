@@ -3634,39 +3634,106 @@ function syncCurrentUserUI() {
   document.getElementById("notesUserLabel") && (document.getElementById("notesUserLabel").textContent = `👤 ${label}`);
 }
 
-function notesStorageKey() {
-  const user = getCurrentUser();
-  return `nttps_notes_${(user.email || user.name || "user").toLowerCase()}`;
+let currentNotes = [];
+
+async function getUserNotes() {
+
+    const token = localStorage.getItem("adminToken");
+
+    const res = await fetch(`${SERVER_URL}/notes`,{
+        headers:{
+            Authorization:`Bearer ${token}`
+        }
+    });
+
+  if(!res.ok){
+
+const err=await res.text();
+
+console.error(err);
+
+currentNotes=[];
+
+return [];
+
 }
-function getUserNotes() {
-  try { return JSON.parse(localStorage.getItem(notesStorageKey()) || "[]"); } catch (e) { return []; }
+
+    currentNotes=await res.json();
+
+    return currentNotes;
 }
-function setUserNotes(notes) { localStorage.setItem(notesStorageKey(), JSON.stringify(notes)); }
+
+
 window.clearNoteComposer = function() {
   document.getElementById("noteTitleInput").value = "";
   document.getElementById("noteBodyInput").value = "";
 };
-window.saveUserNote = function() {
-  const title = document.getElementById("noteTitleInput").value.trim() || "Untitled note";
-  const body = document.getElementById("noteBodyInput").value.trim();
-  if (!body) { alert("Please write a note before saving."); return; }
-  const user = getCurrentUser();
-  const notes = getUserNotes();
-  notes.unshift({ id: Date.now(), title, body, user: user.name || user.email || "User", createdAt: new Date().toISOString() });
-  setUserNotes(notes);
-  clearNoteComposer();
-  renderUserNotes();
+window.saveUserNote = async function(){
+
+    const title=document.getElementById("noteTitleInput").value.trim() || "Untitled";
+
+    const note=document.getElementById("noteBodyInput").value.trim();
+
+    if(!note){
+        alert("Write something");
+        return;
+    }
+
+    const token=localStorage.getItem("adminToken");
+
+    const res=await fetch(`${SERVER_URL}/notes`,{
+
+        method:"POST",
+
+        headers:{
+            "Content-Type":"application/json",
+            Authorization:`Bearer ${token}`
+        },
+
+        body:JSON.stringify({
+            title,
+            note
+        })
+
+    });
+
+    if(!res.ok){
+
+        alert("Unable to save");
+
+        return;
+
+    }
+
+    clearNoteComposer();
+
+    await renderUserNotes();
+
 };
-window.deleteUserNote = function(id) {
-  if (!confirm("Delete this note?")) return;
-  setUserNotes(getUserNotes().filter(n => n.id !== id));
-  renderUserNotes();
+window.deleteUserNote = async function(id){
+
+    if(!confirm("Delete this note?")) return;
+
+    const token=localStorage.getItem("adminToken");
+
+    await fetch(`${SERVER_URL}/notes/${id}`,{
+
+        method:"DELETE",
+
+        headers:{
+            Authorization:`Bearer ${token}`
+        }
+
+    });
+
+    await renderUserNotes();
+
 };
-function renderUserNotes() {
+async function renderUserNotes(){
   syncCurrentUserUI();
   const grid = document.getElementById("notesGrid");
   if (!grid) return;
-  const notes = getUserNotes();
+  const notes = await getUserNotes();
   if (!notes.length) {
     grid.innerHTML = `<div class="note-card"><h3>No notes yet</h3><div class="note-body">Create your first note above. Notes are private to the logged-in user on this device.</div></div>`;
     return;
@@ -3674,8 +3741,15 @@ function renderUserNotes() {
   grid.innerHTML = notes.map(note => `
     <article class="note-card">
       <h3>${escapeHTML(note.title)}</h3>
-      <div class="note-meta">${new Date(note.createdAt).toLocaleString('en-IN')} • ${escapeHTML(note.user)}</div>
-      <div class="note-body">${escapeHTML(note.body)}</div>
+      <div class="note-meta">
+${new Date(note.createdAt).toLocaleString('en-IN')}
+•
+${escapeHTML(note.userName)}
+</div>
+
+<div class="note-body">
+${escapeHTML(note.note)}
+</div>
       <div class="note-card-actions"><button class="note-delete" onclick="deleteUserNote(${note.id})">Delete</button></div>
     </article>`).join("");
 }
@@ -3882,13 +3956,14 @@ async function updateSmartUserMenu() {
 
 
 function handleSmartAuth() {
-  const token = localStorage.getItem("adminToken");
-
+  const token =
+localStorage.getItem("adminToken") ||
+localStorage.getItem("rememberToken");
   if (token) {
     if (!confirm("Logout from Smart Assistant?")) return;
 
-    localStorage.removeItem("adminToken");
-    localStorage.removeItem("isAdmin");
+    logout();
+return;
 
     syncAllLoginUI();
 
@@ -3899,7 +3974,16 @@ function handleSmartAuth() {
   document.getElementById("smartUserDropdown")?.classList.remove("active");
 }
 
+function logout(){
 
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("rememberToken");
+    localStorage.removeItem("loggedUser");
+    localStorage.removeItem("isAdmin");
+
+    window.location.replace("login.html");
+
+}
 function collapseAllDropdowns(sidebarId) {
     const sidebar = document.getElementById(sidebarId);
     if (!sidebar) return;
