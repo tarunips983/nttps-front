@@ -3179,6 +3179,12 @@ header, main, section, .container, .right-panel, #pdf-grid-wrapper { min-width: 
       <a href="javascript:void(0)" onclick="openPasswordModal()" title="Add New Record">➕ Add Record</a>
       <span id="currentUserChip" class="user-chip" title="Logged in user">👤 User</span>
       <a href="login.html?redirect=index.html" id="loginLink" title="Login Page">🔐 Login</a>
+      <button
+    id="logoutBtn"
+    onclick="logout()"
+    style="display:none;background:#dc3545;color:#fff;">
+    🚪 Logout
+</button>
       <div class="burger-menu" onclick="toggleMenu()">☰</div>
 <div id="menuOverlay" class="menu-overlay">
 <!-- Dropdown Menu -->
@@ -3956,32 +3962,75 @@ async function updateSmartUserMenu() {
 
 
 function handleSmartAuth() {
-  const token =
-localStorage.getItem("adminToken") ||
-localStorage.getItem("rememberToken");
-  if (token) {
-    if (!confirm("Logout from Smart Assistant?")) return;
 
-    logout();
-return;
+    const token=localStorage.getItem("adminToken");
 
-    syncAllLoginUI();
+    if(token){
 
-  } else {
+        logout();
+
+        return;
+
+    }
+
     openPasswordModal();
-  }
 
-  document.getElementById("smartUserDropdown")?.classList.remove("active");
+    document.getElementById("smartUserDropdown")
+        ?.classList.remove("active");
+
 }
 
-function logout(){
+function logout() {
+
+    if (!confirm("Logout from your account?")) return;
 
     localStorage.removeItem("adminToken");
     localStorage.removeItem("rememberToken");
     localStorage.removeItem("loggedUser");
     localStorage.removeItem("isAdmin");
+    localStorage.removeItem("role");
+
+    sessionStorage.clear();
+
+    updateLoginButtons();
 
     window.location.replace("login.html");
+}
+    function updateLoginButtons(){
+
+    const loginBtn=document.getElementById("loginBtn");
+    const logoutBtn=document.getElementById("logoutBtn");
+    const chip=document.getElementById("currentUserChip");
+
+    const user=getCurrentUser();
+
+    const loggedIn=!!(
+        localStorage.getItem("adminToken") ||
+        localStorage.getItem("rememberToken")
+    );
+
+    if(loginBtn){
+
+        loginBtn.style.display=
+            loggedIn ? "none" : "inline-flex";
+
+    }
+
+    if(logoutBtn){
+
+        logoutBtn.style.display=
+            loggedIn ? "inline-flex" : "none";
+
+    }
+
+    if(chip){
+
+        chip.textContent=
+            loggedIn
+                ? `👤 ${user.name || user.email}`
+                : "";
+
+    }
 
 }
 function collapseAllDropdowns(sidebarId) {
@@ -5449,6 +5498,7 @@ async function renderCLBioData() {
   closePasswordModal();
 
   syncAllLoginUI();
+      updateLoginButtons();
 
 hideAILoginOverlay();
 loadFiles();
@@ -5511,7 +5561,10 @@ function logoutAI() {
 }
 
 syncCurrentUserUI();
+
 loadUser();
+
+updateLoginButtons();
 
     // Mobile sidebar toggles (slide-in from LEFT)
     function toggleSidebar(buttonId, sidebarId){
