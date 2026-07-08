@@ -3084,6 +3084,11 @@ header > div:first-child h1 {
     max-width: 100% !important;
   }
 }
+    .logoutBtn:hover {
+background: rgb(220, 53, 69);
+    color: rgb(255, 255, 255);
+animation: auto ease 0s 1 normal none running none;
+    }
 @media (max-width: 420px) {
   header > div:first-child h1 { font-size: 14px !important; }
   header > div:first-child img { width: 30px !important; height: 30px !important; }
@@ -3180,9 +3185,17 @@ header, main, section, .container, .right-panel, #pdf-grid-wrapper { min-width: 
       <span id="currentUserChip" class="user-chip" title="Logged in user">👤 User</span>
       <a href="login.html?redirect=index.html" id="loginLink" title="Login Page">🔐 Login</a>
       <button
-    id="logoutBtn"
+    id="logoutBtn" class="logoutBtn"
     onclick="logout()"
-    style="display:none;background:#dc3545;color:#fff;">
+    style="
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .14);
+    color: #fff;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;>
     🚪 Logout
 </button>
       <div class="burger-menu" onclick="toggleMenu()">☰</div>
